@@ -1,3 +1,6 @@
+import dayjs, { type ConfigType } from "dayjs";
+
+// token
 export const TokenKey = "Authorization";
 
 /**
@@ -40,5 +43,33 @@ export function isStringifiedJSON(str: string | null) {
   } catch (e) {
     // 如果解析失败，说明不是有效的JSON字符串
     return false;
+  }
+}
+
+/**
+ * 定义一个函数来计算并格式化时间差
+ * @param date
+ * @returns
+ */
+export function formatTimeAgo(date: ConfigType) {
+  const now = dayjs(); // 当前时间
+  const past = dayjs(date); // 过去的时间
+  const diffInSeconds = now.diff(past, "second"); // 计算时间差（秒）
+
+  // 根据时间差的大小来返回不同的字符串
+  if (diffInSeconds < 60) {
+    return "刚刚";
+  } else if (diffInSeconds < 3600) {
+    return `${Math.floor(diffInSeconds / 60)}分钟前`;
+  } else if (diffInSeconds < 86400) {
+    return `${Math.floor(diffInSeconds / 3600)}小时前`;
+  } else if (diffInSeconds < 2592000) {
+    // 30天以内
+    return `${Math.floor(diffInSeconds / 86400)}天前`;
+  } else if (diffInSeconds < 31536000) {
+    // 1年以内
+    return `${Math.floor(diffInSeconds / (86400 * 30))}个月前`;
+  } else {
+    return `${Math.floor(diffInSeconds / 31536000)}年前`;
   }
 }

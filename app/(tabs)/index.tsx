@@ -1,30 +1,23 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
 import { HelloWave } from "@/components/HelloWave";
 import { ThemedText } from "@/components/theme/ThemedText";
-import { ThemedView } from "@/components/theme/ThemedView";
+import ParallaxView from "@/components/ParallaxView";
 
-import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { ThemedButton } from "@/components/theme/ThemedButton";
 import {
   useBaseApi,
   type GetItemsParams,
   type GetItemsResItem,
 } from "@/api/api";
+import { IndexItem } from "@/components/index/IndexItem";
 
 const { GetItems } = useBaseApi();
-
-// const Item = ({ name }: GetItemsResItem) => (
-//   <View>
-//     <Text>{name}</Text>
-//   </View>
-// );
 
 export default function HomeScreen() {
   const [params, setParams] = useState<GetItemsParams>({
     page: 1,
     password: "",
-    path: "/",
+    path: "/asmr",
     per_page: 30,
     refresh: false,
   });
@@ -41,21 +34,29 @@ export default function HomeScreen() {
     }
   };
 
+  useEffect(() => {
+    onFetch();
+  }, []);
+
   return (
-    <ParallaxScrollView>
-      <ThemedView style={styles.titleContainer}>
+    <ParallaxView>
+      <View style={styles.titleContainer}>
         <ThemedText type="title">Welcome!</ThemedText>
         <HelloWave />
-      </ThemedView>
+      </View>
 
-      <ThemedButton title="获取列表" onPress={onFetch} />
+      {/* <ThemedButton title="获取列表" onPress={onFetch} /> */}
 
-      {/* <FlatList
+      <FlatList
         data={items}
-        renderItem={({ item }) => <Item name={item.name} />}
+        renderItem={({ item }) => <IndexItem {...item} />}
         keyExtractor={(item) => item.name}
-      /> */}
-    </ParallaxScrollView>
+      />
+
+      {/* 占位 */}
+
+      <View style={{ height: 30, width: "100%" }}></View>
+    </ParallaxView>
   );
 }
 

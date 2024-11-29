@@ -4,7 +4,6 @@ import Animated, { useAnimatedRef } from "react-native-reanimated";
 
 import { ThemedView } from "@/components/theme/ThemedView";
 import { useBottomTabOverflow } from "@/components/ui/TabBarBackground";
-import AudioBar from "./audio/AudioBar";
 
 type Props = PropsWithChildren<{}>;
 
