@@ -6,7 +6,7 @@ import { ThemedView } from "../theme/ThemedView";
 import { IconSymbol } from "../ui/IconSymbol";
 import { useTheme } from "@/hooks/useThemeColor";
 
-export function IndexItem({ name, modified }: GetItemsResItem) {
+export function IndexItem({ name, modified, is_dir }: GetItemsResItem) {
   const theme = useTheme();
   return (
     <View style={styles.itemContainer}>
@@ -22,7 +22,7 @@ export function IndexItem({ name, modified }: GetItemsResItem) {
         <ThemedText style={styles.timeStyle}>
           {formatTimeAgo(modified)}
         </ThemedText>
-        <IconSymbol name="keyboard-arrow-right" />
+        <IconSymbol name={is_dir ? "chevron.right" : "dot.scope"} />
       </ThemedView>
     </View>
   );
@@ -44,6 +44,7 @@ const styles = StyleSheet.create({
   },
   timeStyle: {
     fontSize: 12,
+    marginRight: 5
   },
   leftSymbol: {
     marginRight: 5,

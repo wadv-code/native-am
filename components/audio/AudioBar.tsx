@@ -7,19 +7,80 @@ import {
 } from "react-native";
 import { ThemedText } from "../theme/ThemedText";
 import { ThemedView } from "../theme/ThemedView";
-import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/hooks/useThemeColor";
 import { IconSymbol } from "../ui/IconSymbol";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Audio } from "expo-av";
+import { formatMilliseconds } from "@/utils";
 
 export default function AudioBar() {
   const [isPlaying, setIsPlaying] = useState(false);
   const theme = useTheme();
   const mode = useColorScheme();
+  const [duration, setDuration] = useState("00:00");
+  const [current, setCurrent] = useState("00:00");
+  const [soundObject, setSoundObject] = useState(new Audio.Sound());
+  const sound =
+    "http://nm.hzwima.com:8000/%E5%91%A8%E6%9D%B0%E4%BC%A6-%E7%A8%BB%E9%A6%99.mp3";
+  useEffect(() => {
+    (async () => {
+      // // 请求通知栏权限
+      // const { status } = await Notifications.getPermissionsAsync();
+      // if (status !== "granted") {
+      //   await Notifications.requestPermissionsAsync();
+      // }
+      // 卸载音乐
+      await soundObject.unloadAsync();
+      // 重新加载
+      await soundObject.loadAsync({
+        // 这里的 sound 应该是一个音频文件的URL
+        uri: sound,
+      });
 
-  const onPlay = () => {
-    console.log("onPlay");
-    setIsPlaying(!isPlaying);
+      soundObject.setOnPlaybackStatusUpdate((playbackStatus) => {
+        if (!playbackStatus.isLoaded) {
+          console.log("isLoaded");
+          // Update your UI for the unloaded state
+          if (playbackStatus.error) {
+            console.log(
+              `Encountered a fatal error during playback: ${playbackStatus.error}`
+            );
+            // Send Expo team the error on Slack or the forums so we can help you debug!
+          }
+        } else {
+          // Update your UI for the loaded state
+
+          if (playbackStatus.isPlaying) {
+            setDuration(formatMilliseconds(playbackStatus.durationMillis));
+            setCurrent(formatMilliseconds(playbackStatus.positionMillis));
+            // Update your UI for the playing state
+          } else {
+            // Update your UI for the paused state
+          }
+
+          if (playbackStatus.isBuffering) {
+            console.log("isBuffering");
+            // Update your UI for the buffering state
+          }
+
+          if (playbackStatus.didJustFinish && !playbackStatus.isLooping) {
+            console.log("didJustFinish");
+            setIsPlaying(false);
+            // The player has just finished playing and will stop. Maybe you want to play something else?
+          }
+        }
+      });
+    })();
+  }, [sound]);
+
+  const playSound = async () => {
+    await soundObject.playAsync();
+    setIsPlaying(true);
+  };
+
+  const pauseSound = async () => {
+    await soundObject.pauseAsync();
+    setIsPlaying(false);
   };
 
   return (
@@ -37,19 +98,25 @@ export default function AudioBar() {
         <View>
           <ThemedText>这是一首简单的小情歌</ThemedText>
           <View>
-            <ThemedText style={styles.timeStyle}>00:00/00:00</ThemedText>
+            <ThemedText style={styles.timeStyle}>{current}/{duration}</ThemedText>
           </View>
         </View>
       </View>
       <View style={styles.barRightContainer}>
-        <Pressable style={styles.button} onPress={onPlay}>
+        <Pressable
+          style={styles.button}
+          onPress={isPlaying ? pauseSound : playSound}
+        >
           <IconSymbol
-            size={30}
-            name={isPlaying ? "motion-photos-pause" : "play-circle-outline"}
+            size={28}
+            name={isPlaying ? "pause.circle" : "play.circle"}
           />
         </Pressable>
-        <Pressable style={styles.button} onPress={onPlay}>
-          <IconSymbol size={30} name="queue-music" />
+        <Pressable
+          style={styles.button}
+          onPress={isPlaying ? pauseSound : playSound}
+        >
+          <IconSymbol size={28} name="music.note.list" />
         </Pressable>
       </View>
     </ThemedView>
@@ -59,14 +126,15 @@ export default function AudioBar() {
 const styles = StyleSheet.create({
   barContainer: {
     position: "absolute",
-    bottom: 55,
+    // bottom: 55,
+    bottom: 90,
     left: "3%",
     right: "3%",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     // padding: 5, // 可选：内边距
-    shadowOffset: { width: 0, height: -2 },
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 2,
     elevation: 2, // Android上的阴影效果
@@ -91,16 +159,16 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   timeStyle: {
-    fontSize: 10,
+    fontSize: 12,
     margin: 0,
     padding: 0,
-    height: 10,
-    lineHeight: 15,
+    height: 12,
+    lineHeight: 12,
   },
   button: {
     alignItems: "center",
     justifyContent: "center",
     // backgroundColor: "rgba(0,0,0,0.2)",
-    marginLeft: 5,
+    marginLeft: 10,
   },
 });
