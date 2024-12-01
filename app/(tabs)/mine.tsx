@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { Appearance, StyleSheet, useColorScheme } from "react-native";
+import { Appearance, Button, StyleSheet, useColorScheme } from "react-native";
 import { ThemedText } from "@/components/theme/ThemedText";
 import { ThemedView } from "@/components/theme/ThemedView";
 import { ThemedButton } from "@/components/theme/ThemedButton";
 
-import AudioPlayer from "@/components/AudioPlayer";
 import ThemedModal from "@/components/theme/ThemedModal";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 
@@ -34,8 +33,6 @@ export default function MineScreen() {
       <ThemedText>
         This app includes example code to help you get started.
       </ThemedText>
-
-      <AudioPlayer />
 
       <ThemedButton
         title={mode === "dark" ? "深色模式" : "浅色模式"}

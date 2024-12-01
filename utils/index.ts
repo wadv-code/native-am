@@ -1,4 +1,5 @@
 import dayjs, { type ConfigType } from "dayjs";
+import type { SymbolViewProps } from "expo-symbols";
 
 // token
 export const TokenKey = "Authorization";
@@ -72,4 +73,76 @@ export function formatTimeAgo(date: ConfigType) {
   } else {
     return `${Math.floor(diffInSeconds / 31536000)}年前`;
   }
+}
+
+/**
+ * 是否是图片格式
+ * @param fileName
+ * @returns
+ */
+export function isImageFile(fileName: string): boolean {
+  // 定义一个正则表达式，匹配常见的图片文件扩展名（不区分大小写）
+  const imageExtensionRegex = /\.(jpeg|jpg|png|gif|bmp|svg|tiff|webp)$/i;
+
+  // 使用正则表达式的 test 方法来检查文件名
+  return imageExtensionRegex.test(fileName);
+}
+
+/**
+ * 是否是音频格式
+ * @param fileName
+ * @returns
+ */
+export function isAudioFile(fileName: string): boolean {
+  // 定义一个正则表达式，匹配常见的音频文件扩展名（不区分大小写）
+  const audioExtensionRegex = /\.(mp3|wav|ogg|flac|aac|m4a|wma|aiff|au)$/i;
+
+  // 使用正则表达式的 test 方法来检查文件名
+  return audioExtensionRegex.test(fileName);
+}
+
+export type FnIconSymbol = (
+  name: string,
+  is_dir?: boolean
+) => SymbolViewProps["name"];
+
+/**
+ * 根据名称后缀获取图标
+ * @returns  SymbolViewProps['name']
+ */
+export const getIconSymbol: FnIconSymbol = (name: string, is_dir?: boolean) => {
+  if (is_dir) {
+    return "folder.fill";
+  } else if (isImageFile(name)) {
+    return "photo";
+  } else if (isAudioFile(name)) {
+    return "music.note";
+  } else {
+    return "filemenu.and.cursorarrow";
+  }
+};
+
+/**
+ * 文件大小转换
+ * @param bytes size
+ * @param decimal 保留小数
+ * @returns
+ */
+export function formatFileSize(
+  bytes: number | undefined,
+  decimal: number = 2
+): string {
+  if (!bytes || bytes === 0) {
+    return "0 Bytes";
+  }
+
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+  let i = parseInt(String(Math.floor(Math.log(bytes) / Math.log(1024))));
+  if (i === 0) {
+    return `${bytes} ${sizes[i]}`;
+  }
+
+  return `${parseFloat((bytes / Math.pow(1024, i)).toFixed(decimal))} ${
+    sizes[i]
+  }`;
 }

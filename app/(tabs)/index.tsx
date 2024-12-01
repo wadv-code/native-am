@@ -1,24 +1,23 @@
 import { useEffect, useState } from "react";
-import { FlatList, StyleSheet, Text, View } from "react-native";
-import { HelloWave } from "@/components/HelloWave";
-import { ThemedText } from "@/components/theme/ThemedText";
+import { IndexItem } from "@/components/index/IndexItem";
+import { FlatList, Platform, SafeAreaView } from "react-native";
 import ParallaxView from "@/components/ParallaxView";
-
+import { HeaderToolbar } from "@/components/sys";
 import {
   useBaseApi,
   type GetItemsParams,
   type GetItemsResItem,
 } from "@/api/api";
-import { IndexItem } from "@/components/index/IndexItem";
 
 const { GetItems } = useBaseApi();
 
 export default function HomeScreen() {
+  const [selectedName, setSelectedName] = useState<string>();
   const [params, setParams] = useState<GetItemsParams>({
     page: 1,
     password: "",
-    path: "/asmr",
-    per_page: 30,
+    path: "/asmr/中文音声",
+    per_page: 1000,
     refresh: false,
   });
 
@@ -28,7 +27,6 @@ export default function HomeScreen() {
     try {
       const { data } = await GetItems(params);
       setItems(data.content);
-      console.log(items.length);
     } catch {
       console.log("Request Error");
     }
@@ -40,30 +38,29 @@ export default function HomeScreen() {
 
   return (
     <ParallaxView>
-      <View style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </View>
+      <HeaderToolbar path={params.path} name={selectedName} />
 
-      {/* <ThemedButton title="获取列表" onPress={onFetch} /> */}
-
-      <FlatList
-        data={items}
-        renderItem={({ item }) => <IndexItem {...item} />}
-        keyExtractor={(item) => item.name}
-      />
-
-      {/* 占位 */}
-
-      <View style={{ height: 30, width: "100%" }}></View>
+      <SafeAreaView style={{ flex: 1 }}>
+        <FlatList
+          data={items}
+          renderItem={({ item }) => (
+            <IndexItem
+              {...item}
+              onPress={(item) => setSelectedName(item.name)}
+            />
+          )}
+          keyExtractor={(item) => item.name}
+          extraData={selectedName}
+          contentContainerStyle={Platform.select({
+            ios: {
+              paddingBottom: 120,
+            },
+            default: {
+              paddingBottom: 50,
+            },
+          })}
+        />
+      </SafeAreaView>
     </ParallaxView>
   );
 }
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-});

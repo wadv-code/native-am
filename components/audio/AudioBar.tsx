@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
 import { Audio } from "expo-av";
 import { formatMilliseconds } from "@/utils";
 
-export default function AudioBar() {
+const AudioBar = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const theme = useTheme();
   const mode = useColorScheme();
@@ -96,9 +96,11 @@ export default function AudioBar() {
           style={styles.imageStyle}
         ></Image>
         <View>
-          <ThemedText>这是一首简单的小情歌</ThemedText>
+          <ThemedText style={{ fontSize: 12 }}>稻香 - 周杰伦</ThemedText>
           <View>
-            <ThemedText style={styles.timeStyle}>{current}/{duration}</ThemedText>
+            <ThemedText style={styles.timeStyle}>
+              {current}/{duration}
+            </ThemedText>
           </View>
         </View>
       </View>
@@ -121,7 +123,7 @@ export default function AudioBar() {
       </View>
     </ThemedView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   barContainer: {
@@ -163,7 +165,7 @@ const styles = StyleSheet.create({
     margin: 0,
     padding: 0,
     height: 12,
-    lineHeight: 12,
+    lineHeight: 14,
   },
   button: {
     alignItems: "center",
@@ -172,3 +174,5 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
 });
+
+export { AudioBar };

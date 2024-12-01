@@ -20,6 +20,7 @@ export type GetItemsResItem = {
   size?: number;
   thumb?: string;
   type?: number;
+  onPress?: (option: GetItemsResItem) => void;
 };
 
 // 请求参数
