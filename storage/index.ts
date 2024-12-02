@@ -1,4 +1,5 @@
-import { isStringifiedJSON } from "@/utils";
+import { isStringifiedJSON } from "@/utils/lib";
+import { isObject } from "@/utils/helper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 class StorageManager {
@@ -11,7 +12,7 @@ class StorageManager {
   // 存储数据
   public async set(key: string, value: any) {
     try {
-      if (typeof value === "object") {
+      if (isObject(value) || Array.isArray(value)) {
         value = JSON.stringify(value);
       }
       await AsyncStorage.setItem(this.getKey(key), value);
@@ -22,13 +23,13 @@ class StorageManager {
   }
 
   // 获取数据
-  public async get(key: string) {
+  public async get<T = any>(key: string): Promise<T | null> {
     try {
       const value = await AsyncStorage.getItem(this.getKey(key));
       if (isStringifiedJSON(value)) {
         return JSON.parse(value || "") || null;
       } else {
-        return value;
+        return value as T;
       }
     } catch (error) {
       // 处理错误

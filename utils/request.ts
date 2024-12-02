@@ -54,7 +54,7 @@ const cacheAdapter = async (config: AxiosRequestConfig) => {
     const cacheKey = generateCacheKey(config);
 
     const cacheRes = await storageManager.get(cacheKey);
-    if (cacheRes) {
+    if (cacheRes && !config.refresh) {
       return Promise.resolve(cacheRes);
     } else {
       delete config.adapter;
@@ -72,7 +72,7 @@ const cacheAdapter = async (config: AxiosRequestConfig) => {
 };
 
 // 配置新建一个 axios 实例
-const service: AxiosInstance = axios.create({
+const request: AxiosInstance = axios.create({
   adapter: cacheAdapter,
   // baseURL: import.meta.env.VITE_API_URL,
   baseURL: "https://www.asmrgay.com",
@@ -80,7 +80,7 @@ const service: AxiosInstance = axios.create({
 });
 
 // 添加请求拦截器
-service.interceptors.request.use(
+request.interceptors.request.use(
   (config) => {
     // // 在发送请求之前做些什么 token
     // if (token.value) config.headers![TokenKey] = `Bearer ${token.value}`
@@ -93,7 +93,7 @@ service.interceptors.request.use(
 );
 
 // 添加响应拦截器
-service.interceptors.response.use(
+request.interceptors.response.use(
   async (response) => {
     // 对响应数据做点什么
     const res = response.data;
@@ -110,7 +110,7 @@ service.interceptors.response.use(
       // }
       return res;
     } else {
-      return Promise.reject(service.interceptors.response);
+      return Promise.reject(request.interceptors.response);
     }
   },
   (error) => {
@@ -132,4 +132,4 @@ service.interceptors.response.use(
 );
 
 // 导出 axios 实例
-export default service;
+export default request;

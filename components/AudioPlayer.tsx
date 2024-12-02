@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Audio } from "expo-av";
 // import * as Notifications from "expo-notifications";
-import { formatMilliseconds } from "@/utils";
+import { formatMilliseconds } from "@/utils/lib";
 import { ThemedText } from "./theme/ThemedText";
 import { ThemedButton } from "./theme/ThemedButton";
 import { ThemedView } from "./theme/ThemedView";
@@ -108,8 +108,7 @@ const AudioPlayerComponent = () => {
           justifyContent: "center",
           padding: 10,
         }}
-      >
-      </ThemedView>
+      ></ThemedView>
     </ThemedView>
   );
 };

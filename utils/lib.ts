@@ -146,3 +146,21 @@ export function formatFileSize(
     sizes[i]
   }`;
 }
+
+/**
+ * 格式化路径，将多个路径片段合并成一个标准化的路径
+ *
+ * @param {string[]} segments 路径片段数组
+ * @returns {string} 标准化后的路径
+ */
+export function formatPath(...segments: string[]): string {
+  // 合并所有路径片段，并用 '/' 分隔
+  let path = segments.join("/");
+
+  // 使用正则表达式处理冗余的斜杠和其他特殊情况
+  path = path
+    .replace(/\/\/+/g, "/") // 替换多个连续的斜杠为单个斜杠
+    .replace(/\/+$/, ""); // 去掉路径结尾的斜杠
+
+  return path;
+}

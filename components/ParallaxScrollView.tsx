@@ -28,12 +28,12 @@ export default function ParallaxScrollView({ children }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: StatusBar.currentHeight,
+    paddingLeft: 10,
+    paddingRight: 10
   },
   content: {
     flex: 1,
     gap: 10,
-    padding: 10,
     overflow: "hidden",
   },
 });

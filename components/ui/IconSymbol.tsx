@@ -23,9 +23,14 @@ const MAPPING = {
   "text.document": "file-present",
   "arrowtriangle.right.fill": "arrow-right",
   "arrow.up": "arrow-upward",
-  "arrowshape.up.fill": "upload",
-  "arrowshape.down.fill": "download",
-  "arrow.up.and.down.text.horizontal": "arrow-forward-ios",
+  "arrowshape.up.fill": "arrow-upward",
+  "arrowshape.down.fill": "arrow-downward",
+  "arrow.up.and.down.text.horizontal": "format-list-numbered",
+  "pause.circle": "pause-circle-outline",
+  "play.circle": "play-circle-outline",
+  "arrow.right": "arrow-right",
+  "chevron.compact.right": "arrow-right",
+  "folder.fill.badge.gearshape": "snippet-folder",
 } as Partial<
   Record<
     import("expo-symbols").SymbolViewProps["name"],

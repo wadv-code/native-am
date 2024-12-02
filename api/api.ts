@@ -2,6 +2,7 @@ import request from "@/utils/request";
 
 // 请求参数
 export type GetItemsParams = {
+  name?: string;
   page: number;
   password: string;
   path: string;
@@ -11,6 +12,8 @@ export type GetItemsParams = {
 
 export type GetItemsResItem = {
   name: string;
+  raw_url?: string;
+  parent?: string;
   created?: string;
   hash_info?: object | null;
   hashinfo?: string;
@@ -33,6 +36,15 @@ export type GetItemsRes = {
   total: number;
   write: boolean;
 };
+
+export type GetDetailParams = {
+  password?: string;
+  path: string;
+};
+
+export type GetDetailRes = {
+  raw_url: string;
+};
 /**
  * 系统基础
  */
@@ -50,6 +62,18 @@ export function useBaseApi() {
         params: params,
         cache: true,
         refresh: refresh,
+      });
+    },
+    /**
+     * 获取文件详情
+     * @constructor
+     * @param params
+     */
+    GetDetail: async (params: GetDetailParams) => {
+      return request<GetDetailRes>({
+        url: "/api/fs/get",
+        method: "get",
+        params: params,
       });
     },
   };

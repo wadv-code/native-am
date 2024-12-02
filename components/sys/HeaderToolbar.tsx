@@ -1,50 +1,50 @@
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { ThemedView } from "../theme/ThemedView";
-import { IconSymbol } from "../ui/IconSymbol";
+import { IconSymbol } from "../ui";
 import { ThemedText } from "../theme/ThemedText";
 import { useTheme } from "@/hooks/useThemeColor";
 import Animated, { useAnimatedRef } from "react-native-reanimated";
 import { useState } from "react";
+import type { GetItemsParams } from "@/api/api";
 
-export type HeaderToolbarProps = {
-  path: string;
+interface ToolbarProps {
   name?: string;
-};
+  items: GetItemsParams[];
+  onPress?: (item: GetItemsParams) => void;
+  onRoot?: () => void;
+}
 
-const HeaderToolbar = ({ path, name }: HeaderToolbarProps) => {
+export type HeaderToolbarProps = ToolbarProps;
+
+const HeaderToolbar = (props: ToolbarProps) => {
+  const { items, name, onPress, onRoot } = props;
   const [isDesc, setIsDesc] = useState(false);
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
-  const theme = useTheme();
-  const items = path.split("/").filter((f) => f);
+  // const theme = useTheme();
   return (
     <ThemedView>
       {/* <View>面包屑</View> */}
       <View style={styles.row}>
-        <TouchableOpacity style={styles.rootIcon}>
-          <IconSymbol size={26} name="folder.fill.badge.gearshape" />
+        <TouchableOpacity style={styles.rootIcon} onPress={onRoot}>
+          <IconSymbol name="folder.fill.badge.gearshape" />
         </TouchableOpacity>
         <Animated.ScrollView
           ref={scrollRef}
           scrollEventThrottle={16}
           style={{ height: 40 }}
           horizontal={true}
-          contentContainerStyle={{ paddingRight: 20 }}
+          contentContainerStyle={styles.scrollView}
         >
-          {items.map((v, index) => {
+          {items.map((item, index) => {
             return (
-              <View key={index} style={styles.breadcrumb}>
-                <IconSymbol
-                  size={14}
-                  style={styles.icon}
-                  weight="bold"
-                  name="chevron.compact.right"
-                />
-                <TouchableOpacity>
-                  <ThemedText style={[styles.text, { color: theme.primary }]}>
-                    {v}
-                  </ThemedText>
-                </TouchableOpacity>
-              </View>
+              <TouchableOpacity
+                key={index}
+                style={styles.breadcrumb}
+                onPress={() => onPress && onPress(item)}
+              >
+                <IconSymbol weight="bold" name="chevron.compact.right" />
+                <ThemedText style={styles.text}>{item.name}</ThemedText>
+              </TouchableOpacity>
             );
           })}
         </Animated.ScrollView>
@@ -52,13 +52,13 @@ const HeaderToolbar = ({ path, name }: HeaderToolbarProps) => {
       {/* <View>排序</View> */}
       <View style={styles.filterContainer}>
         <ThemedText
-          style={[styles.smallText, { width: "75%" }]}
+          style={[styles.smallText, { width: "78%" }]}
           numberOfLines={1}
           ellipsizeMode="tail"
         >
           {name ?? "精选"}
         </ThemedText>
-        <View style={[styles.row, styles.toolbar]}>
+        <View style={styles.toolbar}>
           <TouchableOpacity style={styles.row}>
             <IconSymbol
               style={styles.icon}
@@ -67,10 +67,7 @@ const HeaderToolbar = ({ path, name }: HeaderToolbarProps) => {
             />
             <ThemedText style={styles.smallText}>名称</ThemedText>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={{ marginLeft: 5 }}
-            onPress={() => setIsDesc(!isDesc)}
-          >
+          <TouchableOpacity onPress={() => setIsDesc(!isDesc)}>
             <IconSymbol
               size={16}
               name={isDesc ? "arrowshape.down.fill" : "arrowshape.up.fill"}
@@ -100,20 +97,28 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   toolbar: {
-    width: "20%",
-    gap: 7,
+    width: "22%",
+    gap: 10,
     flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
   },
   text: {
-    fontSize: 14,
+    fontSize: 16,
   },
   smallText: {
-    fontSize: 12,
+    fontSize: 14,
+    paddingBottom: 3,
   },
   rootIcon: {
     width: 30,
     flexDirection: "row",
     justifyContent: "center",
+  },
+  scrollView: {
+    paddingRight: 20,
+    flexDirection: "row",
+    alignItems: "center",
   },
 });
 

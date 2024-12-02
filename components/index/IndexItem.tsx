@@ -1,10 +1,10 @@
 import type { GetItemsResItem } from "@/api/api";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { formatFileSize, formatTimeAgo, getIconSymbol } from "@/utils";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { formatFileSize, formatTimeAgo, getIconSymbol } from "@/utils/lib";
 import { useTheme } from "@/hooks/useThemeColor";
 import { ThemedText } from "../theme/ThemedText";
 import { ThemedView } from "../theme/ThemedView";
-import { IconSymbol } from "../ui/IconSymbol";
+import { IconSymbol } from "../ui";
 
 const IndexItem = (option: GetItemsResItem) => {
   const { name, modified, is_dir, size, onPress } = option;
@@ -37,7 +37,7 @@ const IndexItem = (option: GetItemsResItem) => {
         <ThemedText style={styles.timeStyle}>
           {formatTimeAgo(modified)}
         </ThemedText>
-        <IconSymbol size={16} name={is_dir ? "chevron.right" : "ellipsis"} />
+        <IconSymbol size={20} name={is_dir ? "chevron.right" : "ellipsis"} />
       </ThemedView>
     </TouchableOpacity>
   );

@@ -3,7 +3,7 @@ import { StyleSheet, TouchableOpacity } from "react-native";
 
 import { ThemedText } from "@/components/theme/ThemedText";
 import { ThemedView } from "@/components/theme/ThemedView";
-import { IconSymbol } from "@/components/ui/IconSymbol";
+import { IconSymbol } from "@/components/ui";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
@@ -22,7 +22,7 @@ export function Collapsible({
         activeOpacity={0.8}
       >
         <IconSymbol
-          name="arrow-right"
+          name="arrow.right"
           size={18}
           color={theme === "light" ? Colors.light.icon : Colors.dark.icon}
           style={{ transform: [{ rotate: isOpen ? "90deg" : "0deg" }] }}
