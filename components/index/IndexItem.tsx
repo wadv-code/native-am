@@ -6,14 +6,20 @@ import { ThemedText } from "../theme/ThemedText";
 import { ThemedView } from "../theme/ThemedView";
 import { IconSymbol } from "../ui";
 
-const IndexItem = (option: GetItemsResItem) => {
-  const { name, modified, is_dir, size, onPress } = option;
+interface ItemProps extends GetItemsResItem {
+  index?: number;
+}
+
+export type IndexItemProps = ItemProps;
+
+const IndexItem = (option: IndexItemProps) => {
+  const { name, modified, is_dir, size, index, onPress } = option;
   const theme = useTheme();
 
   return (
     <TouchableOpacity
       style={styles.itemContainer}
-      onPress={() => onPress && onPress(option)}
+      onPress={() => onPress && onPress(option, index)}
     >
       <ThemedView style={styles.leftContainer}>
         <IconSymbol
@@ -37,7 +43,10 @@ const IndexItem = (option: GetItemsResItem) => {
         <ThemedText style={styles.timeStyle}>
           {formatTimeAgo(modified)}
         </ThemedText>
-        <IconSymbol size={20} name={is_dir ? "chevron.right" : "ellipsis"} />
+        <IconSymbol
+          size={20}
+          name={is_dir ? "keyboard-arrow-right" : "more-vert"}
+        />
       </ThemedView>
     </TouchableOpacity>
   );

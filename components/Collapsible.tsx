@@ -22,7 +22,7 @@ export function Collapsible({
         activeOpacity={0.8}
       >
         <IconSymbol
-          name="arrow.right"
+          name="arrow-right"
           size={18}
           color={theme === "light" ? Colors.light.icon : Colors.dark.icon}
           style={{ transform: [{ rotate: isOpen ? "90deg" : "0deg" }] }}

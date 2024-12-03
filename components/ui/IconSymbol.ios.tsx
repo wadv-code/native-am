@@ -1,6 +1,34 @@
 import { useTheme } from "@/hooks/useThemeColor";
-import { SymbolView, SymbolViewProps, SymbolWeight } from "expo-symbols";
+import type { MaterialIconsName } from "@/types";
+import { SymbolView, SymbolWeight } from "expo-symbols";
 import { StyleProp, ViewStyle } from "react-native";
+
+// Add your SFSymbol to MaterialIcons mappings here.
+const MAPPING = {
+  // See MaterialIcons here: https://icons.expo.fyi
+  // See SF Symbols in the SF Symbols app on Mac.
+  home: "house.fill",
+  send: "paperplane.fill",
+  code: "chevron.left.forwardslash.chevron.right",
+  "keyboard-arrow-right": "chevron.right",
+  "queue-music": "music.note.list",
+  "more-vert": "ellipsis",
+  folder: "folder.fill",
+  photo: "photo",
+  "music-note": "music.note",
+  "arrow-upward": "arrow.up",
+  "arrow-downward": "arrowshape.down.fill",
+  "sort-by-alpha": "arrow.up.and.down.text.horizontal",
+  "pause-circle-outline": "pause.circle",
+  "play-circle-outline": "play.circle",
+  "arrow-right": "arrow.right",
+  "snippet-folder": "folder.fill.badge.gearshape",
+  "file-present": "text.bubble.fill",
+} as Partial<
+  Record<MaterialIconsName, import("expo-symbols").SymbolViewProps["name"]>
+>;
+
+export type IconSymbolName = keyof typeof MAPPING;
 
 export function IconSymbol({
   name,
@@ -9,7 +37,7 @@ export function IconSymbol({
   style,
   weight = "regular",
 }: {
-  name: SymbolViewProps["name"];
+  name: MaterialIconsName;
   size?: number;
   color: string;
   style?: StyleProp<ViewStyle>;
@@ -21,7 +49,7 @@ export function IconSymbol({
       weight={weight}
       tintColor={color ?? theme.icon}
       resizeMode="scaleAspectFit"
-      name={name}
+      name={MAPPING[name] ?? "0.circle"}
       style={[
         {
           width: size,

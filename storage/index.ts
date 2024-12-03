@@ -48,6 +48,16 @@ class StorageManager {
     }
   }
 
+  // 清除缓存
+  public async clear() {
+    try {
+      await AsyncStorage.clear();
+    } catch (error) {
+      // 处理错误
+      console.error("Error clear data: ", error);
+    }
+  }
+
   // 存储key
   public getKey(key: string) {
     return `${this.version}_${key}`;

@@ -2,31 +2,77 @@ import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { ThemedView } from "../theme/ThemedView";
 import { IconSymbol } from "../ui";
 import { ThemedText } from "../theme/ThemedText";
-import { useTheme } from "@/hooks/useThemeColor";
 import Animated, { useAnimatedRef } from "react-native-reanimated";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import type { GetItemsParams } from "@/api/api";
+import type { MaterialIconsName } from "@/types";
 
-interface ToolbarProps {
+// 排序方式
+const orders = ["name", "time", "size"] as const;
+// 排序
+const sorts = ["descending", "ascending", "default"] as const;
+
+export type ToolbarSynopsis = {
+  total: number;
+  pageSize: number;
+};
+
+export type ToolbarOrder = (typeof orders)[number];
+
+export type ToolbarSort = (typeof sorts)[number];
+
+export type ToolbarSortOrder = {
+  sort: ToolbarSort;
+  order: ToolbarOrder;
+};
+
+export type ToolbarProps = {
   name?: string;
   items: GetItemsParams[];
+  synopsis?: ToolbarSynopsis;
   onPress?: (item: GetItemsParams) => void;
   onRoot?: () => void;
-}
+  onSortOrder?: (order: ToolbarSortOrder) => void;
+};
 
-export type HeaderToolbarProps = ToolbarProps;
-
-const HeaderToolbar = (props: ToolbarProps) => {
-  const { items, name, onPress, onRoot } = props;
-  const [isDesc, setIsDesc] = useState(false);
+const HeaderToolbar: React.FC<ToolbarProps> = (props) => {
+  const { name, items, synopsis } = props;
+  const { onPress, onRoot, onSortOrder } = props;
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
-  // const theme = useTheme();
+  const [sort, setSort] = useState<ToolbarSort>("descending");
+  const [order, setOrder] = useState<ToolbarOrder>("time");
+
+  const onOrder = () => {
+    const index = orders.findIndex((f) => f === order);
+    const orderString = orders[index + 1];
+    setOrder(orderString ?? orders[0]);
+  };
+
+  const onSort = () => {
+    const index = sorts.findIndex((f) => f === sort);
+    const sortString = sorts[index + 1];
+    setSort(sortString ?? sorts[0]);
+  };
+
+  const getOrderIcon: () => MaterialIconsName = () => {
+    const icons: Record<ToolbarSort, MaterialIconsName> = {
+      ascending: "arrow-downward",
+      descending: "arrow-upward",
+      default: "blur-on",
+    };
+    return icons[sort];
+  };
+
+  useEffect(() => {
+    onSortOrder && onSortOrder({ sort, order });
+  }, [sort, order]);
+
   return (
     <ThemedView>
       {/* <View>面包屑</View> */}
       <View style={styles.row}>
         <TouchableOpacity style={styles.rootIcon} onPress={onRoot}>
-          <IconSymbol name="folder.fill.badge.gearshape" />
+          <IconSymbol name="snippet-folder" />
         </TouchableOpacity>
         <Animated.ScrollView
           ref={scrollRef}
@@ -42,14 +88,13 @@ const HeaderToolbar = (props: ToolbarProps) => {
                 style={styles.breadcrumb}
                 onPress={() => onPress && onPress(item)}
               >
-                <IconSymbol weight="bold" name="chevron.compact.right" />
+                <IconSymbol weight="bold" name="arrow-right" />
                 <ThemedText style={styles.text}>{item.name}</ThemedText>
               </TouchableOpacity>
             );
           })}
         </Animated.ScrollView>
       </View>
-      {/* <View>排序</View> */}
       <View style={styles.filterContainer}>
         <ThemedText
           style={[styles.smallText, { width: "78%" }]}
@@ -59,19 +104,19 @@ const HeaderToolbar = (props: ToolbarProps) => {
           {name ?? "精选"}
         </ThemedText>
         <View style={styles.toolbar}>
-          <TouchableOpacity style={styles.row}>
+          <ThemedText style={styles.smallText}>
+            {synopsis?.pageSize}/{synopsis?.total}
+          </ThemedText>
+          <TouchableOpacity style={styles.row} onPress={onOrder}>
             <IconSymbol
-              style={styles.icon}
+              style={{ marginRight: 3 }}
               size={16}
-              name="arrow.up.and.down.text.horizontal"
+              name="sort-by-alpha"
             />
-            <ThemedText style={styles.smallText}>名称</ThemedText>
+            <ThemedText style={styles.smallText}>{order}</ThemedText>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => setIsDesc(!isDesc)}>
-            <IconSymbol
-              size={16}
-              name={isDesc ? "arrowshape.down.fill" : "arrowshape.up.fill"}
-            />
+          <TouchableOpacity onPress={onSort}>
+            <IconSymbol size={18} name={getOrderIcon()} />
           </TouchableOpacity>
         </View>
       </View>
@@ -108,7 +153,7 @@ const styles = StyleSheet.create({
   },
   smallText: {
     fontSize: 14,
-    paddingBottom: 3,
+    textTransform: "capitalize",
   },
   rootIcon: {
     width: 30,

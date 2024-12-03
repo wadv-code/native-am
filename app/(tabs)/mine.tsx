@@ -1,16 +1,40 @@
 import { useState } from "react";
-import { Appearance, Button, StyleSheet, useColorScheme } from "react-native";
+import {
+  Alert,
+  Appearance,
+  Button,
+  StyleSheet,
+  ToastAndroid,
+  useColorScheme,
+} from "react-native";
 import { ThemedText } from "@/components/theme/ThemedText";
 import { ThemedView } from "@/components/theme/ThemedView";
 import { ThemedButton } from "@/components/theme/ThemedButton";
 
 import ThemedModal from "@/components/theme/ThemedModal";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
+import { storageManager } from "@/storage";
 
 export default function MineScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const mode = useColorScheme();
   const { setColorScheme } = Appearance;
+
+  const clearStorage = () => {
+    Alert.alert(
+      "Confirmation",
+      "Are you sure you want to proceed?",
+      [
+        {
+          text: "Cancel",
+          onPress: () => ToastAndroid.show("Cancel Pressed", 1000),
+          style: "cancel",
+        },
+        { text: "OK", onPress: () => storageManager.clear() },
+      ],
+      { cancelable: false }
+    );
+  };
 
   const closeModal = () => {
     console.log("closeModal");
@@ -38,6 +62,8 @@ export default function MineScreen() {
         title={mode === "dark" ? "深色模式" : "浅色模式"}
         onPress={setMode}
       />
+
+      <ThemedButton title="清除缓存" onPress={clearStorage} />
 
       <ThemedButton title="弹窗" onPress={openModal} />
 

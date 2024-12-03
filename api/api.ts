@@ -23,7 +23,7 @@ export type GetItemsResItem = {
   size?: number;
   thumb?: string;
   type?: number;
-  onPress?: (option: GetItemsResItem) => void;
+  onPress?: (option: GetItemsResItem, index?: number) => void;
 };
 
 // 请求参数

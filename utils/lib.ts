@@ -1,3 +1,4 @@
+import type { MaterialIconsName } from "@/types";
 import dayjs, { type ConfigType } from "dayjs";
 import type { SymbolViewProps } from "expo-symbols";
 
@@ -104,7 +105,7 @@ export function isAudioFile(fileName: string): boolean {
 export type FnIconSymbol = (
   name: string,
   is_dir?: boolean
-) => SymbolViewProps["name"];
+) => MaterialIconsName;
 
 /**
  * 根据名称后缀获取图标
@@ -112,13 +113,13 @@ export type FnIconSymbol = (
  */
 export const getIconSymbol: FnIconSymbol = (name: string, is_dir?: boolean) => {
   if (is_dir) {
-    return "folder.fill";
+    return "folder";
   } else if (isImageFile(name)) {
     return "photo";
   } else if (isAudioFile(name)) {
-    return "music.note";
+    return "music-note";
   } else {
-    return "filemenu.and.cursorarrow";
+    return "file-present";
   }
 };
 
@@ -163,4 +164,14 @@ export function formatPath(...segments: string[]): string {
     .replace(/\/+$/, ""); // 去掉路径结尾的斜杠
 
   return path;
+}
+
+/**
+ * 首字母大写
+ * @param str
+ * @returns
+ */
+export function capitalizeFirstLetter(str?: string) {
+  if (!str || typeof str !== "string" || str.length === 0) return str;
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }

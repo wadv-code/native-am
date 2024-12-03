@@ -1,46 +1,13 @@
 // This file is a fallback for using MaterialIcons on Android and web.
-
-import { useTheme } from "@/hooks/useThemeColor";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { SymbolWeight } from "expo-symbols";
 import React from "react";
+import { useTheme } from "@/hooks/useThemeColor";
+import { MaterialIcons } from "@expo/vector-icons";
+import { SymbolWeight } from "expo-symbols";
 import { OpaqueColorValue, StyleProp, type TextStyle } from "react-native";
+import type { MaterialIconsName } from "@/types";
 
-// Add your SFSymbol to MaterialIcons mappings here.
-const MAPPING = {
-  // See MaterialIcons here: https://icons.expo.fyi
-  // See SF Symbols in the SF Symbols app on Mac.
-  "house.fill": "home",
-  "paperplane.fill": "send",
-  "chevron.left.forwardslash.chevron.right": "code",
-  "chevron.right": "keyboard-arrow-right",
-  "music.note.list": "queue-music",
-  ellipsis: "more-vert",
-  folder: "folder",
-  "folder.fill": "folder",
-  photo: "photo",
-  "music.note": "music-note",
-  "text.document": "file-present",
-  "arrowtriangle.right.fill": "arrow-right",
-  "arrow.up": "arrow-upward",
-  "arrowshape.up.fill": "arrow-upward",
-  "arrowshape.down.fill": "arrow-downward",
-  "arrow.up.and.down.text.horizontal": "format-list-numbered",
-  "pause.circle": "pause-circle-outline",
-  "play.circle": "play-circle-outline",
-  "arrow.right": "arrow-right",
-  "chevron.compact.right": "arrow-right",
-  "folder.fill.badge.gearshape": "snippet-folder",
-} as Partial<
-  Record<
-    import("expo-symbols").SymbolViewProps["name"],
-    React.ComponentProps<typeof MaterialIcons>["name"]
-  >
->;
-
-export type IconSymbolName = keyof typeof MAPPING;
 export type IconSymbolProps = {
-  name: IconSymbolName;
+  name: MaterialIconsName;
   size?: number;
   color?: string | OpaqueColorValue;
   style?: StyleProp<TextStyle>;
@@ -58,7 +25,7 @@ export function IconSymbol({ name, size = 24, color, style }: IconSymbolProps) {
     <MaterialIcons
       color={color ?? theme.icon}
       size={size}
-      name={MAPPING[name]}
+      name={name}
       style={style}
     />
   );
