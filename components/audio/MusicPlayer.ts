@@ -38,33 +38,6 @@ const MusicPlayer = (props: MusicPlayerProps) => {
       await soundObject.unloadAsync();
       // 重新加载
       await soundObject.loadAsync({ uri });
-      // 事件
-      soundObject.setOnPlaybackStatusUpdate((playbackStatus) => {
-        if (!playbackStatus.isLoaded) {
-          console.log("isLoaded");
-          if (playbackStatus.error) {
-            console.log(
-              `Encountered a fatal error during playback: ${playbackStatus.error}`
-            );
-          }
-        } else {
-          if (playbackStatus.isPlaying) {
-            onUpdate && onUpdate(playbackStatus);
-            // Update your UI for the playing state
-          } else {
-            // Update your UI for the paused state
-          }
-
-          if (playbackStatus.isBuffering) {
-            console.log("isBuffering");
-          }
-
-          if (playbackStatus.didJustFinish && !playbackStatus.isLooping) {
-            console.log("didJustFinish");
-            onFinish && onFinish();
-          }
-        }
-      });
       // 播放
       if (autoplay || playing) await playAsync();
     } catch (error) {
@@ -89,6 +62,37 @@ const MusicPlayer = (props: MusicPlayerProps) => {
       }
     })();
   }, [playing]);
+
+  useEffect(() => {
+    console.log("一次");
+    // 事件
+    soundObject.setOnPlaybackStatusUpdate((playbackStatus) => {
+      if (!playbackStatus.isLoaded) {
+        console.log("isLoaded");
+        if (playbackStatus.error) {
+          console.log(
+            `Encountered a fatal error during playback: ${playbackStatus.error}`
+          );
+        }
+      } else {
+        if (playbackStatus.isPlaying) {
+          onUpdate && onUpdate(playbackStatus);
+          // Update your UI for the playing state
+        } else {
+          // Update your UI for the paused state
+        }
+
+        if (playbackStatus.isBuffering) {
+          console.log("isBuffering");
+        }
+
+        if (playbackStatus.didJustFinish && !playbackStatus.isLooping) {
+          console.log("didJustFinish");
+          onFinish && onFinish();
+        }
+      }
+    });
+  }, []);
 
   return null; // 这个组件不渲染任何东西，只是播放音乐
 };

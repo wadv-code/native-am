@@ -17,11 +17,11 @@ const MAPPING = {
   photo: "photo",
   "music-note": "music.note",
   "arrow-upward": "arrow.up",
-  "arrow-downward": "arrowshape.down.fill",
+  "arrow-downward": "arrow.down",
   "sort-by-alpha": "arrow.up.and.down.text.horizontal",
   "pause-circle-outline": "pause.circle",
   "play-circle-outline": "play.circle",
-  "arrow-right": "arrow.right",
+  "arrow-right": "chevron.right",
   "snippet-folder": "folder.fill.badge.gearshape",
   "file-present": "text.bubble.fill",
 } as Partial<
@@ -32,7 +32,7 @@ export type IconSymbolName = keyof typeof MAPPING;
 
 export function IconSymbol({
   name,
-  size = 20,
+  size = 16,
   color,
   style,
   weight = "regular",

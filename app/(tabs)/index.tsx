@@ -9,7 +9,6 @@ import {
   FlatList,
   BackHandler,
   Platform,
-  ToastAndroid,
   Alert,
   RefreshControl,
 } from "react-native";
@@ -53,7 +52,6 @@ export default function HomeScreen() {
       });
       setTotal(data.total);
       setSortOrderItems(data.content);
-      refresh && ToastAndroid.show("加载成功。", 1000);
     } catch {
       return Promise.reject("onFetch Request Error");
     } finally {

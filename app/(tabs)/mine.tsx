@@ -1,11 +1,5 @@
 import { useState } from "react";
-import {
-  Alert,
-  Appearance,
-  StyleSheet,
-  ToastAndroid,
-  useColorScheme,
-} from "react-native";
+import { Alert, Appearance, StyleSheet, useColorScheme } from "react-native";
 import { storageManager } from "@/storage";
 
 import { ThemedText } from "@/components/theme/ThemedText";
@@ -28,7 +22,7 @@ export default function MineScreen() {
       [
         {
           text: "Cancel",
-          onPress: () => ToastAndroid.show("Cancel Pressed", 1000),
+          onPress: () => console.log("Cancel Pressed"),
           style: "cancel",
         },
         { text: "OK", onPress: () => storageManager.clear() },

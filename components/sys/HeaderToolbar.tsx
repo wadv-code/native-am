@@ -64,7 +64,7 @@ const HeaderToolbar: React.FC<ToolbarProps> = (props) => {
   const getOrderIcon: () => MaterialIconsName = () => {
     const icons: Record<ToolbarSort, MaterialIconsName> = {
       ascending: "arrow-downward",
-      descending: "arrow-upward"
+      descending: "arrow-upward",
     };
     return icons[sort];
   };
@@ -95,7 +95,7 @@ const HeaderToolbar: React.FC<ToolbarProps> = (props) => {
       {/* <View>面包屑</View> */}
       <View style={styles.row}>
         <TouchableOpacity style={styles.rootIcon} onPress={onRoot}>
-          <IconSymbol name="snippet-folder" />
+          <IconSymbol size={24} name="snippet-folder" />
         </TouchableOpacity>
         <Animated.ScrollView
           ref={scrollRef}
@@ -111,7 +111,11 @@ const HeaderToolbar: React.FC<ToolbarProps> = (props) => {
                 style={styles.breadcrumb}
                 onPress={() => onPress && onPress(item)}
               >
-                <IconSymbol weight="bold" name="arrow-right" />
+                <IconSymbol
+                  size={14}
+                  style={{ marginHorizontal: 3 }}
+                  name="arrow-right"
+                />
                 <ThemedText style={styles.text}>{item.name}</ThemedText>
               </TouchableOpacity>
             );
