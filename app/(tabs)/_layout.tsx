@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Tabs } from "expo-router";
 import { Platform } from "react-native";
 import { AudioBar } from "@/components/audio";

@@ -9,9 +9,11 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import "react-native-reanimated";
 import { useColorScheme } from "@/hooks/useColorScheme";
-import { SafeAreaView } from "react-native";
+import { Appearance, SafeAreaView } from "react-native";
 import { useTheme } from "@/hooks/useThemeColor";
 import { StatusBar } from "expo-status-bar";
+import { Provider } from "react-redux";
+import { storageManager } from "@/storage";
 
 // // player
 // import setApp from "@/player/services";
@@ -21,8 +23,10 @@ import { StatusBar } from "expo-status-bar";
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const { setColorScheme } = Appearance;
   const colorScheme = useColorScheme();
   const theme = useTheme();
+
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
@@ -33,9 +37,17 @@ export default function RootLayout() {
     }
   }, [loaded]);
 
-  if (!loaded) {
-    return null;
-  }
+  // 主题
+  useEffect(() => {
+    const initColorScheme = async () => {
+      const colorScheme = (await storageManager.get("color_scheme")) ?? "light";
+      console.log(colorScheme);
+      setColorScheme(colorScheme);
+    };
+    initColorScheme();
+  }, []);
+
+  if (!loaded) return null;
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>

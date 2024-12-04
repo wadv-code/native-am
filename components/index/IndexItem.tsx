@@ -13,11 +13,12 @@ interface ItemProps extends GetItemsResItem {
 export type IndexItemProps = ItemProps;
 
 const IndexItem = (option: IndexItemProps) => {
-  const { name, modified, is_dir, size, index, onPress } = option;
+  const { id, name, modified, is_dir, size, index, onPress } = option;
   const theme = useTheme();
 
   return (
     <TouchableOpacity
+      key={id}
       style={styles.itemContainer}
       onPress={() => onPress && onPress(option, index)}
     >
@@ -57,8 +58,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingTop: 5,
-    paddingBottom: 5,
+    paddingVertical: 10,
   },
   leftContainer: {
     flex: 1,
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
     paddingRight: 40,
   },
   size: {
-    fontSize: 10,
+    fontSize: 12,
     marginTop: 5,
     fontWeight: 300,
   },

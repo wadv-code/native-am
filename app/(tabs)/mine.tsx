@@ -2,22 +2,23 @@ import { useState } from "react";
 import {
   Alert,
   Appearance,
-  Button,
   StyleSheet,
   ToastAndroid,
   useColorScheme,
 } from "react-native";
+import { storageManager } from "@/storage";
+
 import { ThemedText } from "@/components/theme/ThemedText";
 import { ThemedView } from "@/components/theme/ThemedView";
 import { ThemedButton } from "@/components/theme/ThemedButton";
 
 import ThemedModal from "@/components/theme/ThemedModal";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { storageManager } from "@/storage";
 
 export default function MineScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const mode = useColorScheme();
+
   const { setColorScheme } = Appearance;
 
   const clearStorage = () => {
@@ -47,7 +48,9 @@ export default function MineScreen() {
   };
 
   const setMode = () => {
-    setColorScheme(mode === "dark" ? "light" : "dark");
+    const colorScheme = mode === "dark" ? "light" : "dark";
+    setColorScheme(colorScheme);
+    storageManager.set("color_scheme", colorScheme);
   };
   return (
     <ParallaxScrollView>
@@ -55,7 +58,7 @@ export default function MineScreen() {
         <ThemedText type="title">admin-panel-settings</ThemedText>
       </ThemedView>
       <ThemedText>
-        This app includes example code to help you get started.
+        This app includes example code to help you get started.{mode}
       </ThemedText>
 
       <ThemedButton

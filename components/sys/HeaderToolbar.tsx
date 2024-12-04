@@ -3,14 +3,15 @@ import { ThemedView } from "../theme/ThemedView";
 import { IconSymbol } from "../ui";
 import { ThemedText } from "../theme/ThemedText";
 import Animated, { useAnimatedRef } from "react-native-reanimated";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import type { GetItemsParams } from "@/api/api";
 import type { MaterialIconsName } from "@/types";
+import { storageManager } from "@/storage";
 
 // 排序方式
 const orders = ["name", "time", "size"] as const;
 // 排序
-const sorts = ["descending", "ascending", "default"] as const;
+const sorts = ["descending", "ascending"] as const;
 
 export type ToolbarSynopsis = {
   total: number;
@@ -41,31 +42,53 @@ const HeaderToolbar: React.FC<ToolbarProps> = (props) => {
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const [sort, setSort] = useState<ToolbarSort>("descending");
   const [order, setOrder] = useState<ToolbarOrder>("time");
+  const [loading, setLoading] = useState<boolean>(false);
+  const isInitialRender = useRef<boolean>(false);
 
   const onOrder = () => {
     const index = orders.findIndex((f) => f === order);
     const orderString = orders[index + 1];
-    setOrder(orderString ?? orders[0]);
+    const value = orderString ?? orders[0];
+    setOrder(value);
+    storageManager.set("order_string", value);
   };
 
   const onSort = () => {
     const index = sorts.findIndex((f) => f === sort);
     const sortString = sorts[index + 1];
-    setSort(sortString ?? sorts[0]);
+    const value = sortString ?? sorts[0];
+    setSort(value);
+    storageManager.set("sort_string", value);
   };
 
   const getOrderIcon: () => MaterialIconsName = () => {
     const icons: Record<ToolbarSort, MaterialIconsName> = {
       ascending: "arrow-downward",
-      descending: "arrow-upward",
-      default: "blur-on",
+      descending: "arrow-upward"
     };
     return icons[sort];
   };
 
   useEffect(() => {
+    if (!isInitialRender.current) {
+      isInitialRender.current = true;
+      return;
+    }
     onSortOrder && onSortOrder({ sort, order });
   }, [sort, order]);
+
+  useEffect(() => {
+    const init = async () => {
+      const sortValue = (await storageManager.get("sort_string")) ?? sort;
+      const orderValue = (await storageManager.get("order_string")) ?? order;
+      setOrder(sortValue);
+      setOrder(orderValue);
+      setLoading(true);
+    };
+    init();
+  }, []);
+
+  if (!loading) return null;
 
   return (
     <ThemedView>
@@ -97,7 +120,7 @@ const HeaderToolbar: React.FC<ToolbarProps> = (props) => {
       </View>
       <View style={styles.filterContainer}>
         <ThemedText
-          style={[styles.smallText, { width: "78%" }]}
+          style={[styles.smallText, { width: "63%" }]}
           numberOfLines={1}
           ellipsizeMode="tail"
         >
@@ -143,7 +166,7 @@ const styles = StyleSheet.create({
   },
   toolbar: {
     width: "22%",
-    gap: 10,
+    gap: 5,
     flexDirection: "row",
     justifyContent: "flex-end",
     alignItems: "center",
@@ -156,7 +179,6 @@ const styles = StyleSheet.create({
     textTransform: "capitalize",
   },
   rootIcon: {
-    width: 30,
     flexDirection: "row",
     justifyContent: "center",
   },

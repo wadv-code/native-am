@@ -101,6 +101,10 @@ const AudioBar = () => {
   useEffect(() => {
     getStorageAsync();
     emitter.on("onAudioChange", setAudioItem);
+
+    return () => {
+      emitter.off("onAudioChange", setAudioItem);
+    };
   }, []);
 
   const playSound = async () => {
@@ -134,7 +138,10 @@ const AudioBar = () => {
           }}
           style={styles.imageStyle}
         >
-          <Image source={require("@/assets/images/logo.png")}></Image>
+          <Image
+            style={{ width: "100%", height: "100%" }}
+            source={require("@/assets/images/logo.png")}
+          ></Image>
         </Link>
         <View style={{ width: "100%" }}>
           <ThemedText style={{ fontSize: 16 }} numberOfLines={1}>

@@ -1,6 +1,5 @@
 import type { MaterialIconsName } from "@/types";
 import dayjs, { type ConfigType } from "dayjs";
-import type { SymbolViewProps } from "expo-symbols";
 
 // token
 export const TokenKey = "Authorization";

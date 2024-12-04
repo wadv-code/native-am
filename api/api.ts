@@ -8,9 +8,11 @@ export type GetItemsParams = {
   path: string;
   per_page: number;
   refresh?: boolean;
+  scrollName?: string;
 };
 
 export type GetItemsResItem = {
+  id: string;
   name: string;
   raw_url?: string;
   parent?: string;

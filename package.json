@@ -10,7 +10,10 @@
     "web": "expo start --web",
     "test": "jest --watchAll",
     "lint": "expo lint",
-    "update:deps": "npx taze -r -w"
+    "update:deps": "npx taze -r -w",
+    "reinstall": "pnpm clean-only --del-lock && pnpm install",
+    "clean": "pnpm clean-only --del-lock",
+    "clean-only": "node ./scripts/clean.mjs"
   },
   "jest": {
     "preset": "jest-expo"
@@ -18,8 +21,8 @@
   "dependencies": {
     "@expo/vector-icons": "^14.0.4",
     "@react-native-async-storage/async-storage": "~1.23.1",
-    "@react-navigation/bottom-tabs": "^7.1.3",
-    "@react-navigation/native": "^7.0.13",
+    "@react-navigation/bottom-tabs": "^7.0.0",
+    "@react-navigation/native": "^7.0.0",
     "axios": "^1.7.8",
     "dayjs": "^1.11.13",
     "expo": "~52.0.14",

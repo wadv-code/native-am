@@ -4,17 +4,14 @@ import ParallaxView from "@/components/ParallaxView";
 import { formatPath, isAudioFile } from "@/utils/lib";
 import { emitter } from "@/utils/mitt";
 import { storageManager } from "@/storage";
-import { ThemedText } from "@/components/theme/ThemedText";
 import { HeaderToolbar, type ToolbarSortOrder } from "@/components/sys";
 import {
   FlatList,
   BackHandler,
   Platform,
-  RefreshControl,
   ToastAndroid,
   Alert,
-  TouchableOpacity,
-  StyleSheet,
+  RefreshControl,
 } from "react-native";
 import {
   useBaseApi,
@@ -25,22 +22,24 @@ import type { HistoryItem } from "@/types";
 
 const { GetItems } = useBaseApi();
 
+const default_per_page = 1000;
+
 export default function HomeScreen() {
   const flatListRef = useRef<FlatList<GetItemsResItem>>(null);
-  const [scrollY, setScrollY] = useState<number>(0);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [total, setTotal] = useState<number>(0);
   const [selectedName, setSelectedName] = useState<string>();
   const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
-  const historyItemsRef = useRef(historyItems);
-  const isInitialRender = useRef(false);
+  const historyItemsRef = useRef<HistoryItem[]>(historyItems);
+  const isInitialRender = useRef<boolean>(false);
+  const isScrollIndex = useRef<boolean>(false);
   const [items, setItems] = useState<GetItemsResItem[]>([]);
   const [params, setParams] = useState<GetItemsParams>({
     name: "",
     page: 1,
     password: "",
     path: "/",
-    per_page: 30,
+    per_page: default_per_page,
     refresh: false,
   });
 
@@ -49,61 +48,82 @@ export default function HomeScreen() {
       setRefreshing(true);
       const { data } = await GetItems(params, refresh);
       data.content.forEach((item) => {
+        item.id = Math.random().toString();
         item.parent = params.path;
       });
       setTotal(data.total);
-      setItems(data.content);
+      setSortOrderItems(data.content);
       refresh && ToastAndroid.show("加载成功。", 1000);
     } catch {
-      console.log("Request Error");
+      return Promise.reject("onFetch Request Error");
     } finally {
       setRefreshing(false);
     }
   };
 
-  useEffect(() => {
-    flatListRef.current?.scrollToOffset({
-      offset: getOffset(),
-      animated: false,
-    });
-  }, [items]);
+  const onSortOrder = (option: ToolbarSortOrder) => {
+    setSortOrderItems(items, option);
+  };
 
-  const getOffset = () => {
-    return Math.floor(historyItems[historyItems.length - 1]?.scrollY ?? 0);
+  const setSortOrderItems = async (
+    list: GetItemsResItem[],
+    option?: ToolbarSortOrder
+  ) => {
+    const sort = (await storageManager.get("sort_string")) ?? "descending";
+    const order = (await storageManager.get("order_string")) ?? "time";
+    const sortOrder = option ?? { sort, order };
+
+    list.sort((a, b) => {
+      if (sortOrder.order === "time") {
+        if (sortOrder.sort === "ascending") {
+          return (
+            new Date(b.modified || Date.now()).getTime() -
+            new Date(a.modified || Date.now()).getTime()
+          );
+        } else {
+          return (
+            new Date(a.modified || Date.now()).getTime() -
+            new Date(b.modified || Date.now()).getTime()
+          );
+        }
+      } else if (sortOrder.order === "size") {
+        if (sortOrder.sort === "ascending") {
+          return (b.size || 0) - (a.size || 0);
+        } else {
+          return (a.size || 0) - (b.size || 0);
+        }
+      } else {
+        if (sortOrder.sort === "ascending") {
+          return a.name.localeCompare(b.name, "zh-CN");
+        } else {
+          return b.name.localeCompare(a.name, "zh-CN");
+        }
+      }
+    });
+
+    setItems([...list]);
   };
 
   // 刷新
   const onRefresh = async () => {
     if (refreshing) return;
-    params.per_page = 30;
+    params.per_page = default_per_page;
     const history = historyItems.find((f) => f.path === params.path);
     if (history) history.per_page = params.per_page;
     setHistoryLocal(historyItems);
     onFetch(true);
-  };
-
-  const onFetchMore = () => {
-    if (refreshing) return;
-    params.per_page += 30;
-    const history = historyItems.find((f) => f.path === params.path);
-    if (history) history.per_page = params.per_page;
-    setHistoryLocal(historyItems);
-    onFetch(true);
-  };
-
-  const onSortOrder = (option: ToolbarSortOrder) => {
-    console.log(option.order);
   };
 
   const handleItem = async (item: IndexItemProps) => {
+    if (refreshing) return;
     setSelectedName(item.name);
     if (item.is_dir) {
       params.name = item.name;
+      params.scrollName = item.name;
       params.path = formatPath(params.path, item.name);
-      if (historyItems.length) {
-        historyItems[historyItems.length - 1].scrollY = scrollY;
-      }
-      setHistoryLocal([...historyItems, { ...params, scrollY: 0 }]);
+      const lastHistory = historyItems[historyItems.length - 1];
+      if (lastHistory) lastHistory.scrollName = item.name;
+      setHistoryLocal([...historyItems, { ...params }]);
     } else if (isAudioFile(item.name)) {
       emitter.emit("onAudioChange", item);
     } else {
@@ -115,10 +135,6 @@ export default function HomeScreen() {
     const list = items ?? historyItems;
     setHistoryItems(list);
     storageManager.set("history_items", list);
-  };
-
-  const handleScroll = ({ nativeEvent }: { nativeEvent: any }) => {
-    setScrollY(nativeEvent.contentOffset.y);
   };
 
   const onFetchHistoryItems = async () => {
@@ -154,9 +170,35 @@ export default function HomeScreen() {
     } else {
       params.path = "/";
     }
-    onFetch();
+    onFetch().catch((error) => {
+      console.log(error);
+      const list = historyItemsRef.current || [];
+      const lastHistory = list[list.length - 2];
+      if (lastHistory) toHistory(lastHistory);
+    });
     historyItemsRef.current = historyItems;
+    isScrollIndex.current = true;
   }, [historyItems]);
+
+  useEffect(() => {
+    if (!isScrollIndex.current) return;
+    const list = historyItemsRef.current || [];
+    const lastHistory = list[list.length - 1];
+    if (lastHistory) {
+      const index = items.findIndex((f) => f.name === lastHistory.scrollName);
+      if (index > -1) {
+        flatListRef.current?.scrollToIndex({
+          index,
+          animated: false,
+        });
+      }
+      isScrollIndex.current = false;
+    }
+  }, [items]);
+
+  const onScrollToIndexFailed = () => {
+    console.log("onScrollToIndexFailed");
+  };
 
   useEffect(() => {
     onFetchHistoryItems();
@@ -165,8 +207,10 @@ export default function HomeScreen() {
       "hardwareBackPress",
       () => {
         const list = historyItemsRef.current || [];
-        list.pop();
-        setHistoryLocal([...list]);
+        if (list.length) {
+          list.pop();
+          setHistoryLocal([...list]);
+        }
         return true;
       }
     );
@@ -187,24 +231,13 @@ export default function HomeScreen() {
       <FlatList
         ref={flatListRef}
         data={items}
+        keyExtractor={(item) => item.id}
+        onScrollToIndexFailed={onScrollToIndexFailed}
         renderItem={({ item, index }) => (
           <IndexItem {...item} index={index} onPress={handleItem} />
         )}
-        keyExtractor={(item) => item.name}
-        extraData={selectedName}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        onScroll={handleScroll}
-        ListFooterComponent={() =>
-          items.length < total ? (
-            <TouchableOpacity
-              onPress={onFetchMore}
-              style={styles.moreTouchable}
-            >
-              <ThemedText>··· 点我加载更多 ···</ThemedText>
-            </TouchableOpacity>
-          ) : null
         }
         contentContainerStyle={Platform.select({
           ios: {
@@ -218,12 +251,3 @@ export default function HomeScreen() {
     </ParallaxView>
   );
 }
-
-const styles = StyleSheet.create({
-  moreTouchable: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 10,
-  },
-});
