@@ -4,7 +4,7 @@ import { IconSymbol } from "../ui";
 import { ThemedText } from "../theme/ThemedText";
 import Animated, { useAnimatedRef } from "react-native-reanimated";
 import React, { useEffect, useRef, useState } from "react";
-import type { GetItemsParams } from "@/api/api";
+import type { GetItemsParams } from "@/api";
 import type { MaterialIconsName } from "@/types";
 import { storageManager } from "@/storage";
 

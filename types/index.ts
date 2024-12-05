@@ -1,4 +1,4 @@
-import type { GetItemsParams } from "@/api/api";
+import type { GetItemsParams } from "@/api";
 import { MaterialIcons } from "@expo/vector-icons";
 
 export type MaterialIconsName = React.ComponentProps<

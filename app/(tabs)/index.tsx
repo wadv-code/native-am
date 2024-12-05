@@ -5,6 +5,9 @@ import { formatPath, isAudioFile } from "@/utils/lib";
 import { emitter } from "@/utils/mitt";
 import { storageManager } from "@/storage";
 import { HeaderToolbar, type ToolbarSortOrder } from "@/components/sys";
+import { useBaseApi } from "@/api/api";
+import type { HistoryItem } from "@/types";
+import type { GetItemsParams, GetItemsResItem } from "@/api";
 import {
   FlatList,
   BackHandler,
@@ -12,18 +15,15 @@ import {
   Alert,
   RefreshControl,
 } from "react-native";
-import {
-  useBaseApi,
-  type GetItemsParams,
-  type GetItemsResItem,
-} from "@/api/api";
-import type { HistoryItem } from "@/types";
+import { useIsFocused } from "@react-navigation/native";
 
 const { GetItems } = useBaseApi();
 
 const default_per_page = 1000;
 
 export default function HomeScreen() {
+  const isFocused = useIsFocused();
+  const isFocusedRef = useRef<boolean>(false);
   const flatListRef = useRef<FlatList<GetItemsResItem>>(null);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [total, setTotal] = useState<number>(0);
@@ -34,7 +34,6 @@ export default function HomeScreen() {
   const isScrollIndex = useRef<boolean>(false);
   const [items, setItems] = useState<GetItemsResItem[]>([]);
   const [params, setParams] = useState<GetItemsParams>({
-    name: "",
     page: 1,
     password: "",
     path: "/",
@@ -117,11 +116,10 @@ export default function HomeScreen() {
     setSelectedName(item.name);
     if (item.is_dir) {
       params.name = item.name;
-      params.scrollName = item.name;
       params.path = formatPath(params.path, item.name);
       const lastHistory = historyItems[historyItems.length - 1];
       if (lastHistory) lastHistory.scrollName = item.name;
-      setHistoryLocal([...historyItems, { ...params }]);
+      setHistoryLocal([...historyItems, JSON.parse(JSON.stringify(params))]);
     } else if (isAudioFile(item.name)) {
       emitter.emit("onAudioChange", item);
     } else {
@@ -141,10 +139,9 @@ export default function HomeScreen() {
     if (lastParams) {
       params.path = lastParams.path;
       params.name = lastParams.name;
-      setParams({ ...lastParams });
+      setParams({ ...params });
     }
     setHistoryItems(list);
-    onFetch();
   };
 
   const toHistory = (history?: HistoryItem) => {
@@ -168,8 +165,7 @@ export default function HomeScreen() {
     } else {
       params.path = "/";
     }
-    onFetch().catch((error) => {
-      console.log(error);
+    onFetch().catch(() => {
       const list = historyItemsRef.current || [];
       const lastHistory = list[list.length - 2];
       if (lastHistory) toHistory(lastHistory);
@@ -204,17 +200,23 @@ export default function HomeScreen() {
     const backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
       () => {
-        const list = historyItemsRef.current || [];
-        if (list.length) {
-          list.pop();
-          setHistoryLocal([...list]);
+        if (isFocusedRef.current) {
+          const list = historyItemsRef.current || [];
+          if (list.length) {
+            list.pop();
+            setHistoryLocal([...list]);
+          }
         }
-        return true;
+        return isFocusedRef.current;
       }
     );
     // 组件卸载时移除监听
     return () => backHandler.remove();
   }, []);
+
+  useEffect(() => {
+    isFocusedRef.current = isFocused;
+  }, [isFocused]);
 
   return (
     <ParallaxView>

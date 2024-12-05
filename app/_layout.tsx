@@ -12,7 +12,6 @@ import { useColorScheme } from "@/hooks/useColorScheme";
 import { Appearance, SafeAreaView } from "react-native";
 import { useTheme } from "@/hooks/useThemeColor";
 import { StatusBar } from "expo-status-bar";
-import { Provider } from "react-redux";
 import { storageManager } from "@/storage";
 
 // // player
@@ -55,6 +54,10 @@ export default function RootLayout() {
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="+not-found" />
+          <Stack.Screen
+            name="views/player"
+            options={{ headerShown: false, animation: "fade_from_bottom" }}
+          />
         </Stack>
         <StatusBar style="auto" />
       </SafeAreaView>

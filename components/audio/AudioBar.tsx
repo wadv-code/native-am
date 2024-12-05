@@ -6,26 +6,24 @@ import { useEffect, useState } from "react";
 import { formatMilliseconds, formatPath } from "@/utils/lib";
 import { emitter } from "@/utils/mitt";
 import { MusicPlayer } from "./MusicPlayer";
+import { useBaseApi } from "@/api/api";
+import { storageManager } from "@/storage";
+import type { GetDetailParams, GetItemsResItem } from "@/api";
 import {
-  useBaseApi,
-  type GetDetailParams,
-  type GetItemsResItem,
-} from "@/api/api";
-import {
-  Image,
+  View,
   Platform,
   Pressable,
   StyleSheet,
-  useColorScheme,
-  View,
+  ActivityIndicator,
+  ImageBackground,
+  TouchableOpacity,
 } from "react-native";
-// import type { AVPlaybackStatusSuccess } from "expo-av";
-import { storageManager } from "@/storage";
-import { Link } from "expo-router";
+import ThemeImage from "../theme/ThemeImage";
+import { Link, useRouter } from "expo-router";
 
-const { GetDetail } = useBaseApi();
+const { GetDetail, GetCover } = useBaseApi();
 
-interface RawUrlItemType {
+interface OptionType {
   key: string;
   value: string;
 }
@@ -34,43 +32,71 @@ interface RawUrlItemType {
 //   "http://nm.hzwima.com:8000/%E5%91%A8%E6%9D%B0%E4%BC%A6-%E7%A8%BB%E9%A6%99.mp3";
 
 const AudioBar = () => {
-  const [playing, setPlaying] = useState(false);
   const theme = useTheme();
-  const mode = useColorScheme();
+  const router = useRouter();
+  const [playing, setPlaying] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [currentTrack, setCurrentTrack] = useState("");
   const [duration, setDuration] = useState("00:00");
   const [current, setCurrent] = useState("00:00");
   const [audioItem, setAudioItem] = useState<GetItemsResItem | null>(null);
-  const [rawUrlItems, setRawUrlItems] = useState<RawUrlItemType[]>([]);
   const [params, setParams] = useState<GetDetailParams>({
     password: "",
     path: "",
   });
 
-  const onFetchRawUrl = async () => {
-    if (audioItem) {
-      params.path = formatPath(audioItem.parent || "/", audioItem.name);
+  const onFetchRawUrl = async (currentAudio?: GetItemsResItem) => {
+    const { rawUrlItems, coverItems } = await getStorageAsync();
+    const audio = currentAudio || audioItem || (await getAudioItemAsync());
+    if (audio) {
+      setLoading(true);
+      params.path = formatPath(audio.parent || "/", audio.name);
       const item = rawUrlItems.find((f) => f.key === params.path);
+      const coverItem = coverItems.find((f) => f.key === params.path);
+      let raw_url = audio.raw_url;
+      let cover = audio.cover;
       if (item) {
+        raw_url = item.value;
         setCurrentTrack(item.value);
       } else {
         const { data } = await GetDetail(params);
-        setCurrentTrack(data.raw_url);
+        raw_url = data.raw_url;
         await handleRawUrlItems({ key: params.path, value: data.raw_url });
-        await setAudioItemAsync();
       }
+      if (coverItem) {
+        cover = coverItem.value;
+      } else {
+        const { url } = await GetCover({ type: "json", mode: 8 });
+        if (url) {
+          cover = url;
+          await handleCoverItems({ key: params.path, value: url });
+        }
+      }
+      if (raw_url) setCurrentTrack(raw_url);
+      await setAudioItemAsync({ ...audio, cover, raw_url });
+      setLoading(false);
     } else {
-      console.log("is not audioItem");
+      console.log("is not audio");
     }
   };
 
-  const handleRawUrlItems = async ({ value, key }: RawUrlItemType) => {
+  const handleRawUrlItems = async ({ value, key }: OptionType) => {
+    const { rawUrlItems } = await getStorageAsync();
     if (!rawUrlItems.some((s) => s.key === key)) {
       const list = [...rawUrlItems, { value, key }];
-      setRawUrlItems(list);
       await storageManager.set("raw_url_items", list);
     } else {
       console.log("raw_url 已经存在");
+    }
+  };
+
+  const handleCoverItems = async ({ value, key }: OptionType) => {
+    const { coverItems } = await getStorageAsync();
+    if (!coverItems.some((s) => s.key === key)) {
+      const list = [...coverItems, { value, key }];
+      await storageManager.set("cover_items", list);
+    } else {
+      console.log("cover 已经存在");
     }
   };
 
@@ -79,71 +105,105 @@ const AudioBar = () => {
     setCurrent(formatMilliseconds(playbackStatus.positionMillis));
   };
 
-  const onFinish = () => {
-    console.log("onFinish");
+  interface GetStorageAsync {
+    rawUrlItems: OptionType[];
+    coverItems: OptionType[];
+  }
+
+  const getStorageAsync = async (): Promise<GetStorageAsync> => {
+    // 源集
+    const rawUrlItems = ((await storageManager.get("raw_url_items")) ||
+      []) as OptionType[];
+    // 封面集
+    const coverItems = ((await storageManager.get("cover_items")) ||
+      []) as OptionType[];
+
+    return { coverItems, rawUrlItems };
   };
 
-  const getStorageAsync = async () => {
-    const raw_url_items = await storageManager.get("raw_url_items");
-    setRawUrlItems(raw_url_items || []);
-    const audio_item_bar = await storageManager.get("audio_item_bar");
-    setAudioItem(audio_item_bar);
+  const getAudioItemAsync = async (): Promise<GetItemsResItem | null> => {
+    // 当前播放内容
+    const audio_item_bar = (await storageManager.get(
+      "audio_item_bar"
+    )) as GetItemsResItem;
+    setAudioItemAsync(audio_item_bar);
+    return audio_item_bar;
   };
 
-  const setAudioItemAsync = async () => {
-    await storageManager.set("audio_item_bar", audioItem);
+  const setAudioItemAsync = async (audio?: GetItemsResItem) => {
+    const item = audio ?? audioItem;
+    setAudioItem(item);
+    await storageManager.set("audio_item_bar", item);
   };
 
   useEffect(() => {
-    if (audioItem) onFetchRawUrl();
-  }, [audioItem]);
-
-  useEffect(() => {
-    getStorageAsync();
-    emitter.on("onAudioChange", setAudioItem);
-
+    getAudioItemAsync();
+    onFetchRawUrl();
+    emitter.on("onAudioChange", onFetchRawUrl);
     return () => {
-      emitter.off("onAudioChange", setAudioItem);
+      emitter.off("onAudioChange", onFetchRawUrl);
     };
   }, []);
 
   const playSound = async () => {
+    if (loading) return;
     setPlaying(true);
   };
 
   const pauseSound = async () => {
+    if (loading) return;
     setPlaying(false);
+  };
+
+  const onLoaded = () => {
+    // console.log("onLoaded");
+    setLoading(false);
+  };
+
+  const onError = () => {
+    // console.log("onError");
+  };
+
+  const onFinish = () => {
+    // console.log("onFinish");
+    // { borderColor: mode === "dark" ? theme.primary : "transparent" },
+  };
+
+  const toAudioPlayer = () => {
+    router.navigate("/views/player");
   };
 
   return (
     <ThemedView
       style={[
         styles.barContainer,
-        { borderColor: mode === "dark" ? theme.primary : "transparent" },
         Platform.select({
           ios: {
             bottom: 90,
           },
           default: {
-            bottom: 52,
+            bottom: 55,
           },
         }),
       ]}
     >
-      <View style={styles.barLeftContainer}>
-        <Link
-          href={{
-            pathname: "/views/search",
-            params: { id: "bacon" },
-          }}
-          style={styles.imageStyle}
-        >
-          <Image
-            style={{ width: "100%", height: "100%" }}
-            source={require("@/assets/images/logo.png")}
-          ></Image>
-        </Link>
-        <View style={{ width: "100%" }}>
+      <ImageBackground
+        style={styles.backgroundImage}
+        src={audioItem?.cover}
+        source={audioItem?.cover ? require("@/assets/images/logo.png") : null}
+        resizeMode="cover"
+      />
+      <TouchableOpacity style={styles.barLeftContainer} onPress={toAudioPlayer}>
+        {loading ? (
+          <ActivityIndicator
+            size={30}
+            color={theme.primary}
+            style={styles.imageStyle}
+          />
+        ) : (
+          <ThemeImage src={audioItem?.cover} style={styles.imageStyle} />
+        )}
+        <View style={{ flex: 1 }}>
           <ThemedText style={{ fontSize: 16 }} numberOfLines={1}>
             {audioItem?.name ?? "没有音乐可播放"}
           </ThemedText>
@@ -153,7 +213,7 @@ const AudioBar = () => {
             </ThemedText>
           </View>
         </View>
-      </View>
+      </TouchableOpacity>
       <View style={styles.barRightContainer}>
         <Pressable
           style={styles.button}
@@ -174,6 +234,8 @@ const AudioBar = () => {
       <MusicPlayer
         uri={currentTrack}
         playing={playing}
+        onError={onError}
+        onLoaded={onLoaded}
         onFinish={onFinish}
         onUpdate={onUpdate}
         onPlaying={setPlaying}
@@ -186,8 +248,8 @@ const styles = StyleSheet.create({
   barContainer: {
     position: "absolute",
     bottom: 55,
-    left: "3%",
-    right: "3%",
+    left: "2%",
+    right: "2%",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -200,10 +262,21 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 25,
     borderTopLeftRadius: 5,
     borderBottomLeftRadius: 5,
-    borderWidth: 0.5,
+    // borderWidth: 0.5,
+    overflow: "hidden",
+  },
+  backgroundImage: {
+    position: "absolute",
+    top: -10,
+    left: -10,
+    right: -10,
+    bottom: -10,
+    resizeMode: "cover", // 让图片覆盖整个容器
+    opacity: 0.3,
+    backgroundSize: "100%",
   },
   barLeftContainer: {
-    width: "65%",
+    width: "75%",
     flexDirection: "row",
     alignItems: "center",
   },
@@ -213,9 +286,12 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   imageStyle: {
-    width: 45,
-    height: 45,
+    width: 40,
+    height: 40,
+    margin: 3,
+    borderRadius: 5,
     marginRight: 5,
+    flexShrink: 0,
   },
   timeStyle: {
     margin: 0,

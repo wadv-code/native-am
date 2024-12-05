@@ -1,4 +1,4 @@
-import type { GetItemsResItem } from "@/api/api";
+import type { GetItemsResItem } from "@/api";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { formatFileSize, formatTimeAgo, getIconSymbol } from "@/utils/lib";
 import { useTheme } from "@/hooks/useThemeColor";
