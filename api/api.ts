@@ -5,7 +5,6 @@ import type {
   GetItemsParams,
   GetCoverParams,
   GetDetailParams,
-  GetCoverRes,
 } from ".";
 /**
  * 系统基础
@@ -19,7 +18,7 @@ export function useBaseApi() {
      */
     GetItems: async (params: GetItemsParams, refresh?: boolean) => {
       return request<GetItemsRes>({
-        url: "/api/fs/list",
+        url: "https://www.asmrgay.com/api/fs/list",
         method: "get",
         params: params,
         cache: true,
@@ -33,7 +32,7 @@ export function useBaseApi() {
      */
     GetDetail: async (params: GetDetailParams) => {
       return request<GetDetailRes>({
-        url: "/api/fs/get",
+        url: "https://www.asmrgay.com/api/fs/get",
         method: "get",
         params: params,
       });
