@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   Animated,
   Easing,
+  ImageBackground,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -54,7 +55,7 @@ const PlayerScreen = () => {
 
   return (
     <ThemedView style={styles.viewContainer}>
-      <ThemeImageBackground
+      <ImageBackground
         style={styles.backgroundImage}
         src={audioItem?.cover}
       />

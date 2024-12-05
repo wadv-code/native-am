@@ -23,18 +23,18 @@ class StorageManager {
   }
 
   // 获取数据
-  public async get<T = any>(key: string): Promise<T | null> {
+  public async get<T = any>(key: string, defaultValue?: T): Promise<T | null> {
     try {
       const value = await AsyncStorage.getItem(this.getKey(key));
-      if (isStringifiedJSON(value)) {
+      if (value && isStringifiedJSON(value)) {
         return JSON.parse(value || "") || null;
       } else {
-        return value as T;
+        return (value || defaultValue) as T;
       }
     } catch (error) {
       // 处理错误
       console.error("Error retrieving data: ", error);
-      return null;
+      return defaultValue || null;
     }
   }
 

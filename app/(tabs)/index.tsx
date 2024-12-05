@@ -5,7 +5,7 @@ import { formatPath, isAudioFile } from "@/utils/lib";
 import { emitter } from "@/utils/mitt";
 import { storageManager } from "@/storage";
 import { HeaderToolbar, type ToolbarSortOrder } from "@/components/sys";
-import { useBaseApi } from "@/api/api";
+import { GetItems } from "@/api/api";
 import type { HistoryItem } from "@/types";
 import type { GetItemsParams, GetItemsResItem } from "@/api";
 import {
@@ -16,8 +16,6 @@ import {
   RefreshControl,
 } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
-
-const { GetItems } = useBaseApi();
 
 const default_per_page = 1000;
 

@@ -56,7 +56,7 @@ export default function RootLayout() {
           <Stack.Screen name="+not-found" />
           <Stack.Screen
             name="views/player"
-            options={{ headerShown: false, animation: "fade_from_bottom" }}
+            options={{ animation: "fade_from_bottom" }}
           />
         </Stack>
         <StatusBar style="auto" />

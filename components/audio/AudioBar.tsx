@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { formatMilliseconds, formatPath } from "@/utils/lib";
 import { emitter } from "@/utils/mitt";
 import { MusicPlayer } from "./MusicPlayer";
-import { useBaseApi } from "@/api/api";
+import { GetDetail } from "@/api/api";
 import { storageManager } from "@/storage";
 import type { GetDetailParams, GetItemsResItem } from "@/api";
 import {
@@ -17,11 +17,10 @@ import {
   ActivityIndicator,
   ImageBackground,
   TouchableOpacity,
+  ToastAndroid,
 } from "react-native";
 import ThemeImage from "../theme/ThemeImage";
-import { Link, useRouter } from "expo-router";
-
-const { GetDetail, GetCover } = useBaseApi();
+import { useRouter } from "expo-router";
 
 interface OptionType {
   key: string;
@@ -49,32 +48,39 @@ const AudioBar = () => {
     const { rawUrlItems, coverItems } = await getStorageAsync();
     const audio = currentAudio || audioItem || (await getAudioItemAsync());
     if (audio) {
-      setLoading(true);
-      params.path = formatPath(audio.parent || "/", audio.name);
-      const item = rawUrlItems.find((f) => f.key === params.path);
-      const coverItem = coverItems.find((f) => f.key === params.path);
-      let raw_url = audio.raw_url;
-      let cover = audio.cover;
-      if (item) {
-        raw_url = item.value;
-        setCurrentTrack(item.value);
-      } else {
-        const { data } = await GetDetail(params);
-        raw_url = data.raw_url;
-        await handleRawUrlItems({ key: params.path, value: data.raw_url });
-      }
-      if (coverItem) {
-        cover = coverItem.value;
-      } else {
-        const { url } = await GetCover({ type: "json", mode: 8 });
-        if (url) {
-          cover = url;
-          await handleCoverItems({ key: params.path, value: url });
+      try {
+        setLoading(true);
+        params.path = formatPath(audio.parent || "/", audio.name);
+        const item = rawUrlItems.find((f) => f.key === params.path);
+        const coverItem = coverItems.find((f) => f.key === params.path);
+        let raw_url = audio.raw_url;
+        let cover = audio.cover;
+        if (item) {
+          raw_url = item.value;
+        } else {
+          const { data } = await GetDetail(params);
+          raw_url = data.raw_url;
+          handleRawUrlItems({ key: params.path, value: data.raw_url });
         }
+        if (coverItem) {
+          cover = coverItem.value;
+        } else {
+          const { url } = await fetch(
+            "https://3650000.xyz/api?type=json&mode=8"
+          ).then((res) => res.json());
+          // console.log(url);
+          // const { url } = await GetCover({ type: "json", mode: 8 });
+          if (url) {
+            cover = url;
+            await handleCoverItems({ key: params.path, value: url });
+          }
+        }
+        setAudioItemAsync({ ...audio, cover, raw_url });
+        if (raw_url) setCurrentTrack(raw_url);
+        setLoading(false);
+      } catch (error) {
+        ToastAndroid.show("加载错误" + String(error), 1000);
       }
-      if (raw_url) setCurrentTrack(raw_url);
-      await setAudioItemAsync({ ...audio, cover, raw_url });
-      setLoading(false);
     } else {
       console.log("is not audio");
     }
@@ -112,36 +118,39 @@ const AudioBar = () => {
 
   const getStorageAsync = async (): Promise<GetStorageAsync> => {
     // 源集
-    const rawUrlItems = ((await storageManager.get("raw_url_items")) ||
-      []) as OptionType[];
+    const rawUrlItems = await storageManager.get("raw_url_items");
     // 封面集
-    const coverItems = ((await storageManager.get("cover_items")) ||
-      []) as OptionType[];
+    const coverItems = await storageManager.get("cover_items");
 
-    return { coverItems, rawUrlItems };
+    return { coverItems: coverItems || [], rawUrlItems: rawUrlItems ?? [] };
   };
 
   const getAudioItemAsync = async (): Promise<GetItemsResItem | null> => {
     // 当前播放内容
-    const audio_item_bar = (await storageManager.get(
-      "audio_item_bar"
-    )) as GetItemsResItem;
+    const audio_item_bar = await storageManager.get("audio_item_bar");
     setAudioItemAsync(audio_item_bar);
     return audio_item_bar;
   };
 
   const setAudioItemAsync = async (audio?: GetItemsResItem) => {
     const item = audio ?? audioItem;
-    setAudioItem(item);
-    await storageManager.set("audio_item_bar", item);
+    if (item) {
+      setAudioItem(item);
+      await storageManager.set("audio_item_bar", item);
+    }
+  };
+
+  const onAudioChange = (audio: GetItemsResItem) => {
+    if (!audioItem) setAudioItemAsync(audio);
+    onFetchRawUrl(audio);
   };
 
   useEffect(() => {
     getAudioItemAsync();
     onFetchRawUrl();
-    emitter.on("onAudioChange", onFetchRawUrl);
+    emitter.on("onAudioChange", onAudioChange);
     return () => {
-      emitter.off("onAudioChange", onFetchRawUrl);
+      emitter.off("onAudioChange", onAudioChange);
     };
   }, []);
 
@@ -286,8 +295,8 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   imageStyle: {
-    width: 40,
-    height: 40,
+    width: 45,
+    height: 45,
     margin: 3,
     borderRadius: 5,
     marginRight: 5,
