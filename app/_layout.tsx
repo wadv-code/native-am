@@ -25,7 +25,7 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const { setColorScheme } = Appearance;
-  const colorScheme = useColorScheme();
+  const mode = useColorScheme();
   const theme = useTheme();
 
   const [loaded] = useFonts({
@@ -42,29 +42,26 @@ export default function RootLayout() {
   useEffect(() => {
     const initColorScheme = async () => {
       const colorScheme = (await storageManager.get("color_scheme")) ?? "light";
-      console.log(colorScheme);
       setColorScheme(colorScheme);
     };
     initColorScheme();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (!loaded) return null;
 
   return (
     <Provider store={store}>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <SafeAreaView style={{ backgroundColor: theme.background, flex: 1 }}>
+      <SafeAreaView style={{ backgroundColor: theme.background, flex: 1 }}>
+        <ThemeProvider value={mode === "dark" ? DarkTheme : DefaultTheme}>
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" />
-            <Stack.Screen
-              name="views/player"
-              options={{ headerShown: false, animation: "fade_from_bottom" }}
-            />
+            <Stack.Screen name="views/search" />
           </Stack>
           <StatusBar style="auto" />
-        </SafeAreaView>
-      </ThemeProvider>
+        </ThemeProvider>
+      </SafeAreaView>
     </Provider>
   );
 }

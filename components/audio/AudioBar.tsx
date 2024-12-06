@@ -3,7 +3,6 @@ import { ThemedView } from "../theme/ThemedView";
 import { useTheme } from "@/hooks/useThemeColor";
 import { IconSymbol } from "../ui";
 import { MusicPlayer } from "./MusicPlayer";
-import { useRouter } from "expo-router";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "@/store";
 import { setPlaying } from "@/store/slices/audioSlice";
@@ -20,17 +19,16 @@ import ThemeImage from "../theme/ThemeImage";
 // const sound =
 //   "http://nm.hzwima.com:8000/%E5%91%A8%E6%9D%B0%E4%BC%A6-%E7%A8%BB%E9%A6%99.mp3";
 
-const AudioBar = () => {
+type AudioBarProps = {
+  onPress?: () => void;
+};
+
+const AudioBar = ({ onPress }: AudioBarProps) => {
   const theme = useTheme();
-  const router = useRouter();
   const dispatch = useDispatch();
   const audioState = useSelector((state: RootState) => state.audio);
   const { audioInfo, loading, playing, durationFormat, currentFormat } =
     audioState;
-
-  const toAudioPlayer = () => {
-    router.navigate("/views/player");
-  };
 
   const togglePlaying = () => {
     if (loading) return;
@@ -59,7 +57,7 @@ const AudioBar = () => {
           resizeMode="cover"
         />
       </ThemedView>
-      <TouchableOpacity style={styles.barLeftContainer} onPress={toAudioPlayer}>
+      <TouchableOpacity style={styles.barLeftContainer} onPress={onPress}>
         {loading ? (
           <ActivityIndicator
             size={30}

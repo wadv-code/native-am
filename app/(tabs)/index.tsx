@@ -14,6 +14,8 @@ import {
   Platform,
   Alert,
   RefreshControl,
+  type NativeSyntheticEvent,
+  type NativeScrollEvent,
 } from "react-native";
 import {
   formatFileSize,
@@ -34,7 +36,7 @@ export default function HomeScreen() {
   const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
   const historyItemsRef = useRef<HistoryItem[]>(historyItems);
   const isInitialRender = useRef<boolean>(false);
-  const isScrollIndex = useRef<boolean>(false);
+  const scrollYRef = useRef<number>(0);
   const [items, setItems] = useState<GetItemsResItem[]>([]);
   const [params, setParams] = useState<GetItemsParams>({
     page: 1,
@@ -126,7 +128,7 @@ export default function HomeScreen() {
       params.name = item.name;
       params.path = formatPath(params.path, item.name);
       const lastHistory = historyItems[historyItems.length - 1];
-      if (lastHistory) lastHistory.scrollName = item.name;
+      if (lastHistory) lastHistory.scrollY = scrollYRef.current;
       setHistoryLocal([...historyItems, JSON.parse(JSON.stringify(params))]);
     } else if (isAudioFile(item.name)) {
       emitter.emit("onAudioChange", item);
@@ -161,6 +163,10 @@ export default function HomeScreen() {
     }
   };
 
+  const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    scrollYRef.current = event.nativeEvent.contentOffset.y;
+  };
+
   useEffect(() => {
     if (!isInitialRender.current) {
       isInitialRender.current = true;
@@ -173,30 +179,23 @@ export default function HomeScreen() {
     } else {
       params.path = "/";
     }
-    onFetch().catch(() => {
-      const list = historyItemsRef.current || [];
-      const lastHistory = list[list.length - 2];
-      if (lastHistory) toHistory(lastHistory);
-    });
-    historyItemsRef.current = historyItems;
-    isScrollIndex.current = true;
+    onFetch()
+      .catch(() => {
+        const list = historyItemsRef.current || [];
+        const lastHistory = list[list.length - 2];
+        if (lastHistory) toHistory(lastHistory);
+      })
+      .then(() => {
+        historyItemsRef.current = historyItems;
+        setTimeout(() => {
+          flatListRef.current?.scrollToOffset({
+            offset: history ? history.scrollY || 0 : 0,
+            animated: false,
+          });
+        }, 100);
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [historyItems]);
-
-  useEffect(() => {
-    if (!isScrollIndex.current) return;
-    const list = historyItemsRef.current || [];
-    const lastHistory = list[list.length - 1];
-    if (lastHistory) {
-      const index = items.findIndex((f) => f.name === lastHistory.scrollName);
-      if (index > -1) {
-        flatListRef.current?.scrollToIndex({
-          index,
-          animated: false,
-        });
-      }
-      isScrollIndex.current = false;
-    }
-  }, [items]);
 
   const onScrollToIndexFailed = () => {
     console.log("onScrollToIndexFailed");
@@ -220,6 +219,7 @@ export default function HomeScreen() {
     );
     // 组件卸载时移除监听
     return () => backHandler.remove();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -240,6 +240,7 @@ export default function HomeScreen() {
         ref={flatListRef}
         data={items}
         keyExtractor={(item) => item.id}
+        onScroll={onScroll}
         onScrollToIndexFailed={onScrollToIndexFailed}
         renderItem={({ item }) => (
           <IndexItem item={item} onPress={handleItem} />
@@ -249,10 +250,10 @@ export default function HomeScreen() {
         }
         contentContainerStyle={Platform.select({
           ios: {
-            paddingBottom: 120,
+            paddingBottom: 140,
           },
           default: {
-            paddingBottom: 60,
+            paddingBottom: 70,
           },
         })}
       />

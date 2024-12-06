@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { Audio, type AVPlaybackStatus } from "expo-av";
 import { useSelector } from "react-redux";
-import type { RootState } from "@/store";
 import { emitter } from "@/utils/mitt";
+import { useAppDispatch } from "@/hooks/useStore";
+import { storageManager } from "@/storage";
+import { formatPath } from "@/utils/lib";
+import type { RootState } from "@/store";
 import type { GetItemsResItem } from "@/api";
 import {
   setAudioInfoAsync,
@@ -10,9 +13,6 @@ import {
   setDuration,
   setPlaying,
 } from "@/store/slices/audioSlice";
-import { useAppDispatch } from "@/hooks/useStore";
-import { storageManager } from "@/storage";
-import { formatPath } from "@/utils/lib";
 
 Audio.setAudioModeAsync({
   allowsRecordingIOS: false,
@@ -137,6 +137,7 @@ const MusicPlayer = (props: MusicPlayerProps) => {
   };
 
   const setAudioSeek = (value: number) => {
+    dispatch(setCurrent(value));
     soundObject.setPositionAsync(value);
   };
 

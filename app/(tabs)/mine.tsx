@@ -8,10 +8,13 @@ import { ThemedButton } from "@/components/theme/ThemedButton";
 
 import ThemedModal from "@/components/theme/ThemedModal";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
+import { useRouter } from "expo-router";
+// import MusicNotifications from "@/components/audio/MusicNotifications";
 
 export default function MineScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const mode = useColorScheme();
+  const router = useRouter();
 
   const { setColorScheme } = Appearance;
 
@@ -41,6 +44,10 @@ export default function MineScreen() {
     setModalVisible(true);
   };
 
+  const openSearch = () => {
+    router.navigate("/views/search");
+  };
+
   const setMode = () => {
     const colorScheme = mode === "dark" ? "light" : "dark";
     setColorScheme(colorScheme);
@@ -64,7 +71,11 @@ export default function MineScreen() {
 
       <ThemedButton title="弹窗" onPress={openModal} />
 
+      <ThemedButton title="搜索页面" onPress={openSearch} />
+
       <ThemedModal modalVisible={modalVisible} closeModal={closeModal} />
+
+      {/* <MusicNotifications /> */}
     </ParallaxScrollView>
   );
 }
@@ -72,6 +83,6 @@ export default function MineScreen() {
 const styles = StyleSheet.create({
   titleContainer: {
     flexDirection: "row",
-    gap: 8,
+    gap: 20,
   },
 });

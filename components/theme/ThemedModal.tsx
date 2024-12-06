@@ -1,10 +1,4 @@
-import {
-  Alert,
-  Modal,
-  Pressable,
-  StyleSheet,
-  type TextProps,
-} from "react-native";
+import { Modal, Pressable, StyleSheet, type TextProps } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { ThemedView } from "./ThemedView";
 import { ThemedText } from "./ThemedText";
@@ -26,10 +20,7 @@ export default function ThemedModal({
           animationType="slide"
           transparent={true}
           visible={modalVisible}
-          onRequestClose={() => {
-            Alert.alert("Modal has been closed.");
-            closeModal();
-          }}
+          onRequestClose={closeModal}
         >
           <ThemedView style={styles.centeredView}>
             <ThemedView style={styles.modalView}>

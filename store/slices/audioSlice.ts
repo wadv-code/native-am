@@ -35,20 +35,24 @@ export const getStorageAsync = async (): Promise<GetStorageAsync> => {
 
 export const handleRawUrlItems = async ({ value, key }: OptionType) => {
   const { rawUrlItems } = await getStorageAsync();
-  if (!rawUrlItems.some((s) => s.key === key)) {
+  const rawUrl = rawUrlItems.find((f) => f.key === key);
+  if (rawUrl) {
+    rawUrl.value = value;
+    await storageManager.set("raw_url_items", [...rawUrlItems]);
+  } else {
     const list = [...rawUrlItems, { value, key }];
     await storageManager.set("raw_url_items", list);
-  } else {
-    console.log("raw_url 已经存在");
   }
 };
 export const handleCoverItems = async ({ value, key }: OptionType) => {
   const { coverItems } = await getStorageAsync();
-  if (!coverItems.some((s) => s.key === key)) {
+  const cover = coverItems.find((f) => f.key === key);
+  if (cover) {
+    cover.value = value;
+    await storageManager.set("cover_items", [...coverItems]);
+  } else {
     const list = [...coverItems, { value, key }];
     await storageManager.set("cover_items", list);
-  } else {
-    console.log("cover 已经存在");
   }
 };
 
@@ -78,7 +82,8 @@ export const setAudioInfoAsync = createAsyncThunk<
   audio.cover = coverItem ? coverItem.value : "";
   if (!audio.cover) {
     try {
-      const data = await GetCover({ type: "json", mode: "3,5,6,8,9" });
+      // "3,5,6,8,9"
+      const data = await GetCover({ type: "json", mode: 8 });
       if (data.url) {
         const uri = __DEV__ ? data.url : data.url.replace(/http:/g, "https:");
         audio.cover = uri;

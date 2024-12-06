@@ -1,10 +1,11 @@
 import type { GetItemsResItem } from "@/api";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
-import { formatFileSize, formatTimeAgo, getIconSymbol } from "@/utils/lib";
+import { getIconSymbol } from "@/utils/lib";
 import { useTheme } from "@/hooks/useThemeColor";
 import { ThemedText } from "../theme/ThemedText";
 import { ThemedView } from "../theme/ThemedView";
 import { IconSymbol } from "../ui";
+import React from "react";
 
 type ItemProps = {
   item: GetItemsResItem;
@@ -13,45 +14,51 @@ type ItemProps = {
 
 export type IndexItemProps = ItemProps;
 
-const IndexItem = (option: IndexItemProps) => {
-  const { item, onPress } = option;
-  const { id, name, is_dir, sizeFormat, modifiedFormat } = item;
-  const theme = useTheme();
+const IndexItem = React.memo(
+  (option: IndexItemProps) => {
+    const { item, onPress } = option;
+    const { id, name, is_dir, sizeFormat, modifiedFormat } = item;
+    const theme = useTheme();
 
-  return (
-    <TouchableOpacity
-      key={id}
-      style={styles.itemContainer}
-      onPress={() => onPress && onPress(item)}
-    >
-      <ThemedView style={styles.leftContainer}>
-        <IconSymbol
-          size={26}
-          name={getIconSymbol(name, is_dir)}
-          color={theme.primary}
-          style={styles.leftSymbol}
-        />
-        <View>
-          <ThemedText
-            numberOfLines={2}
-            ellipsizeMode="tail"
-            style={{ fontSize: 14 }}
-          >
-            {name}
-          </ThemedText>
-          <ThemedText style={styles.size}>{sizeFormat}</ThemedText>
-        </View>
-      </ThemedView>
-      <ThemedView style={styles.rightContainer}>
-        <ThemedText style={styles.timeStyle}>{modifiedFormat}</ThemedText>
-        <IconSymbol
-          size={20}
-          name={is_dir ? "keyboard-arrow-right" : "more-vert"}
-        />
-      </ThemedView>
-    </TouchableOpacity>
-  );
-};
+    return (
+      <TouchableOpacity
+        key={id}
+        style={styles.itemContainer}
+        onPress={() => onPress && onPress(item)}
+      >
+        <ThemedView style={styles.leftContainer}>
+          <IconSymbol
+            size={26}
+            name={getIconSymbol(name, is_dir)}
+            color={theme.primary}
+            style={styles.leftSymbol}
+          />
+          <View>
+            <ThemedText
+              numberOfLines={2}
+              ellipsizeMode="tail"
+              style={{ fontSize: 14 }}
+            >
+              {name}
+            </ThemedText>
+            <ThemedText style={styles.size}>{sizeFormat}</ThemedText>
+          </View>
+        </ThemedView>
+        <ThemedView style={styles.rightContainer}>
+          <ThemedText style={styles.timeStyle}>{modifiedFormat}</ThemedText>
+          <IconSymbol
+            size={20}
+            name={is_dir ? "keyboard-arrow-right" : "more-vert"}
+          />
+        </ThemedView>
+      </TouchableOpacity>
+    );
+  },
+  (prevProps, nextProps) => {
+    // 如果item的id没有改变，则不需要重新渲染
+    return prevProps.item.id === nextProps.item.id;
+  }
+);
 
 const styles = StyleSheet.create({
   itemContainer: {
@@ -83,5 +90,7 @@ const styles = StyleSheet.create({
     marginRight: 5,
   },
 });
+
+IndexItem.displayName = "IndexItem";
 
 export { IndexItem };

@@ -6,7 +6,6 @@ export type GetItemsParams = {
   path: string;
   per_page: number;
   refresh?: boolean;
-  scrollName?: string;
 };
 
 export type GetItemsResItem = {

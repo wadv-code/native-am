@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Tabs } from "expo-router";
 import { Platform } from "react-native";
 import { AudioBar } from "@/components/audio";
@@ -9,10 +9,16 @@ import { useColorScheme } from "@/hooks/useColorScheme";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import TabBarBackground from "@/components/ui/TabBarBackground";
 import { HeaderBar } from "@/components/sys";
+import { ModalPlayer } from "@/components/audio/ModalPlayer";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const theme = useTheme();
+  const [visible, setVisible] = useState(false);
+
+  const closeModal = () => {
+    setVisible(false);
+  };
 
   return (
     <>
@@ -62,7 +68,8 @@ export default function TabLayout() {
         />
       </Tabs>
 
-      <AudioBar />
+      <AudioBar onPress={() => setVisible(true)} />
+      <ModalPlayer modalVisible={visible} closeModal={closeModal} />
     </>
   );
 }

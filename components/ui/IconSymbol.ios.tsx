@@ -22,8 +22,10 @@ const MAPPING = {
   "pause-circle-outline": "pause.circle",
   "play-circle-outline": "play.circle",
   "arrow-right": "chevron.right",
+  "arrow-left": "chevron.left",
   "snippet-folder": "folder.fill.badge.gearshape",
   "file-present": "text.bubble.fill",
+  "keyboard-arrow-down": "chevron.down",
 } as Partial<
   Record<MaterialIconsName, import("expo-symbols").SymbolViewProps["name"]>
 >;
