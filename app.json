@@ -34,13 +34,22 @@
           "image": "./assets/images/logo.png",
           "imageWidth": 100,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#000000"
         }
       ],
       [
         "expo-av",
         {
           "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/favicon.png",
+          "color": "#000000",
+          "sounds": ["./assets/audio/dx.mp3"],
+          "mode": "production"
         }
       ]
     ],

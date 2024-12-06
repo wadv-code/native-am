@@ -13,7 +13,6 @@ import {
 import { useAppDispatch } from "@/hooks/useStore";
 import { storageManager } from "@/storage";
 import { formatPath } from "@/utils/lib";
-import * as Notifications from "expo-notifications";
 
 Audio.setAudioModeAsync({
   allowsRecordingIOS: false,
@@ -141,20 +140,20 @@ const MusicPlayer = (props: MusicPlayerProps) => {
     soundObject.setPositionAsync(value);
   };
 
-  const setNotifications = async () => {
-    // 请求通知栏权限
-    const { status } = await Notifications.getPermissionsAsync();
-    if (status !== "granted") {
-      await Notifications.requestPermissionsAsync();
-    }
-    Notifications.setNotificationHandler({
-      handleNotification: async () => ({
-        shouldShowAlert: true,
-        shouldPlaySound: false,
-        shouldSetBadge: false,
-      }),
-    });
-  };
+  // const setNotifications = async () => {
+  //   // 请求通知栏权限
+  //   const { status } = await Notifications.getPermissionsAsync();
+  //   if (status !== "granted") {
+  //     await Notifications.requestPermissionsAsync();
+  //   }
+  //   Notifications.setNotificationHandler({
+  //     handleNotification: async () => ({
+  //       shouldShowAlert: true,
+  //       shouldPlaySound: false,
+  //       shouldSetBadge: false,
+  //     }),
+  //   });
+  // };
 
   useEffect(() => {
     storageManager.get("audio_info").then((audio) => {
@@ -182,7 +181,7 @@ const MusicPlayer = (props: MusicPlayerProps) => {
 
   useEffect(() => {
     loadEvent();
-    setNotifications();
+    // setNotifications();
     emitter.on("onAudioChange", onAudioChange);
     emitter.on("setAudioSeek", setAudioSeek);
     return () => {
