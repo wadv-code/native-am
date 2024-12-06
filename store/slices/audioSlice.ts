@@ -3,6 +3,7 @@ import { GetCover, GetDetail } from "@/api/api";
 import { storageManager } from "@/storage";
 import { formatMilliseconds, formatPath } from "@/utils/lib";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { Alert } from "react-native";
 
 export type AudioSlice = {
   loading: boolean;
@@ -79,9 +80,8 @@ export const setAudioInfoAsync = createAsyncThunk<
     try {
       const data = await GetCover({ type: "json", mode: "3,5,6,8,9" });
       if (data.url) {
-        const uri = data.url + ".jpg";
+        const uri = __DEV__ ? data.url : data.url.replace(/http:/g, "https:");
         audio.cover = uri;
-        console.log(uri);
         handleCoverItems({ key: params.path, value: uri });
       }
     } catch (error) {
@@ -138,7 +138,7 @@ const audioSlice = createSlice({
       .addCase(setAudioInfoAsync.rejected, (state, action) => {
         state.loading = false;
         console.log("rejected", action.error);
-        // Alert.alert("设置音频错误", JSON.stringify(action.payload));
+        Alert.alert("设置音频错误", JSON.stringify(action.error));
       });
   },
 });

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Audio, type AVPlaybackStatus } from "expo-av";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
