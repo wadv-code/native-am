@@ -16,7 +16,6 @@ import {
   TouchableOpacity,
 } from "react-native";
 import ThemeImage from "../theme/ThemeImage";
-import { useEffect } from "react";
 
 // const sound =
 //   "http://nm.hzwima.com:8000/%E5%91%A8%E6%9D%B0%E4%BC%A6-%E7%A8%BB%E9%A6%99.mp3";
@@ -32,10 +31,6 @@ const AudioBar = () => {
   const toAudioPlayer = () => {
     router.navigate("/views/player");
   };
-
-  // useEffect(() => {
-  //   console.log("change => ", audioInfo.raw_url);
-  // }, [audioInfo]);
 
   const togglePlaying = () => {
     if (loading) return;
