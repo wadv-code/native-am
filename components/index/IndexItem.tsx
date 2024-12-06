@@ -6,21 +6,23 @@ import { ThemedText } from "../theme/ThemedText";
 import { ThemedView } from "../theme/ThemedView";
 import { IconSymbol } from "../ui";
 
-interface ItemProps extends GetItemsResItem {
-  index?: number;
-}
+type ItemProps = {
+  item: GetItemsResItem;
+  onPress: (option: GetItemsResItem) => void;
+};
 
 export type IndexItemProps = ItemProps;
 
 const IndexItem = (option: IndexItemProps) => {
-  const { id, name, modified, is_dir, size, index, onPress } = option;
+  const { item, onPress } = option;
+  const { id, name, is_dir, sizeFormat, modifiedFormat } = item;
   const theme = useTheme();
 
   return (
     <TouchableOpacity
       key={id}
       style={styles.itemContainer}
-      onPress={() => onPress && onPress(option, index)}
+      onPress={() => onPress && onPress(item)}
     >
       <ThemedView style={styles.leftContainer}>
         <IconSymbol
@@ -37,13 +39,11 @@ const IndexItem = (option: IndexItemProps) => {
           >
             {name}
           </ThemedText>
-          <ThemedText style={styles.size}>{formatFileSize(size)}</ThemedText>
+          <ThemedText style={styles.size}>{sizeFormat}</ThemedText>
         </View>
       </ThemedView>
       <ThemedView style={styles.rightContainer}>
-        <ThemedText style={styles.timeStyle}>
-          {formatTimeAgo(modified)}
-        </ThemedText>
+        <ThemedText style={styles.timeStyle}>{modifiedFormat}</ThemedText>
         <IconSymbol
           size={20}
           name={is_dir ? "keyboard-arrow-right" : "more-vert"}

@@ -1,13 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
-import { IndexItem, type IndexItemProps } from "@/components/index/IndexItem";
+import { IndexItem } from "@/components/index/IndexItem";
 import ParallaxView from "@/components/ParallaxView";
-import { formatPath, isAudioFile } from "@/utils/lib";
 import { emitter } from "@/utils/mitt";
 import { storageManager } from "@/storage";
 import { HeaderToolbar, type ToolbarSortOrder } from "@/components/sys";
 import { GetItems } from "@/api/api";
 import type { HistoryItem } from "@/types";
 import type { GetItemsParams, GetItemsResItem } from "@/api";
+import { useIsFocused } from "@react-navigation/native";
 import {
   FlatList,
   BackHandler,
@@ -15,7 +15,12 @@ import {
   Alert,
   RefreshControl,
 } from "react-native";
-import { useIsFocused } from "@react-navigation/native";
+import {
+  formatFileSize,
+  formatPath,
+  formatTimeAgo,
+  isAudioFile,
+} from "@/utils/lib";
 
 const default_per_page = 1000;
 
@@ -46,6 +51,11 @@ export default function HomeScreen() {
       data.content.forEach((item) => {
         item.id = Math.random().toString();
         item.parent = params.path;
+        // item.modified = dayjs(item.modified || Date.now()).format(
+        //   "YYYY-MM-DD hh:ss"
+        // );
+        item.modifiedFormat = formatTimeAgo(item.modified);
+        item.sizeFormat = formatFileSize(item.size);
       });
       setTotal(data.total);
       setSortOrderItems(data.content);
@@ -109,7 +119,7 @@ export default function HomeScreen() {
     onFetch(true);
   };
 
-  const handleItem = async (item: IndexItemProps) => {
+  const handleItem = (item: GetItemsResItem) => {
     if (refreshing) return;
     setSelectedName(item.name);
     if (item.is_dir) {
@@ -231,8 +241,8 @@ export default function HomeScreen() {
         data={items}
         keyExtractor={(item) => item.id}
         onScrollToIndexFailed={onScrollToIndexFailed}
-        renderItem={({ item, index }) => (
-          <IndexItem {...item} index={index} onPress={handleItem} />
+        renderItem={({ item }) => (
+          <IndexItem item={item} onPress={handleItem} />
         )}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />

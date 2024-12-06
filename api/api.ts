@@ -14,7 +14,7 @@ import type {
  */
 export async function GetItems(params: GetItemsParams, refresh?: boolean) {
   return request<GetItemsRes>({
-    url: "https://www.asmrgay.com/api/fs/list",
+    url: "/api/fs/list",
     method: "get",
     params: params,
     cache: true,
@@ -29,7 +29,7 @@ export async function GetItems(params: GetItemsParams, refresh?: boolean) {
  */
 export async function GetDetail(params: GetDetailParams) {
   return request<GetDetailRes>({
-    url: "https://www.asmrgay.com/api/fs/get",
+    url: "/api/fs/get",
     method: "get",
     params: params,
   });
@@ -41,7 +41,7 @@ export async function GetDetail(params: GetDetailParams) {
  */
 export async function GetCover(params: GetCoverParams) {
   return request<string>({
-    url: "https://3650000.xyz/api",
+    url: "https://3650000.xyz/api/",
     method: "get",
     params: params,
   });

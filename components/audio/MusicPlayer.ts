@@ -1,5 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Audio, type AVPlaybackStatus } from "expo-av";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store";
+import { emitter } from "@/utils/mitt";
+import type { GetItemsResItem } from "@/api";
+import {
+  setAudioInfoAsync,
+  setCurrent,
+  setDuration,
+  setPlaying,
+} from "@/store/slices/audioSlice";
+import { useAppDispatch } from "@/hooks/useStore";
+import { storageManager } from "@/storage";
+import { formatPath } from "@/utils/lib";
 
 Audio.setAudioModeAsync({
   allowsRecordingIOS: false,
@@ -10,34 +23,55 @@ Audio.setAudioModeAsync({
 });
 
 type MusicPlayerProps = {
-  uri: string;
   autoplay?: boolean;
   playing?: boolean;
   onUpdate?: (option: AVPlaybackStatus) => void;
   onFinish?: () => void;
-  onPlaying?: (playing: boolean) => void;
   onError?: (msg?: string) => void;
   onLoaded?: () => void;
   onBuffering?: () => void;
 };
 
-const MusicPlayer = (props: MusicPlayerProps) => {
-  const { uri, playing, autoplay } = props;
-  const { onUpdate, onFinish, onPlaying, onLoaded, onError, onBuffering } =
-    props;
-  const [soundObject, setSoundObject] = useState(new Audio.Sound());
+type OptionType = {
+  key: string;
+  value: string;
+};
 
-  const loadAudio = async () => {
+type GetStorageAsync = {
+  rawUrlItems: OptionType[];
+  coverItems: OptionType[];
+};
+
+const MusicPlayer = (props: MusicPlayerProps) => {
+  const { autoplay } = props;
+  const dispatch = useAppDispatch();
+  const { onFinish, onLoaded, onError, onBuffering } = props;
+  const audioState = useSelector((state: RootState) => state.audio);
+  const { audioInfo, playing } = audioState;
+  const [soundObject] = useState(new Audio.Sound());
+
+  const loadAudio = async (uri: string) => {
     try {
       await unloadAudio();
       const playbackStatus = await soundObject.loadAsync(
-        { uri }
-        // { shouldPlay: true }
+        { uri },
+        { shouldPlay: !!autoplay }
       );
-      onUpdate && onUpdate(playbackStatus);
+      if (playbackStatus) onUpdate(playbackStatus);
       onLoaded && onLoaded();
-      autoplay && (await playAsync());
+      (autoplay || playing) && (await playAsync());
     } catch {
+      // 错误就移除url
+      delete audioInfo.raw_url;
+      storageManager.get("raw_url_items").then((list: OptionType[] | null) => {
+        if (list) {
+          const path = formatPath(audioInfo.parent || "/", audioInfo.name);
+          storageManager.set(
+            "raw_url_items",
+            list.filter((s) => path !== s.key)
+          );
+        }
+      });
       onError && onError("加载音乐错误");
     }
   };
@@ -50,12 +84,19 @@ const MusicPlayer = (props: MusicPlayerProps) => {
 
   const playAsync = async () => {
     await soundObject.playAsync();
-    onPlaying && onPlaying(true);
+    dispatch(setPlaying(true));
   };
 
   const pauseAsync = async () => {
     await soundObject.pauseAsync();
-    onPlaying && onPlaying(false);
+    dispatch(setPlaying(false));
+  };
+
+  const onUpdate = (playbackStatus: AVPlaybackStatus) => {
+    if (playbackStatus.isLoaded) {
+      dispatch(setCurrent(playbackStatus.positionMillis));
+      dispatch(setDuration(playbackStatus.durationMillis));
+    }
   };
 
   const loadEvent = () => {
@@ -82,23 +123,35 @@ const MusicPlayer = (props: MusicPlayerProps) => {
       }
     });
   };
-
   useEffect(() => {
-    if (uri) {
-      loadAudio();
+    if (audioInfo.raw_url) {
+      loadAudio(audioInfo.raw_url);
     } else {
       unloadAudio();
     }
-  }, [uri]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [audioInfo.raw_url]);
+
+  const onAudioChange = (audio: GetItemsResItem) => {
+    dispatch(setAudioInfoAsync(audio));
+  };
+
+  const setAudioSeek = (value: number) => {
+    soundObject.setPositionAsync(value);
+  };
 
   useEffect(() => {
-    loadEvent();
+    storageManager.get("audio_info").then((audio) => {
+      if (audio && audio.parent) onAudioChange(audio);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-    // 清理函数，确保在组件卸载时释放资源
-    return () => {
-      unloadAudio();
-    };
-  }, [soundObject]);
+  // useEffect(() => {
+  //   console.log(audioInfo);
+  //   // onFetchRawUrl();
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [audioInfo]);
 
   useEffect(() => {
     (async () => {
@@ -108,9 +161,22 @@ const MusicPlayer = (props: MusicPlayerProps) => {
         await pauseAsync();
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playing]);
 
-  return null; // 这个组件不渲染任何东西，只是播放音乐
+  useEffect(() => {
+    loadEvent();
+    emitter.on("onAudioChange", onAudioChange);
+    emitter.on("setAudioSeek", setAudioSeek);
+    return () => {
+      emitter.off("onAudioChange", onAudioChange);
+      emitter.off("setAudioSeek", setAudioSeek);
+      unloadAudio();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [soundObject]);
+
+  return null;
 };
 
-export { MusicPlayer, MusicPlayerProps };
+export { MusicPlayer, MusicPlayerProps, OptionType, GetStorageAsync };

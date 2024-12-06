@@ -19,12 +19,13 @@ export type GetItemsResItem = {
   hashinfo?: string;
   is_dir?: boolean;
   modified?: string;
+  modifiedFormat?: string;
   sign?: string;
   size?: number;
+  sizeFormat?: string;
   thumb?: string;
   type?: number;
   cover?: string;
-  onPress?: (option: GetItemsResItem, index?: number) => void;
 };
 
 // 请求参数
@@ -49,7 +50,7 @@ export type GetDetailRes = {
 
 export type GetCoverParams = {
   type: string;
-  mode: number;
+  mode: number | string;
 };
 
 export type GetCoverRes = {

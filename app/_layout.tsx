@@ -13,6 +13,8 @@ import { Appearance, SafeAreaView } from "react-native";
 import { useTheme } from "@/hooks/useThemeColor";
 import { StatusBar } from "expo-status-bar";
 import { storageManager } from "@/storage";
+import { Provider } from "react-redux";
+import { store } from "@/store";
 
 // // player
 // import setApp from "@/player/services";
@@ -49,18 +51,20 @@ export default function RootLayout() {
   if (!loaded) return null;
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <SafeAreaView style={{ backgroundColor: theme.background, flex: 1 }}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="+not-found" />
-          <Stack.Screen
-            name="views/player"
-            options={{ animation: "fade_from_bottom" }}
-          />
-        </Stack>
-        <StatusBar style="auto" />
-      </SafeAreaView>
-    </ThemeProvider>
+    <Provider store={store}>
+      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+        <SafeAreaView style={{ backgroundColor: theme.background, flex: 1 }}>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="+not-found" />
+            <Stack.Screen
+              name="views/player"
+              options={{ headerShown: false, animation: "fade_from_bottom" }}
+            />
+          </Stack>
+          <StatusBar style="auto" />
+        </SafeAreaView>
+      </ThemeProvider>
+    </Provider>
   );
 }
