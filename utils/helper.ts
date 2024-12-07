@@ -1,7 +1,9 @@
+import { number } from "yargs";
+
 export const isObject = (val: unknown) =>
   val !== null && typeof val === "object";
 export const isArray = Array.isArray;
-
+export const isNumber = (val: number) => typeof val === "number";
 // const NO = () => false;
 // const isOn = (key) =>
 //   key.charCodeAt(0) === 111 &&

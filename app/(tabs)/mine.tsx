@@ -48,6 +48,10 @@ export default function MineScreen() {
     router.navigate("/views/search");
   };
 
+  const openViewer = () => {
+    router.navigate("/views/viewer");
+  };
+
   const setMode = () => {
     const colorScheme = mode === "dark" ? "light" : "dark";
     setColorScheme(colorScheme);
@@ -72,6 +76,8 @@ export default function MineScreen() {
       <ThemedButton title="弹窗" onPress={openModal} />
 
       <ThemedButton title="搜索页面" onPress={openSearch} />
+
+      <ThemedButton title="愉悦心情" onPress={openViewer} />
 
       <ThemedModal modalVisible={modalVisible} closeModal={closeModal} />
 

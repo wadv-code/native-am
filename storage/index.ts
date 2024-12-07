@@ -1,5 +1,5 @@
 import { isStringifiedJSON } from "@/utils/lib";
-import { isObject } from "@/utils/helper";
+import { isObject, isNumber } from "@/utils/helper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 class StorageManager {
@@ -12,7 +12,7 @@ class StorageManager {
   // 存储数据
   public async set(key: string, value: any) {
     try {
-      if (isObject(value) || Array.isArray(value)) {
+      if (isObject(value) || Array.isArray(value) || isNumber(value)) {
         value = JSON.stringify(value);
       }
       await AsyncStorage.setItem(this.getKey(key), value);

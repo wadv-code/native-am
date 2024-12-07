@@ -22,15 +22,21 @@ export type OptionType = {
 export type GetStorageAsync = {
   rawUrlItems: OptionType[];
   coverItems: OptionType[];
+  viewerIndex: number;
 };
 
 export const getStorageAsync = async (): Promise<GetStorageAsync> => {
+  const viewerIndex = await storageManager.get("viewer_index");
   // 源集
   const rawUrlItems = await storageManager.get("raw_url_items");
   // 封面集
   const coverItems = await storageManager.get("cover_items");
 
-  return { coverItems: coverItems ?? [], rawUrlItems: rawUrlItems ?? [] };
+  return {
+    coverItems: coverItems ?? [],
+    rawUrlItems: rawUrlItems ?? [],
+    viewerIndex: Number(viewerIndex) || 0,
+  };
 };
 
 export const handleRawUrlItems = async ({ value, key }: OptionType) => {
@@ -44,15 +50,21 @@ export const handleRawUrlItems = async ({ value, key }: OptionType) => {
     await storageManager.set("raw_url_items", list);
   }
 };
-export const handleCoverItems = async ({ value, key }: OptionType) => {
+export const handleCoverItems = async ({
+  value,
+  key,
+}: OptionType): Promise<OptionType[]> => {
   const { coverItems } = await getStorageAsync();
   const cover = coverItems.find((f) => f.key === key);
   if (cover) {
     cover.value = value;
-    await storageManager.set("cover_items", [...coverItems]);
+    const list = [...coverItems];
+    storageManager.set("cover_items", list);
+    return list;
   } else {
     const list = [...coverItems, { value, key }];
-    await storageManager.set("cover_items", list);
+    storageManager.set("cover_items", list);
+    return list;
   }
 };
 
@@ -83,7 +95,7 @@ export const setAudioInfoAsync = createAsyncThunk<
   if (!audio.cover) {
     try {
       // "3,5,6,8,9"
-      const data = await GetCover({ type: "json", mode: 8 });
+      const data = await GetCover({ type: "json", mode: "2,8" });
       if (data.url) {
         const uri = __DEV__ ? data.url : data.url.replace(/http:/g, "https:");
         audio.cover = uri;
