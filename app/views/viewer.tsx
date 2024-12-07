@@ -23,7 +23,6 @@ import {
 const ImageScreen = () => {
   const mode = useColorScheme();
   const theme = useTheme();
-  const zoomRef = useRef<ReactNativeZoomableView>(null);
   const [index, setIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState<OptionType[]>([]);
@@ -116,7 +115,7 @@ const ImageScreen = () => {
         </TouchableOpacity>
         <ThemedText style={{ fontWeight: "bold" }}>💗</ThemedText>
       </View>
-      <ReactNativeZoomableView ref={zoomRef} maxZoom={30}>
+      <ReactNativeZoomableView maxZoom={30}>
         <Image src={imageUrl} style={styles.imageViewer}></Image>
       </ReactNativeZoomableView>
       <View
@@ -174,6 +173,7 @@ const styles = StyleSheet.create({
   imageViewer: {
     width: "100%",
     height: "100%",
+    resizeMode: "contain",
   },
   headerContainer: {
     width: "100%",

@@ -2,9 +2,18 @@
 export type GetItemsParams = {
   name?: string;
   page: number;
-  password: string;
   path: string;
   per_page: number;
+  refresh?: boolean;
+  keywords?: string;
+  password?: string;
+};
+
+export type GetSearchParams = {
+  page: number;
+  per_page: number;
+  keywords: string;
+  parent: string;
   refresh?: boolean;
 };
 

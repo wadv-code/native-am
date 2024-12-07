@@ -5,12 +5,11 @@ import { AudioBar } from "@/components/audio";
 import { useTheme } from "@/hooks/useThemeColor";
 import { HapticTab } from "@/components/HapticTab";
 import { useColorScheme } from "@/hooks/useColorScheme";
-
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import TabBarBackground from "@/components/ui/TabBarBackground";
 import { HeaderBar } from "@/components/sys";
 import { ModalPlayer } from "@/components/audio/ModalPlayer";
 import { MusicPlayer } from "@/components/audio/MusicPlayer";
+import { IconSymbol } from "@/components/ui";
+import TabBarBackground from "@/components/ui/TabBarBackground";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -25,12 +24,16 @@ export default function TabLayout() {
     <>
       <HeaderBar />
       <Tabs
+        initialRouteName="index"
         screenOptions={{
+          tabBarActiveBackgroundColor: theme.backgroundPrimary,
+          tabBarInactiveBackgroundColor: theme.background,
           tabBarActiveTintColor:
-            colorScheme === "dark" ? theme.tint : theme.primary,
+            colorScheme === "dark" ? theme.icon : theme.primary,
           headerShown: false,
           tabBarButton: HapticTab,
           tabBarBackground: TabBarBackground,
+          tabBarLabelStyle: { fontSize: 12 },
           tabBarStyle: Platform.select({
             ios: {
               // Use a transparent background on iOS to show the blur effect
@@ -45,16 +48,16 @@ export default function TabLayout() {
           options={{
             title: "Home",
             tabBarIcon: ({ color }) => (
-              <MaterialIcons size={28} name="home" color={color} />
+              <IconSymbol size={28} name="home" color={color} />
             ),
           }}
         />
         <Tabs.Screen
-          name="explore"
+          name="catalog"
           options={{
-            title: "Explore",
+            title: "Catalog",
             tabBarIcon: ({ color }) => (
-              <MaterialIcons size={28} name="send" color={color} />
+              <IconSymbol size={28} name="snippet-folder" color={color} />
             ),
           }}
         />
@@ -63,7 +66,7 @@ export default function TabLayout() {
           options={{
             title: "Mine",
             tabBarIcon: ({ color }) => (
-              <MaterialIcons size={28} name="account-circle" color={color} />
+              <IconSymbol size={28} name="account-circle" color={color} />
             ),
           }}
         />

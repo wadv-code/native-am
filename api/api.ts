@@ -5,18 +5,19 @@ import type {
   GetItemsParams,
   GetCoverParams,
   GetDetailParams,
+  GetSearchParams,
 } from ".";
 
 /**
  * 获取列表
  * @constructor
- * @param params
+ * @param data
  */
-export async function GetItems(params: GetItemsParams, refresh?: boolean) {
+export async function GetItems(data: GetItemsParams, refresh?: boolean) {
   return request<GetItemsRes>({
     url: "/api/fs/list",
-    method: "get",
-    params: params,
+    method: "post",
+    data,
     cache: true,
     refresh: refresh,
   });
@@ -25,15 +26,29 @@ export async function GetItems(params: GetItemsParams, refresh?: boolean) {
 /**
  * 获取文件详情
  * @constructor
- * @param params
+ * @param data
  */
-export async function GetDetail(params: GetDetailParams) {
+export async function GetDetail(data: GetDetailParams) {
   return request<GetDetailRes>({
     url: "/api/fs/get",
-    method: "get",
-    params: params,
+    method: "post",
+    data,
   });
 }
+
+/**
+ * 获取搜索目录/文件
+ * @constructor
+ * @param data
+ */
+export async function GetSearch(data: GetSearchParams) {
+  return request<GetItemsRes>({
+    url: "/api/fs/search",
+    method: "post",
+    data,
+  });
+}
+
 /**
  * 获取封面
  * @constructor

@@ -1,14 +1,13 @@
 import { useState } from "react";
-import { Alert, Appearance, StyleSheet, useColorScheme } from "react-native";
+import { useRouter } from "expo-router";
 import { storageManager } from "@/storage";
+import { Alert, Appearance, StyleSheet, useColorScheme } from "react-native";
 
-import { ThemedText } from "@/components/theme/ThemedText";
-import { ThemedView } from "@/components/theme/ThemedView";
 import { ThemedButton } from "@/components/theme/ThemedButton";
 
 import ThemedModal from "@/components/theme/ThemedModal";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { useRouter } from "expo-router";
+import { ThemedText } from "@/components/theme/ThemedText";
 // import MusicNotifications from "@/components/audio/MusicNotifications";
 
 export default function MineScreen() {
@@ -58,14 +57,13 @@ export default function MineScreen() {
     storageManager.set("color_scheme", colorScheme);
   };
   return (
-    <ParallaxScrollView>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">admin-panel-settings</ThemedText>
-      </ThemedView>
-      <ThemedText>
-        This app includes example code to help you get started.{mode}
+    <ParallaxScrollView style={styles.container}>
+      <ThemedText
+        type="title"
+        style={{ textAlign: "center", paddingVertical: 10 }}
+      >
+        Title
       </ThemedText>
-
       <ThemedButton
         title={mode === "dark" ? "深色模式" : "浅色模式"}
         onPress={setMode}
@@ -87,8 +85,8 @@ export default function MineScreen() {
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: "row",
-    gap: 20,
+  container: {
+    paddingHorizontal: 10,
+    gap: 10,
   },
 });

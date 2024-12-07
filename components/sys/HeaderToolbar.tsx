@@ -75,6 +75,7 @@ const HeaderToolbar: React.FC<ToolbarProps> = (props) => {
       return;
     }
     onSortOrder && onSortOrder({ sort, order });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sort, order]);
 
   useEffect(() => {
@@ -86,6 +87,7 @@ const HeaderToolbar: React.FC<ToolbarProps> = (props) => {
       setLoading(true);
     };
     init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (!loading) return null;

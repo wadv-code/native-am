@@ -23,7 +23,7 @@ export function IconSymbol({ name, size = 24, color, style }: IconSymbolProps) {
   const theme = useTheme();
   return (
     <MaterialIcons
-      color={color ?? theme.text}
+      color={color ?? theme.icon}
       size={size}
       name={name}
       style={style}

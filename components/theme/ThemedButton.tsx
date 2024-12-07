@@ -1,8 +1,8 @@
-import { Button, type TextProps } from "react-native";
+import { Button, type ButtonProps, type TextProps } from "react-native";
 
 import { useTheme } from "@/hooks/useThemeColor";
 
-export type ThemedButtonProps = TextProps & {
+export type ThemedButtonProps = ButtonProps & {
   title: string;
   lightColor?: string;
   darkColor?: string;
@@ -10,7 +10,6 @@ export type ThemedButtonProps = TextProps & {
 };
 
 export function ThemedButton({
-  style,
   title,
   lightColor,
   darkColor,

@@ -1,18 +1,18 @@
 import type { PropsWithChildren } from "react";
-import { StatusBar, StyleSheet } from "react-native";
+import { StyleSheet, type ViewProps } from "react-native";
 import Animated, { useAnimatedRef } from "react-native-reanimated";
 
 import { ThemedView } from "@/components/theme/ThemedView";
 import { useBottomTabOverflow } from "@/components/ui/TabBarBackground";
 
-type Props = PropsWithChildren<{}>;
+type Props = PropsWithChildren<ViewProps>;
 
-export default function ParallaxScrollView({ children }: Props) {
+export default function ParallaxScrollView({ children, style }: Props) {
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const bottom = useBottomTabOverflow();
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedView style={[styles.container, style]}>
       <Animated.ScrollView
         ref={scrollRef}
         scrollEventThrottle={16}
@@ -28,8 +28,8 @@ export default function ParallaxScrollView({ children }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingLeft: 10,
-    paddingRight: 10
+    // paddingLeft: 10,
+    // paddingRight: 10
   },
   content: {
     flex: 1,

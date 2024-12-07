@@ -1,16 +1,7 @@
-import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { ThemedText } from "@/components/theme/ThemedText";
-import { ThemedView } from "@/components/theme/ThemedView";
-import { useTheme } from "@/hooks/useThemeColor";
+import IndexSearch from "@/components/index/IndexSearch";
 
 const SearchScreen = () => {
-  const theme = useTheme();
-  return (
-    <ParallaxScrollView>
-      <ThemedView>
-        <ThemedText style={{ color: theme.primary }}>SearchScreen</ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
-  );
+  return <IndexSearch style={{ paddingTop: 10 }} />;
 };
+
 export default SearchScreen;

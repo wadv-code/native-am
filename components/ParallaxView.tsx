@@ -1,6 +1,4 @@
-import type { PropsWithChildren } from "react";
-import { StatusBar, StyleSheet, type ViewProps } from "react-native";
-
+import { StyleSheet, type ViewProps } from "react-native";
 import { ThemedView } from "@/components/theme/ThemedView";
 
 export type ParallaxViewProps = ViewProps & {
@@ -10,22 +8,11 @@ export type ParallaxViewProps = ViewProps & {
 };
 
 export default function ParallaxView({ children, style }: ParallaxViewProps) {
-  return (
-    <ThemedView style={[styles.container, style]}>
-      <ThemedView style={styles.content}>{children}</ThemedView>
-    </ThemedView>
-  );
+  return <ThemedView style={[styles.container, style]}>{children}</ThemedView>;
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingLeft: 10,
-    paddingRight: 10
-  },
-  content: {
-    flex: 1,
-    gap: 10,
-    overflow: "hidden",
   },
 });
