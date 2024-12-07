@@ -29,7 +29,7 @@ export default function TabLayout() {
           tabBarActiveBackgroundColor: theme.backgroundPrimary,
           tabBarInactiveBackgroundColor: theme.background,
           tabBarActiveTintColor:
-            colorScheme === "dark" ? theme.icon : theme.primary,
+            colorScheme === "dark" ? theme.text : theme.primary,
           headerShown: false,
           tabBarButton: HapticTab,
           tabBarBackground: TabBarBackground,
