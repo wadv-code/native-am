@@ -105,38 +105,6 @@ const ImageScreen = () => {
     }
   };
 
-  // const onPanStart: OnPanStartCallback = (event) => {
-  //   console.log("onPanStart", event.absoluteX);
-  // };
-
-  // const onPanEnd: OnPanEndCallback = (event) => {
-  //   console.log("onPanEnd", event.absoluteX);
-  // };
-
-  // let time = 0;
-  // const onShiftingAfter = (event: GestureResponderEvent) => {
-  //   if (!time) time = Date.now();
-  //   return true;
-  // };
-
-  // const onShiftingEnd = (
-  //   event: GestureResponderEvent,
-  //   gestureState: PanResponderGestureState
-  // ) => {
-  //   if (loading) return;
-  //   const diff = Date.now() - time;
-  //   if (diff > 50 && diff < 300) {
-  //     if (gestureState.dx > 0) {
-  //       prevPicture();
-  //     } else {
-  //       nextPicture();
-  //     }
-  //   }
-  //   time = 0;
-  // };
-  // onShiftingEnd={onShiftingEnd}
-  // onShiftingAfter={onShiftingAfter}
-
   return (
     <ThemedView style={styles.viewContainer}>
       <View style={styles.headerContainer}>
@@ -150,15 +118,7 @@ const ImageScreen = () => {
       </View>
       <ReactNativeZoomableView ref={zoomRef} maxZoom={30}>
         <Image src={imageUrl} style={styles.imageViewer}></Image>
-        {/* <ThemedText>This is the content</ThemedText> */}
       </ReactNativeZoomableView>
-      {/* <ImageZoom
-        uri={imageUrl}
-        onPanEnd={onPanEnd}
-        onPanStart={onPanStart}
-        isDoubleTapEnabled={true}
-        style={styles.imageViewer}
-      /> */}
       <View
         style={[
           styles.toolbar,
@@ -201,15 +161,6 @@ const ImageScreen = () => {
         </TouchableOpacity>
       </View>
     </ThemedView>
-    // <ThemedView>
-    //   {images.length ? (
-    //     <ImageViewer
-    //       style={styles.imageViewer}
-    //       imageUrls={images}
-    //       onChange={onChange}
-    //     />
-    //   ) : null}
-    // </ThemedView>
   );
 };
 
