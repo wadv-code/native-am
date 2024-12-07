@@ -129,6 +129,9 @@ const audioSlice = createSlice({
     setPlaying: (state, action) => {
       state.playing = action.payload;
     },
+    setLoading: (state, action) => {
+      state.loading = action.payload;
+    },
     setDuration: (state, action) => {
       state.duration = action.payload;
       state.durationFormat = formatMilliseconds(action.payload);
@@ -144,11 +147,11 @@ const audioSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(setAudioInfoAsync.pending, (state, action) => {
+      .addCase(setAudioInfoAsync.pending, (state) => {
         state.loading = true;
       })
       .addCase(setAudioInfoAsync.fulfilled, (state, action) => {
-        state.loading = false;
+        // state.loading = false;
         state.audioInfo = action.payload;
         storageManager.set("audio_info", action.payload);
       })
@@ -160,7 +163,7 @@ const audioSlice = createSlice({
   },
 });
 
-export const { setPlaying, setDuration, setCurrent, setAudioInfo } =
+export const { setPlaying, setLoading, setDuration, setCurrent, setAudioInfo } =
   audioSlice.actions;
 
 export default audioSlice.reducer;

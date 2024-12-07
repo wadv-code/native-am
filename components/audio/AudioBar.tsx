@@ -2,7 +2,6 @@ import { ThemedText } from "../theme/ThemedText";
 import { ThemedView } from "../theme/ThemedView";
 import { useTheme } from "@/hooks/useThemeColor";
 import { IconSymbol } from "../ui";
-import { MusicPlayer } from "./MusicPlayer";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "@/store";
 import { setPlaying } from "@/store/slices/audioSlice";
@@ -61,8 +60,8 @@ const AudioBar = ({ onPress }: AudioBarProps) => {
         {loading ? (
           <ActivityIndicator
             size={30}
-            color={theme.primary}
-            style={styles.imageStyle}
+            color="white"
+            style={[styles.imageStyle, { backgroundColor: theme.primary }]}
           />
         ) : (
           <ThemeImage src={audioInfo?.cover} style={styles.imageStyle} />
@@ -89,7 +88,6 @@ const AudioBar = ({ onPress }: AudioBarProps) => {
           <IconSymbol size={28} name="queue-music" />
         </TouchableOpacity>
       </View>
-      <MusicPlayer />
     </View>
   );
 };
@@ -130,7 +128,7 @@ const styles = StyleSheet.create({
     right: -10,
     bottom: -10,
     resizeMode: "cover", // 让图片覆盖整个容器
-    opacity: 0.3,
+    opacity: 0.1,
     backgroundSize: "100%",
   },
   barLeftContainer: {

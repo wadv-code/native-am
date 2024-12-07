@@ -12,6 +12,7 @@ import {
   setCurrent,
   setDuration,
   setPlaying,
+  setLoading,
 } from "@/store/slices/audioSlice";
 
 Audio.setAudioModeAsync({
@@ -47,7 +48,7 @@ const MusicPlayer = (props: MusicPlayerProps) => {
   const dispatch = useAppDispatch();
   const { onFinish, onLoaded, onError, onBuffering } = props;
   const audioState = useSelector((state: RootState) => state.audio);
-  const { audioInfo, playing } = audioState;
+  const { audioInfo, playing, loading } = audioState;
   const [soundObject] = useState(new Audio.Sound());
 
   const loadAudio = async (uri: string) => {
@@ -83,11 +84,13 @@ const MusicPlayer = (props: MusicPlayerProps) => {
   // const [soundObject, setSoundObject] = useState(new Audio.Sound());
 
   const playAsync = async () => {
+    if (loading) return;
     await soundObject.playAsync();
     dispatch(setPlaying(true));
   };
 
   const pauseAsync = async () => {
+    if (loading) return;
     await soundObject.pauseAsync();
     dispatch(setPlaying(false));
   };
@@ -106,6 +109,7 @@ const MusicPlayer = (props: MusicPlayerProps) => {
           onError && onError(playbackStatus.error);
         }
       } else {
+        if (playbackStatus.durationMillis) dispatch(setLoading(false));
         if (playbackStatus.isPlaying) {
           onUpdate && onUpdate(playbackStatus);
           // Update your UI for the playing state
@@ -126,8 +130,10 @@ const MusicPlayer = (props: MusicPlayerProps) => {
   useEffect(() => {
     if (audioInfo.raw_url) {
       loadAudio(audioInfo.raw_url);
+      dispatch(setLoading(true));
     } else {
       unloadAudio();
+      dispatch(setLoading(false));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [audioInfo.raw_url]);

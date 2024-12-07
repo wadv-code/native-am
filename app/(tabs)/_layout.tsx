@@ -10,6 +10,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import TabBarBackground from "@/components/ui/TabBarBackground";
 import { HeaderBar } from "@/components/sys";
 import { ModalPlayer } from "@/components/audio/ModalPlayer";
+import { MusicPlayer } from "@/components/audio/MusicPlayer";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -70,6 +71,7 @@ export default function TabLayout() {
 
       <AudioBar onPress={() => setVisible(true)} />
       <ModalPlayer modalVisible={visible} closeModal={closeModal} />
+      <MusicPlayer />
     </>
   );
 }

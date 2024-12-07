@@ -7,14 +7,10 @@ import Slider from "@react-native-community/slider";
 import { useTheme } from "@/hooks/useThemeColor";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
-import {
-  handleCoverItems,
-  setAudioInfo,
-  setPlaying,
-} from "@/store/slices/audioSlice";
 import { useAppDispatch } from "@/hooks/useStore";
 import { formatMilliseconds, formatPath } from "@/utils/lib";
 import { ThemedView } from "../theme/ThemedView";
+import { GetCover } from "@/api/api";
 import {
   ActivityIndicator,
   Animated,
@@ -25,7 +21,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { GetCover } from "@/api/api";
+import {
+  handleCoverItems,
+  setAudioInfo,
+  setPlaying,
+} from "@/store/slices/audioSlice";
 
 type ViewPlayerProps = {
   closeModal: () => void;
@@ -35,6 +35,7 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
   const theme = useTheme();
   const [loading, setLoading] = useState(false);
   const [isHappy, setIsHappy] = useState(false);
+  const [value, setValue] = useState(0);
   const [dragCurrent, setDragCurrent] = useState<string | undefined>();
   const rotateAnimation = useRef(new Animated.Value(0)).current;
   const animatedValue = useRef(new Animated.Value(0)).current;
@@ -46,8 +47,8 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
     playing,
     currentFormat,
     durationFormat,
-    duration,
     current,
+    duration,
   } = audio;
 
   const spin = rotateAnimation.interpolate({
@@ -62,14 +63,15 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
   // };
 
   const onSlidingComplete = (value: number) => {
-    dispatch(setPlaying(true));
     setDragCurrent(undefined);
-    // dispatch(setCurrent(value));
-    emitter.emit("setAudioSeek", value);
+    dispatch(setPlaying(true));
+    const diff = Math.floor(value * duration);
+    emitter.emit("setAudioSeek", diff);
   };
 
   const onValueChange = (value: number) => {
-    setDragCurrent(formatMilliseconds(value));
+    const diff = Math.floor(value * duration);
+    setDragCurrent(formatMilliseconds(diff));
   };
 
   const onSlidingStart = () => {
@@ -90,7 +92,7 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
     Animated.loop(
       Animated.timing(rotateAnimation, {
         toValue: 1,
-        duration: 20000,
+        duration: 30000,
         useNativeDriver: true,
         easing: Easing.linear,
       })
@@ -162,6 +164,12 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isHappy]);
 
+  useEffect(() => {
+    setValue(parseFloat((current / duration).toFixed(2)));
+    if (dragCurrent) setDragCurrent(undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [current]);
+
   const animatedStyle = {
     transform: [{ translateX: animatedValue }],
   };
@@ -183,7 +191,7 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
         </TouchableOpacity>
       </View>
       <ImageBackground
-        style={[styles.backgroundImage, { opacity: isHappy ? 1 : 0.3 }]}
+        style={[styles.backgroundImage, { opacity: isHappy ? 1 : 0.1 }]}
         src={audioInfo.cover}
       />
       <TouchableOpacity onPress={onCoverRefresh} style={styles.animatedImage}>
@@ -209,16 +217,16 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
           {audioInfo.modifiedFormat}
         </ThemedText>
         <Slider
-          value={current}
+          value={value}
           onSlidingStart={onSlidingStart}
           onSlidingComplete={onSlidingComplete}
           onValueChange={onValueChange}
           minimumValue={0}
-          maximumValue={duration}
+          maximumValue={1}
           minimumTrackTintColor={theme.primary}
           thumbTintColor={theme.primary}
-          step={1}
-          style={{ width: "100%" }}
+          step={0.01}
+          style={{ width: "90%" }}
         />
         <View style={styles.time}>
           <ThemedText>{dragCurrent || currentFormat}</ThemedText>
@@ -314,6 +322,10 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
+    flex: 1,
+    flexDirection: "row",
+    width: "100%",
+    height: "100%",
   },
   toolbar: {
     flexDirection: "row",
