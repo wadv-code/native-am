@@ -1,12 +1,12 @@
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { StyleSheet, TouchableOpacity, View, Animated } from "react-native";
 import { ThemedView } from "../theme/ThemedView";
 import { IconSymbol } from "../ui";
 import { ThemedText } from "../theme/ThemedText";
-import Animated, { useAnimatedRef } from "react-native-reanimated";
 import React, { useEffect, useRef, useState } from "react";
+import { storageManager } from "@/storage";
+import { useRouter } from "expo-router";
 import type { GetItemsParams } from "@/api";
 import type { MaterialIconsName } from "@/types";
-import { storageManager } from "@/storage";
 
 // 排序方式
 const orders = ["name", "time", "size"] as const;
@@ -29,6 +29,7 @@ export type ToolbarSortOrder = {
 
 export type ToolbarProps = {
   name?: string;
+  path?: string;
   items: GetItemsParams[];
   synopsis?: ToolbarSynopsis;
   onPress?: (item: GetItemsParams) => void;
@@ -37,13 +38,13 @@ export type ToolbarProps = {
 };
 
 const HeaderToolbar: React.FC<ToolbarProps> = (props) => {
-  const { name, items, synopsis } = props;
+  const { name, path, items, synopsis } = props;
   const { onPress, onRoot, onSortOrder } = props;
-  const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const [sort, setSort] = useState<ToolbarSort>("descending");
   const [order, setOrder] = useState<ToolbarOrder>("time");
   const [loading, setLoading] = useState<boolean>(false);
   const isInitialRender = useRef<boolean>(false);
+  const navigation = useRouter();
 
   const onOrder = () => {
     const index = orders.findIndex((f) => f === order);
@@ -67,6 +68,15 @@ const HeaderToolbar: React.FC<ToolbarProps> = (props) => {
       descending: "arrow-upward",
     };
     return icons[sort];
+  };
+
+  const openSearch = () => {
+    navigation.navigate({
+      pathname: "/views/search",
+      params: {
+        path: path ?? "/",
+      },
+    });
   };
 
   useEffect(() => {
@@ -94,13 +104,11 @@ const HeaderToolbar: React.FC<ToolbarProps> = (props) => {
 
   return (
     <ThemedView>
-      {/* <View>面包屑</View> */}
       <View style={styles.row}>
-        <TouchableOpacity style={styles.rootIcon} onPress={onRoot}>
+        <TouchableOpacity onPress={onRoot}>
           <IconSymbol size={24} name="snippet-folder" />
         </TouchableOpacity>
         <Animated.ScrollView
-          ref={scrollRef}
           scrollEventThrottle={16}
           style={{ height: 40 }}
           horizontal={true}
@@ -114,7 +122,7 @@ const HeaderToolbar: React.FC<ToolbarProps> = (props) => {
                 onPress={() => onPress && onPress(item)}
               >
                 <IconSymbol
-                  size={14}
+                  size={16}
                   style={{ marginHorizontal: 3 }}
                   name="arrow-right"
                 />
@@ -123,6 +131,9 @@ const HeaderToolbar: React.FC<ToolbarProps> = (props) => {
             );
           })}
         </Animated.ScrollView>
+        <TouchableOpacity style={styles.searchIcon} onPress={openSearch}>
+          <ThemedText>🔍搜索</ThemedText>
+        </TouchableOpacity>
       </View>
       <View style={styles.filterContainer}>
         <ThemedText
@@ -184,9 +195,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textTransform: "capitalize",
   },
-  rootIcon: {
+  searchIcon: {
+    paddingHorizontal: 5,
     flexDirection: "row",
-    justifyContent: "center",
+    alignItems: "center",
   },
   scrollView: {
     paddingRight: 20,

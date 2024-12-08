@@ -10,3 +10,7 @@ interface HistoryItemType extends GetItemsParams {
 }
 
 export type HistoryItem = HistoryItemType;
+
+export type RootStackParamList = {
+  search: { path: string };
+};

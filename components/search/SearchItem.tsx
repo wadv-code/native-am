@@ -11,20 +11,21 @@ type ItemProps = {
   onPress: (option: GetItemsResItem) => void;
 };
 
-export type IndexItemProps = ItemProps;
+export type SearchItemProps = ItemProps;
 
-const IndexItem = React.memo(
-  (option: IndexItemProps) => {
+const SearchItem = React.memo(
+  (option: SearchItemProps) => {
     const { item, onPress } = option;
-    const { id, name, is_dir, sizeFormat, modifiedFormat } = item;
+    const { id, name, is_dir, parent, sizeFormat } = item;
     const theme = useTheme();
 
     return (
-      <View key={id} style={styles.itemContainer}>
-        <TouchableOpacity
-          style={styles.leftContainer}
-          onPress={() => onPress && onPress(item)}
-        >
+      <TouchableOpacity
+        key={id}
+        style={styles.itemContainer}
+        onPress={() => onPress && onPress(item)}
+      >
+        <View style={styles.leftContainer}>
           <IconSymbol
             size={26}
             name={getIconSymbol(name, is_dir)}
@@ -35,21 +36,23 @@ const IndexItem = React.memo(
             <ThemedText
               numberOfLines={2}
               ellipsizeMode="tail"
-              style={styles.title}
+              style={{ fontSize: 14 }}
             >
               {name}
             </ThemedText>
-            <ThemedText style={styles.size}>{sizeFormat}</ThemedText>
+            <ThemedText style={[styles.size, { color: theme.primary }]}>
+              {parent}
+            </ThemedText>
           </View>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.rightContainer}>
-          <ThemedText style={styles.timeStyle}>{modifiedFormat}</ThemedText>
+        </View>
+        <View style={styles.rightContainer}>
+          <ThemedText style={styles.timeStyle}>{sizeFormat}</ThemedText>
           <IconSymbol
             size={20}
             name={is_dir ? "keyboard-arrow-right" : "more-vert"}
           />
-        </TouchableOpacity>
-      </View>
+        </View>
+      </TouchableOpacity>
     );
   },
   (prevProps, nextProps) => {
@@ -71,13 +74,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingRight: 40,
   },
-  title: {
-    fontSize: 14,
-    fontWeight: "bold",
-  },
   size: {
     fontSize: 12,
-    marginTop: 5,
+    marginTop: 3,
   },
   rightContainer: {
     flexDirection: "row",
@@ -92,6 +91,6 @@ const styles = StyleSheet.create({
   },
 });
 
-IndexItem.displayName = "IndexItem";
+SearchItem.displayName = "SearchItem";
 
-export { IndexItem };
+export { SearchItem };

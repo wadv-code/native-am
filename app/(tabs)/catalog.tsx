@@ -224,6 +224,22 @@ const CatalogScreen = () => {
 
   useEffect(() => {
     isFocusedRef.current = isFocused;
+    if (isFocused) {
+      (async () => {
+        const path = await storageManager.get("parent_search_path");
+        if (path) {
+          const spPtahs = path.split("/").filter((f: string) => f);
+          let parentPath = "";
+          const list = spPtahs.map((v: string) => {
+            parentPath = formatPath(parentPath, v);
+            return { ...params, name: v, path: parentPath };
+          });
+          await storageManager.remove("parent_search_path");
+          setHistoryLocal(list);
+        }
+      })();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isFocused]);
 
   return (
@@ -231,6 +247,7 @@ const CatalogScreen = () => {
       <HeaderToolbar
         items={historyItems}
         name={selectedName}
+        path={params.path}
         synopsis={{ total, pageSize: items.length }}
         onPress={toHistory}
         onRoot={() => toHistory()}

@@ -176,10 +176,11 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
   const opacityStyle = { opacity: animatedOpacity };
 
   return (
-    <ThemedView style={[styles.viewContainer]}>
+    <ThemedView style={styles.viewContainer}>
       <View style={styles.headerContainer}>
         <TouchableOpacity onPress={closeModal}>
           <IconSymbol
+            color={theme.text}
             name="keyboard-arrow-down"
             size={Platform.OS === "android" ? 35 : 25}
           />

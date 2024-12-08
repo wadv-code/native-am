@@ -130,31 +130,37 @@ const ImageScreen = () => {
         <TouchableOpacity onPress={() => setIndex(0)}>
           <IconSymbol
             name="keyboard-double-arrow-left"
+            style={{ color: theme.text }}
             size={Platform.OS === "android" ? 30 : 20}
           />
         </TouchableOpacity>
         <TouchableOpacity onPress={prevPicture}>
           <IconSymbol
             name="arrow-left"
+            style={{ color: theme.text }}
             size={Platform.OS === "android" ? 60 : 40}
           />
         </TouchableOpacity>
-        {loading ? (
-          <ActivityIndicator size={30} color={theme.primary} />
-        ) : (
-          <ThemedText>
-            {index + 1}/{images.length}
-          </ThemedText>
-        )}
+        <View style={styles.center}>
+          {loading ? (
+            <ActivityIndicator size={30} color={theme.text} />
+          ) : (
+            <ThemedText style={styles.centerText}>
+              {index + 1}/{images.length}
+            </ThemedText>
+          )}
+        </View>
         <TouchableOpacity onPress={nextPicture}>
           <IconSymbol
             name="arrow-right"
+            style={{ color: theme.text }}
             size={Platform.OS === "android" ? 60 : 40}
           />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => setIndex(images.length - 1)}>
           <IconSymbol
             name="keyboard-double-arrow-right"
+            style={{ color: theme.text }}
             size={Platform.OS === "android" ? 30 : 20}
           />
         </TouchableOpacity>
@@ -169,6 +175,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     position: "relative",
+  },
+  center: {
+    width: 100,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  centerText: {
+    fontSize: 16,
+    fontWeight: "bold",
   },
   imageViewer: {
     width: "100%",
@@ -189,7 +205,7 @@ const styles = StyleSheet.create({
     paddingRight: 10,
   },
   toolbar: {
-    opacity: 0.5,
+    // opacity: 0.5,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-around",

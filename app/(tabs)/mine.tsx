@@ -34,17 +34,11 @@ export default function MineScreen() {
   };
 
   const closeModal = () => {
-    console.log("closeModal");
     setModalVisible(false);
   };
 
   const openModal = () => {
-    console.log("openModal");
     setModalVisible(true);
-  };
-
-  const openSearch = () => {
-    router.navigate("/views/search");
   };
 
   const openViewer = () => {
@@ -72,8 +66,6 @@ export default function MineScreen() {
       <ThemedButton title="清除缓存" onPress={clearStorage} />
 
       <ThemedButton title="弹窗" onPress={openModal} />
-
-      <ThemedButton title="搜索页面" onPress={openSearch} />
 
       <ThemedButton title="愉悦心情" onPress={openViewer} />
 

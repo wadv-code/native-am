@@ -20,6 +20,10 @@ const HeaderSearchBar = ({ keywords, onSeatch }: HeaderSearchBarProps) => {
     onSeatch && onSeatch(query);
   };
 
+  const handleClear = () => {
+    setSearch("");
+  };
+
   useEffect(() => {
     setSearch(keywords || "");
   }, [keywords]);
@@ -48,6 +52,11 @@ const HeaderSearchBar = ({ keywords, onSeatch }: HeaderSearchBarProps) => {
           onEndEditing={() => handleSearch(search)}
           style={[styles.input, { color: theme.text }]}
         />
+        {search ? (
+          <TouchableOpacity style={styles.closeIcon} onPress={handleClear}>
+            <IconSymbol size={22} name="close" />
+          </TouchableOpacity>
+        ) : null}
         <TouchableOpacity
           style={[styles.search, { backgroundColor: theme.primary }]}
           onPress={() => handleSearch(search)}
@@ -62,8 +71,8 @@ const HeaderSearchBar = ({ keywords, onSeatch }: HeaderSearchBarProps) => {
 const styles = StyleSheet.create({
   search: {
     width: 60,
-    height: "76%",
-    marginRight: 5,
+    height: "85%",
+    marginRight: 2,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -76,7 +85,6 @@ const styles = StyleSheet.create({
   },
   container: {
     width: "100%",
-    height: 40,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
@@ -89,15 +97,19 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   },
   input: {
+    paddingVertical: 7,
+    margin: 0,
     flexGrow: 1,
     height: "100%",
     fontWeight: "bold",
     fontSize: 16,
   },
   searchIcon: {
-    paddingLeft: 10,
-    paddingRight: 5,
+    paddingHorizontal: 5,
     flexShrink: 0,
+  },
+  closeIcon: {
+    paddingHorizontal: 7,
   },
 });
 

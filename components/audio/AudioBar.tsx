@@ -14,12 +14,13 @@ import {
   TouchableOpacity,
 } from "react-native";
 import ThemeImage from "../theme/ThemeImage";
+import type { ModalPlayerType } from "./ModalPlayer";
 
 // const sound =
 //   "http://nm.hzwima.com:8000/%E5%91%A8%E6%9D%B0%E4%BC%A6-%E7%A8%BB%E9%A6%99.mp3";
 
 type AudioBarProps = {
-  onPress?: () => void;
+  onPress?: (type: ModalPlayerType) => void;
 };
 
 const AudioBar = ({ onPress }: AudioBarProps) => {
@@ -43,7 +44,7 @@ const AudioBar = ({ onPress }: AudioBarProps) => {
             bottom: 90,
           },
           default: {
-            bottom: 58,
+            bottom: 55,
           },
         }),
       ]}
@@ -56,12 +57,15 @@ const AudioBar = ({ onPress }: AudioBarProps) => {
           resizeMode="cover"
         />
       </ThemedView>
-      <TouchableOpacity style={styles.barLeftContainer} onPress={onPress}>
+      <TouchableOpacity
+        style={styles.barLeftContainer}
+        onPress={() => onPress && onPress("view")}
+      >
         {loading ? (
           <ActivityIndicator
             size={30}
             color="white"
-            style={[styles.imageStyle, { backgroundColor: theme.primary }]}
+            style={[styles.imageStyle]}
           />
         ) : (
           <ThemeImage src={audioInfo?.cover} style={styles.imageStyle} />
@@ -84,7 +88,10 @@ const AudioBar = ({ onPress }: AudioBarProps) => {
             name={playing ? "pause-circle-outline" : "play-circle-outline"}
           />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => onPress && onPress("list")}
+        >
           <IconSymbol size={28} name="queue-music" />
         </TouchableOpacity>
       </View>
@@ -140,6 +147,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginRight: 10,
+    gap: 10,
   },
   imageStyle: {
     width: 45,
@@ -158,7 +166,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     // backgroundColor: "rgba(0,0,0,0.2)",
-    marginLeft: 5,
   },
 });
 

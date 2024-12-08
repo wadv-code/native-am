@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Tabs } from "expo-router";
 import { Platform } from "react-native";
 import { AudioBar } from "@/components/audio";
@@ -6,7 +6,10 @@ import { useTheme } from "@/hooks/useThemeColor";
 import { HapticTab } from "@/components/HapticTab";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { HeaderBar } from "@/components/sys";
-import { ModalPlayer } from "@/components/audio/ModalPlayer";
+import {
+  ModalPlayer,
+  type ModalPlayerType,
+} from "@/components/audio/ModalPlayer";
 import { MusicPlayer } from "@/components/audio/MusicPlayer";
 import { IconSymbol } from "@/components/ui";
 import TabBarBackground from "@/components/ui/TabBarBackground";
@@ -15,9 +18,16 @@ export default function TabLayout() {
   const colorScheme = useColorScheme();
   const theme = useTheme();
   const [visible, setVisible] = useState(false);
+  const [modalType, setModalType] = useState<ModalPlayerType>("view");
 
   const closeModal = () => {
     setVisible(false);
+  };
+
+  const openModal = async (type: ModalPlayerType) => {
+    setModalType(type);
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    setVisible(true);
   };
 
   return (
@@ -72,8 +82,12 @@ export default function TabLayout() {
         />
       </Tabs>
 
-      <AudioBar onPress={() => setVisible(true)} />
-      <ModalPlayer modalVisible={visible} closeModal={closeModal} />
+      <AudioBar onPress={openModal} />
+      <ModalPlayer
+        modalType={modalType}
+        modalVisible={visible}
+        closeModal={closeModal}
+      />
       <MusicPlayer />
     </>
   );

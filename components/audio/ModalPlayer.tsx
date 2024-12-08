@@ -1,12 +1,20 @@
 import { Modal, type TextProps } from "react-native";
 import { ViewPlayer } from "./ViewPlayer";
+import { ListPlayer } from "./ListPlayer";
+
+type ModalPlayerType = "view" | "list";
 
 type ModalPlayerProps = TextProps & {
+  modalType: ModalPlayerType;
   modalVisible: boolean;
   closeModal: () => void;
 };
 
-const ModalPlayer = ({ modalVisible, closeModal }: ModalPlayerProps) => {
+const ModalPlayer = ({
+  modalVisible,
+  modalType = "view",
+  closeModal,
+}: ModalPlayerProps) => {
   return (
     <Modal
       animationType="slide"
@@ -15,9 +23,10 @@ const ModalPlayer = ({ modalVisible, closeModal }: ModalPlayerProps) => {
       onRequestClose={closeModal}
       statusBarTranslucent={true}
     >
-      <ViewPlayer closeModal={closeModal} />
+      {modalType === "view" && <ViewPlayer closeModal={closeModal} />}
+      {modalType === "list" && <ListPlayer closeModal={closeModal} />}
     </Modal>
   );
 };
 
-export { ModalPlayer, ModalPlayerProps };
+export { ModalPlayer, ModalPlayerType, ModalPlayerProps };
