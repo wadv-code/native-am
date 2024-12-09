@@ -143,7 +143,7 @@ const CatalogToolbar: React.FC<ToolbarProps> = (props) => {
         if (path) {
           await storageManager.remove("parent_search_path");
           splitToItems(path);
-          toCurrentPath();
+          toPath && toPath(path);
         }
       })();
     }

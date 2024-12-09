@@ -2,7 +2,7 @@ import { IndexItem } from "@/components/index/IndexItem";
 import type { GetItemsResItem } from "@/api";
 import type { ThemedViewProps } from "@/components/theme/ThemedView";
 import { useTheme } from "@/hooks/useThemeColor";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Platform,
@@ -30,11 +30,12 @@ const CatalogList = (props: CatalogListProps) => {
   const { path = "/", total, loading = false, items } = props;
   const ref = useRef<VirtualizedList<GetItemsResItem>>(null);
   const [refreshing, setRefreshing] = useState(loading);
-  const isInitialRender = useRef<boolean>(false);
+  const scrollYRef = useRef(0);
   const { onRefresh, handleItem } = props;
   const theme = useTheme();
 
   const click = (item: GetItemsResItem) => {
+    state[path] = scrollYRef.current || 0;
     handleItem && handleItem(item);
   };
 
@@ -43,19 +44,13 @@ const CatalogList = (props: CatalogListProps) => {
   };
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    if (isInitialRender.current) {
-      isInitialRender.current = false;
-      return;
-    }
-    const contentOffset = event.nativeEvent.contentOffset;
-    state[path] = contentOffset.y;
+    scrollYRef.current = event.nativeEvent.contentOffset.y;
   };
 
-  // // 处理滚动事件，更新当前滚动索引
-  // const handleScroll = useCallback(({ index }: any) => {
-  //   console.log(index);
-  //   // setCurrentScrollIndex(index);
-  // }, []);
+  const handleRefresh = () => {
+    delete state[path];
+    onRefresh && onRefresh();
+  };
 
   const renderItem: ListRenderItem<GetItemsResItem> = ({ item }) => {
     return <IndexItem item={item} height={ITEM_HEIGHT} onPress={click} />;
@@ -67,22 +62,22 @@ const CatalogList = (props: CatalogListProps) => {
   };
 
   useEffect(() => {
-    isInitialRender.current = true;
     if (ref.current && ref.current.scrollToOffset) {
       const offset = state[path] ?? 0;
-      console.log("offset", offset);
-      ref.current.scrollToOffset({
+      ref.current?.scrollToOffset({
         offset,
-        animated: true,
+        animated: false,
       });
+      delete state[path];
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items]);
 
   useEffect(() => {
     setRefreshing(loading);
   }, [loading]);
 
-  if (refreshing) {
+  if (!items.length) {
     return (
       <ActivityIndicator
         size={50}
@@ -107,7 +102,7 @@ const CatalogList = (props: CatalogListProps) => {
       onScrollToIndexFailed={onScrollToIndexFailed}
       scrollEventThrottle={16}
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
       }
       contentContainerStyle={Platform.select({
         ios: {

@@ -1,4 +1,4 @@
-import { CatalogList } from "@/components/index/CatalogList";
+import { CatalogList } from "@/components/catalog/CatalogList";
 import { useEffect, useState } from "react";
 import ParallaxView from "../ParallaxView";
 import { HeaderBar, type ToolbarSortOrder } from "../sys";
