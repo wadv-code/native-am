@@ -108,7 +108,7 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
     try {
       const path = formatPath(audioInfo.parent || "/", audioInfo.name);
       setLoading(true);
-      const data = await GetCover({ type: "json", mode: "2,8" });
+      const data = await GetCover({ type: "json" });
       if (data.url) {
         const uri = __DEV__ ? data.url : data.url.replace(/http:/g, "https:");
         handleCoverItems({ key: path, value: uri });

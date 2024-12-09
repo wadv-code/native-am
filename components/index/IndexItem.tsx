@@ -8,6 +8,7 @@ import React from "react";
 
 type ItemProps = {
   item: GetItemsResItem;
+  height?: number;
   onPress: (option: GetItemsResItem) => void;
 };
 
@@ -15,12 +16,11 @@ export type IndexItemProps = ItemProps;
 
 const IndexItem = React.memo(
   (option: IndexItemProps) => {
-    const { item, onPress } = option;
+    const { item, height = 50, onPress } = option;
     const { id, name, is_dir, sizeFormat, modifiedFormat } = item;
     const theme = useTheme();
-
     return (
-      <View key={id} style={styles.itemContainer}>
+      <View key={id} style={[styles.itemContainer, { height }]}>
         <TouchableOpacity
           style={styles.leftContainer}
           onPress={() => onPress && onPress(item)}
@@ -63,7 +63,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 10,
   },
   leftContainer: {
     flex: 1,

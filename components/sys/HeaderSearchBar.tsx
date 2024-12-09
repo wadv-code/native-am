@@ -70,7 +70,7 @@ const HeaderSearchBar = ({ keywords, onSeatch }: HeaderSearchBarProps) => {
 
 const styles = StyleSheet.create({
   search: {
-    width: 60,
+    width: 70,
     height: "85%",
     marginRight: 2,
     flexDirection: "row",

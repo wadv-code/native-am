@@ -1,5 +1,4 @@
 import { Modal, Pressable, StyleSheet, type TextProps } from "react-native";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { ThemedView } from "./ThemedView";
 import { ThemedText } from "./ThemedText";
 import { Colors } from "@/constants/Colors";
@@ -14,28 +13,25 @@ export default function ThemedModal({
   closeModal,
 }: ThemedModalProps) {
   return (
-    <SafeAreaProvider>
-      <SafeAreaView style={styles.centeredView}>
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={closeModal}
-        >
-          <ThemedView style={styles.centeredView}>
-            <ThemedView style={styles.modalView}>
-              <ThemedText style={styles.modalText}>Hello World!</ThemedText>
-              <Pressable
-                style={[styles.button, styles.buttonClose]}
-                onPress={() => closeModal()}
-              >
-                <ThemedText style={styles.textStyle}>Hide Modal</ThemedText>
-              </Pressable>
-            </ThemedView>
-          </ThemedView>
-        </Modal>
-      </SafeAreaView>
-    </SafeAreaProvider>
+    <Modal
+      animationType="slide"
+      transparent={true}
+      statusBarTranslucent={true}
+      visible={modalVisible}
+      onRequestClose={closeModal}
+    >
+      <ThemedView style={styles.centeredView}>
+        <ThemedView style={styles.modalView}>
+          <ThemedText style={styles.modalText}>Hello World!</ThemedText>
+          <Pressable
+            style={[styles.button, styles.buttonClose]}
+            onPress={() => closeModal()}
+          >
+            <ThemedText style={styles.textStyle}>Hide Modal</ThemedText>
+          </Pressable>
+        </ThemedView>
+      </ThemedView>
+    </Modal>
   );
 }
 

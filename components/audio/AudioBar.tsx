@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
     right: -10,
     bottom: -10,
     resizeMode: "cover", // 让图片覆盖整个容器
-    opacity: 0.1,
+    opacity: 0.2,
     backgroundSize: "100%",
   },
   barLeftContainer: {

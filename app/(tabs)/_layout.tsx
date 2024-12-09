@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { Tabs } from "expo-router";
 import { Platform } from "react-native";
 import { AudioBar } from "@/components/audio";
@@ -6,16 +6,16 @@ import { useTheme } from "@/hooks/useThemeColor";
 import { HapticTab } from "@/components/HapticTab";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { HeaderBar } from "@/components/sys";
+import { MusicPlayer } from "@/components/audio/MusicPlayer";
+import { IconSymbol } from "@/components/ui";
+import TabBarBackground from "@/components/ui/TabBarBackground";
 import {
   ModalPlayer,
   type ModalPlayerType,
 } from "@/components/audio/ModalPlayer";
-import { MusicPlayer } from "@/components/audio/MusicPlayer";
-import { IconSymbol } from "@/components/ui";
-import TabBarBackground from "@/components/ui/TabBarBackground";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const mode = useColorScheme();
   const theme = useTheme();
   const [visible, setVisible] = useState(false);
   const [modalType, setModalType] = useState<ModalPlayerType>("view");
@@ -32,14 +32,12 @@ export default function TabLayout() {
 
   return (
     <>
-      <HeaderBar />
       <Tabs
-        initialRouteName="index"
+        initialRouteName="mine"
         screenOptions={{
           tabBarActiveBackgroundColor: theme.backgroundPrimary,
           tabBarInactiveBackgroundColor: theme.background,
-          tabBarActiveTintColor:
-            colorScheme === "dark" ? theme.text : theme.primary,
+          tabBarActiveTintColor: mode === "dark" ? theme.text : theme.primary,
           headerShown: false,
           tabBarButton: HapticTab,
           tabBarBackground: TabBarBackground,

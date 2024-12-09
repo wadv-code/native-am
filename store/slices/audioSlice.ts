@@ -95,7 +95,7 @@ export const setAudioInfoAsync = createAsyncThunk<
   if (!audio.cover) {
     try {
       // "3,5,6,8,9"
-      const data = await GetCover({ type: "json", mode: "2,8" });
+      const data = await GetCover({ type: "json" });
       if (data.url) {
         const uri = __DEV__ ? data.url : data.url.replace(/http:/g, "https:");
         audio.cover = uri;
@@ -119,6 +119,7 @@ const initialState: AudioSlice = {
   audioInfo: {
     id: "1",
     name: "还没有音乐可以播放",
+    cover: "http://3650000.xyz/api/",
   },
 };
 

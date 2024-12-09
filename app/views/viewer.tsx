@@ -26,9 +26,7 @@ const ImageScreen = () => {
   const [index, setIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState<OptionType[]>([]);
-  const [imageUrl, setImageUrl] = useState(
-    "http://inews.gtimg.com/newsapp_ls/0/13388781949/0"
-  );
+  const [imageUrl, setImageUrl] = useState("http://3650000.xyz/api/");
   const isInitialRender = useRef<boolean>(false);
 
   const router = useRouter();
@@ -50,7 +48,7 @@ const ImageScreen = () => {
     if (loading) return;
     try {
       setLoading(true);
-      const data = await GetCover({ type: "json", mode: "2,8" });
+      const data = await GetCover({ type: "json" });
       if (data.url) {
         const uri = __DEV__ ? data.url : data.url.replace(/http:/g, "https:");
         const option = { key: Date.now().toString(), value: uri };
@@ -131,7 +129,7 @@ const ImageScreen = () => {
           <IconSymbol
             name="keyboard-double-arrow-left"
             style={{ color: theme.text }}
-            size={Platform.OS === "android" ? 30 : 20}
+            size={Platform.OS === "android" ? 40 : 20}
           />
         </TouchableOpacity>
         <TouchableOpacity onPress={prevPicture}>
@@ -143,7 +141,7 @@ const ImageScreen = () => {
         </TouchableOpacity>
         <View style={styles.center}>
           {loading ? (
-            <ActivityIndicator size={30} color={theme.text} />
+            <ActivityIndicator size={40} color={theme.text} />
           ) : (
             <ThemedText style={styles.centerText}>
               {index + 1}/{images.length}
@@ -161,7 +159,7 @@ const ImageScreen = () => {
           <IconSymbol
             name="keyboard-double-arrow-right"
             style={{ color: theme.text }}
-            size={Platform.OS === "android" ? 30 : 20}
+            size={Platform.OS === "android" ? 40 : 20}
           />
         </TouchableOpacity>
       </View>

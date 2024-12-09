@@ -1,12 +1,9 @@
 import React, { useState } from "react";
-import { Image, type ImageStyle, type StyleProp } from "react-native";
+import { Image, type ImageProps } from "react-native";
 
-export type ThemeImageProps = {
-  src?: string;
-  style?: StyleProp<ImageStyle>;
-};
+export type ThemeImageProps = ImageProps & {};
 
-const ThemeImage = ({ src, style }: ThemeImageProps) => {
+const ThemeImage = ({ src, style, resizeMode }: ThemeImageProps) => {
   const [hasError, setHasError] = useState(false); // 加载错误状态
 
   // 处理图片加载错误
@@ -28,6 +25,7 @@ const ThemeImage = ({ src, style }: ThemeImageProps) => {
     <Image
       source={getSource()}
       style={style}
+      resizeMode={resizeMode}
       onError={handleImageError} // 当加载失败时调用handleImageError
     />
   );

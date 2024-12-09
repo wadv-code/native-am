@@ -7,19 +7,31 @@ import type {
   GetDetailParams,
   GetSearchParams,
 } from ".";
+import { formatFileSize, formatTimeAgo } from "@/utils/lib";
 
 /**
  * 获取列表
  * @constructor
- * @param data
+ * @param params
  */
-export async function GetItems(data: GetItemsParams, refresh?: boolean) {
+export async function GetItems(params: GetItemsParams, refresh?: boolean) {
   return request<GetItemsRes>({
     url: "/api/fs/list",
     method: "post",
-    data,
+    data: params,
     cache: true,
     refresh: refresh,
+  }).then(({ data }) => {
+    data.content.forEach((item) => {
+      item.id = Math.random().toString();
+      item.parent = item.parent || params.path || "/";
+      // item.modified = dayjs(item.modified || Date.now()).format(
+      //   "YYYY-MM-DD hh:ss"
+      // );
+      item.modifiedFormat = formatTimeAgo(item.modified);
+      item.sizeFormat = formatFileSize(item.size);
+    });
+    return { data };
   });
 }
 

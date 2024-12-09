@@ -1,50 +1,80 @@
-import { StyleSheet, TouchableOpacity, View, Animated } from "react-native";
+import {
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  Animated,
+  BackHandler,
+} from "react-native";
 import { ThemedView } from "../theme/ThemedView";
 import { IconSymbol } from "../ui";
 import { ThemedText } from "../theme/ThemedText";
 import React, { useEffect, useRef, useState } from "react";
 import { storageManager } from "@/storage";
 import { useRouter } from "expo-router";
-import type { GetItemsParams } from "@/api";
 import type { MaterialIconsName } from "@/types";
+import { useIsFocused } from "@react-navigation/native";
 
 // 排序方式
 const orders = ["name", "time", "size"] as const;
 // 排序
 const sorts = ["descending", "ascending"] as const;
 
-export type ToolbarSynopsis = {
-  total: number;
-  pageSize: number;
-};
+// type ToolbarSynopsis = {
+//   total: number;
+//   pageSize: number;
+// };
 
-export type ToolbarOrder = (typeof orders)[number];
+type ToolbarOrder = (typeof orders)[number];
 
-export type ToolbarSort = (typeof sorts)[number];
+type ToolbarSort = (typeof sorts)[number];
 
-export type ToolbarSortOrder = {
+type ToolbarSortOrder = {
   sort: ToolbarSort;
   order: ToolbarOrder;
 };
 
-export type ToolbarProps = {
-  name?: string;
+type ToolbarProps = {
+  rightText: string;
   path?: string;
-  items: GetItemsParams[];
-  synopsis?: ToolbarSynopsis;
-  onPress?: (item: GetItemsParams) => void;
-  onRoot?: () => void;
+  toPath?: (path: string) => void;
   onSortOrder?: (order: ToolbarSortOrder) => void;
 };
 
-const HeaderToolbar: React.FC<ToolbarProps> = (props) => {
-  const { name, path, items, synopsis } = props;
-  const { onPress, onRoot, onSortOrder } = props;
+type HistoryItem = {
+  name: string;
+  parent: string;
+};
+
+const CatalogToolbar: React.FC<ToolbarProps> = (props) => {
+  const { rightText, path = "/" } = props;
+  const { toPath, onSortOrder } = props;
+  const isFocused = useIsFocused();
+  const isFocusedRef = useRef<boolean>(false);
+  const [items, setItems] = useState<HistoryItem[]>([]);
+  const itemsRef = useRef<HistoryItem[]>(items);
   const [sort, setSort] = useState<ToolbarSort>("descending");
   const [order, setOrder] = useState<ToolbarOrder>("time");
-  const [loading, setLoading] = useState<boolean>(false);
   const isInitialRender = useRef<boolean>(false);
   const navigation = useRouter();
+
+  const onRoot = () => {
+    setItems([]);
+    toPath && toPath("/");
+  };
+
+  const handleItem = (item: HistoryItem, index: number) => {
+    setItems([...items.slice(0, index + 1)]);
+    toPath && toPath(item.parent);
+  };
+
+  const openSearch = () => {
+    navigation.navigate({
+      pathname: "/views/search",
+      params: {
+        path: path ?? "/",
+      },
+    });
+  };
 
   const onOrder = () => {
     const index = orders.findIndex((f) => f === order);
@@ -70,14 +100,55 @@ const HeaderToolbar: React.FC<ToolbarProps> = (props) => {
     return icons[sort];
   };
 
-  const openSearch = () => {
-    navigation.navigate({
-      pathname: "/views/search",
-      params: {
-        path: path ?? "/",
-      },
-    });
+  const getName = () => {
+    const item = items[items.length - 1];
+    return item ? item.name : "精选";
   };
+
+  const splitToItems = (splitPath?: string) => {
+    const p = splitPath || "/";
+    const split = p.split("/").filter((f) => f);
+    let parent: string[] = [];
+    const result = split.map((v) => {
+      parent.push(v);
+      return {
+        parent: "/" + parent.join("/"),
+        name: v,
+      };
+    });
+    const list = [...result];
+    itemsRef.current = list;
+    setItems(list);
+    return list;
+  };
+
+  const toCurrentPath = () => {
+    if (isFocusedRef.current) {
+      const list = itemsRef.current || [];
+      const backItem = list[list.length - 2];
+      if (backItem) {
+        handleItem(backItem, list.length - 2);
+      } else {
+        onRoot();
+      }
+    }
+    return isFocusedRef.current;
+  };
+
+  useEffect(() => {
+    isFocusedRef.current = isFocused;
+    if (isFocused) {
+      (async () => {
+        const path = await storageManager.get("parent_search_path");
+        if (path) {
+          await storageManager.remove("parent_search_path");
+          splitToItems(path);
+          toCurrentPath();
+        }
+      })();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isFocused]);
 
   useEffect(() => {
     if (!isInitialRender.current) {
@@ -89,18 +160,19 @@ const HeaderToolbar: React.FC<ToolbarProps> = (props) => {
   }, [sort, order]);
 
   useEffect(() => {
-    const init = async () => {
-      const sortValue = (await storageManager.get("sort_string")) ?? sort;
-      const orderValue = (await storageManager.get("order_string")) ?? order;
-      setOrder(sortValue);
-      setOrder(orderValue);
-      setLoading(true);
-    };
-    init();
+    // 注册返回事件监听
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      toCurrentPath
+    );
+    // 组件卸载时移除监听
+    return () => backHandler.remove();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (!loading) return null;
+  useEffect(() => {
+    splitToItems(path);
+  }, [path]);
 
   return (
     <ThemedView>
@@ -119,7 +191,7 @@ const HeaderToolbar: React.FC<ToolbarProps> = (props) => {
               <TouchableOpacity
                 key={index}
                 style={styles.breadcrumb}
-                onPress={() => onPress && onPress(item)}
+                onPress={() => handleItem(item, index)}
               >
                 <IconSymbol
                   size={16}
@@ -141,12 +213,10 @@ const HeaderToolbar: React.FC<ToolbarProps> = (props) => {
           numberOfLines={1}
           ellipsizeMode="tail"
         >
-          {name ?? "精选"}
+          {getName()}
         </ThemedText>
         <View style={styles.toolbar}>
-          <ThemedText style={styles.smallText}>
-            {synopsis?.pageSize}/{synopsis?.total}
-          </ThemedText>
+          <ThemedText style={styles.smallText}>{rightText}</ThemedText>
           <TouchableOpacity style={styles.row} onPress={onOrder}>
             <IconSymbol
               style={{ marginRight: 3 }}
@@ -207,4 +277,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export { HeaderToolbar };
+export { CatalogToolbar, ToolbarSortOrder, ToolbarOrder, ToolbarSort };

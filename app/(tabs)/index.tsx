@@ -1,14 +1,21 @@
-import ParallaxView from "@/components/ParallaxView";
-import { ThemedText } from "@/components/theme/ThemedText";
+import { CatalogView } from "@/components/index/CatalogView";
+import { storageManager } from "@/storage";
+import { useEffect, useState } from "react";
 
 const IndexScreen = () => {
-  return (
-    <ParallaxView>
-      <ThemedText type="title" style={{ textAlign: "center", paddingTop: 10 }}>
-        Index
-      </ThemedText>
-    </ParallaxView>
-  );
+  const [path, setPath] = useState("");
+
+  useEffect(() => {
+    (async () => {
+      const path = await storageManager.get("catalog_view_path");
+      console.log(path);
+      setPath(path || "/");
+    })();
+  }, []);
+
+  if (!path) return null;
+
+  return <CatalogView path={path} />;
 };
 
 export default IndexScreen;

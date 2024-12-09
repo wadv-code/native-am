@@ -58,7 +58,7 @@ export type GetDetailRes = {
 
 export type GetCoverParams = {
   type: string;
-  mode: number | string;
+  mode?: number | string;
 };
 
 export type GetCoverRes = {

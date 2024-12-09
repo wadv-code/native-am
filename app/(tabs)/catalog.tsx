@@ -3,7 +3,11 @@ import { IndexItem } from "@/components/index/IndexItem";
 import ParallaxView from "@/components/ParallaxView";
 import { emitter } from "@/utils/mitt";
 import { storageManager } from "@/storage";
-import { HeaderToolbar, type ToolbarSortOrder } from "@/components/sys";
+import {
+  HeaderBar,
+  HeaderToolbar,
+  type ToolbarSortOrder,
+} from "@/components/sys";
 import { GetItems } from "@/api/api";
 import type { HistoryItem } from "@/types";
 import type { GetItemsParams, GetItemsResItem } from "@/api";
@@ -244,6 +248,7 @@ const CatalogScreen = () => {
 
   return (
     <ParallaxView style={{ paddingHorizontal: 10 }}>
+      <HeaderBar />
       <HeaderToolbar
         items={historyItems}
         name={selectedName}

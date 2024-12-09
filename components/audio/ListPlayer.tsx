@@ -141,7 +141,7 @@ const ListPlayer = ({ closeModal }: ListPlayerProps) => {
         </TouchableOpacity>
       </View>
       <ImageBackground
-        style={[styles.backgroundImage, { opacity: isHappy ? 1 : 0.1 }]}
+        style={[styles.backgroundImage, { opacity: isHappy ? 1 : 0.3 }]}
         src={audioInfo.cover}
       />
       <FlatList
