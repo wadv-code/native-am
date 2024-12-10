@@ -99,7 +99,7 @@ export const DarkTheme: Theme = {
     background: "#011413",
     backgroundPrimary: "#011211",
     card: "rgb(18, 18, 18)",
-    border: "rgb(39, 39, 41)",
+    border: "rgb(18, 18, 18)",
     notification: "rgb(255, 69, 58)",
     danger: "#F44336",
     success: "#4CAF50",

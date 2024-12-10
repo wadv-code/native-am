@@ -19,6 +19,7 @@ import {
   useColorScheme,
   View,
 } from "react-native";
+import { globalStyles } from "@/styles";
 
 const ImageScreen = () => {
   const mode = useColorScheme();
@@ -31,14 +32,6 @@ const ImageScreen = () => {
 
   const router = useRouter();
 
-  useEffect(() => {
-    (async () => {
-      const { coverItems, viewerIndex } = await getStorageAsync();
-      setIndex(viewerIndex);
-      setImages([...coverItems]);
-    })();
-  }, []);
-
   const setImagesAsync = async (list: OptionType[]) => {
     setImages(list);
     await storageManager.set("cover_items", list);
@@ -48,7 +41,7 @@ const ImageScreen = () => {
     if (loading) return;
     try {
       setLoading(true);
-      const data = await GetCover({ type: "json" });
+      const data = await GetCover({ type: "json", mode: "3,5,8" });
       if (data.url) {
         const uri = __DEV__ ? data.url : data.url.replace(/http:/g, "https:");
         const option = { key: Date.now().toString(), value: uri };
@@ -65,17 +58,6 @@ const ImageScreen = () => {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (!isInitialRender.current) {
-      isInitialRender.current = true;
-      return;
-    }
-    const cover = images[index];
-    if (cover) setImageUrl(cover.value);
-    storageManager.set("viewer_index", index);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [index]);
 
   const onBack = () => {
     router.back();
@@ -102,6 +84,43 @@ const ImageScreen = () => {
     }
   };
 
+  const handleDelete = async () => {
+    const item = images[index];
+    if (item) {
+      images.splice(index, 1);
+      if (images.length) {
+        const current = images[index];
+        if (current) {
+          setImageUrl(current.value);
+        } else {
+          setIndex(index - 1);
+        }
+      } else {
+        await nextPicture();
+      }
+      setImagesAsync([...images]);
+    }
+  };
+
+  useEffect(() => {
+    if (!isInitialRender.current) {
+      isInitialRender.current = true;
+      return;
+    }
+    const cover = images[index];
+    if (cover) setImageUrl(cover.value);
+    storageManager.set("viewer_index", index);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index]);
+
+  useEffect(() => {
+    (async () => {
+      const { coverItems, viewerIndex } = await getStorageAsync();
+      setIndex(viewerIndex);
+      setImages([...coverItems]);
+    })();
+  }, []);
+
   return (
     <ThemedView style={styles.viewContainer}>
       <View style={styles.headerContainer}>
@@ -111,7 +130,10 @@ const ImageScreen = () => {
             size={Platform.OS === "android" ? 35 : 25}
           />
         </TouchableOpacity>
-        <ThemedText style={{ fontWeight: "bold" }}>💗</ThemedText>
+        <TouchableOpacity style={globalStyles.row} onPress={handleDelete}>
+          <IconSymbol name="delete" />
+          {/* <ThemedText style={{ fontWeight: "bold" }}>💗</ThemedText> */}
+        </TouchableOpacity>
       </View>
       <ReactNativeZoomableView maxZoom={30}>
         <Image src={imageUrl} style={styles.imageViewer}></Image>

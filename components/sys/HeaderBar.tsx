@@ -1,17 +1,26 @@
-import { Platform } from "react-native";
-import { ThemedView } from "../theme/ThemedView";
+import { Platform, View, type ViewProps } from "react-native";
 import Constants from "expo-constants";
+import { StatusBar, type StatusBarStyle } from "expo-status-bar";
 
-const HeaderBar = () => {
+type HeaderBarProps = ViewProps & {
+  statusBarStyle?: StatusBarStyle;
+};
+
+const HeaderBar = ({ statusBarStyle = "auto", style }: HeaderBarProps) => {
   return (
-    <ThemedView
-      style={Platform.select({
-        android: {
-          height: Constants.statusBarHeight,
-        },
-      })}
-    />
+    <View style={[styles.container, style]}>
+      <StatusBar style={statusBarStyle} />
+    </View>
   );
 };
 
-export { HeaderBar };
+const styles = Platform.select({
+  android: {
+    container: {
+      height: Constants.statusBarHeight,
+    },
+  },
+  default: {},
+});
+
+export { HeaderBar, HeaderBarProps };

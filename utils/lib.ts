@@ -175,3 +175,9 @@ export function capitalizeFirstLetter(str?: string) {
   if (!str || typeof str !== "string" || str.length === 0) return str;
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
+
+/**
+ * @description 随机数（闭区间）
+ * @param num
+ */
+export const randomNum = (num: number) => Math.floor(Math.random() * (num + 1));

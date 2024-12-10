@@ -1,16 +1,4 @@
-import {
-  ActivityIndicator,
-  Alert,
-  Appearance,
-  ImageBackground,
-  StyleSheet,
-  Switch,
-  TouchableOpacity,
-  useColorScheme,
-  View,
-} from "react-native";
 import Animated, { useAnimatedRef } from "react-native-reanimated";
-import Constants from "expo-constants";
 import { ThemedText } from "@/components/theme/ThemedText";
 import { ThemedView } from "@/components/theme/ThemedView";
 import { useBottomTabOverflow } from "@/components/ui/TabBarBackground";
@@ -19,26 +7,36 @@ import { IconSymbol } from "@/components/ui";
 import type { RootState } from "@/store";
 import { useSelector } from "react-redux";
 import ThemeImage from "@/components/theme/ThemeImage";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { storageManager } from "@/storage";
 import ThemedModal from "@/components/theme/ThemedModal";
 import { useRouter } from "expo-router";
 import { formatPath } from "@/utils/lib";
 import { useAppDispatch } from "@/hooks/useStore";
+import { GetCover } from "@/api/api";
+import { globalStyles } from "@/styles";
 import {
   handleCoverItems,
   setAudioInfo,
   setLoading,
 } from "@/store/slices/audioSlice";
-import { GetCover } from "@/api/api";
+import {
+  ActivityIndicator,
+  Alert,
+  Appearance,
+  StyleSheet,
+  TouchableOpacity,
+  useColorScheme,
+  View,
+} from "react-native";
+import { ThemedNavigation } from "@/components/theme/ThemedNavigation";
 
 export default function MineScreen() {
-  const { theme, setThemeColor } = useThemeColor();
+  const { theme } = useThemeColor();
   const mode = useColorScheme();
   const router = useRouter();
   const dispatch = useAppDispatch();
   const [isDark, setIsDark] = useState(mode === "dark");
-  const [colors, setColors] = useState<string[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const bottom = useBottomTabOverflow();
@@ -50,7 +48,7 @@ export default function MineScreen() {
     try {
       const path = formatPath(audioInfo.parent || "/", audioInfo.name);
       dispatch(setLoading(true));
-      const data = await GetCover({ type: "json" });
+      const data = await GetCover({ type: "json", mode: "3,5,8" });
       if (data.url) {
         const uri = __DEV__ ? data.url : data.url.replace(/http:/g, "https:");
         handleCoverItems({ key: path, value: uri });
@@ -87,8 +85,8 @@ export default function MineScreen() {
     setModalVisible(true);
   };
 
-  const openAbout = () => {
-    router.navigate("/views/about");
+  const openSettings = () => {
+    router.navigate("/views/settings");
   };
 
   const openViewer = () => {
@@ -102,48 +100,23 @@ export default function MineScreen() {
     storageManager.set("color_scheme", colorScheme);
   };
 
-  const takeColors = () => {
-    if (!theme) return;
-    const keys = [
-      "danger",
-      "success",
-      "warning",
-      "pink",
-      "purple",
-      "deepPurple",
-      "indigo",
-      "blue",
-      "lightBlue",
-      "cyan",
-      "teal",
-      "lightGreen",
-      "lime",
-      "yellow",
-      "amber",
-      "deepOrange",
-      "brown",
-      "blueGrey",
-      "grey",
-    ];
-    const list: string[] = [];
-
-    keys.forEach((key) => {
-      // @ts-ignore
-      const color: string = theme[key];
-      if (color) list.push(color);
-    });
-
-    setColors(list);
+  const onBack = () => {
+    console.log("onBack");
   };
 
-  useEffect(takeColors, [theme]);
   return (
-    <ThemedView style={styles.container}>
-      <ImageBackground
-        style={styles.backgroundImage}
-        src={audioInfo.cover}
-        resizeMode="cover"
-      />
+    <ThemedNavigation
+      leftIcon="qr-code-scanner"
+      isImage={true}
+      statusBar={true}
+      style={styles.container}
+      rightText={
+        <TouchableOpacity onPress={openSettings} style={styles.rightText}>
+          <IconSymbol name="settings" style={{ color: theme.text }} />
+        </TouchableOpacity>
+      }
+      onBack={onBack}
+    >
       <Animated.ScrollView
         ref={scrollRef}
         scrollEventThrottle={16}
@@ -151,7 +124,7 @@ export default function MineScreen() {
         contentContainerStyle={{ paddingBottom: bottom }}
       >
         <View style={styles.header}>
-          <View style={styles.headerBar}></View>
+          {/* <View style={styles.headerBar}></View>
           <View style={styles.headerTool}>
             <TouchableOpacity>
               <IconSymbol
@@ -159,12 +132,12 @@ export default function MineScreen() {
                 style={{ color: theme.text }}
               />
             </TouchableOpacity>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={openSettings}>
               <IconSymbol name="settings" style={{ color: theme.text }} />
             </TouchableOpacity>
-          </View>
+          </View> */}
           <View style={styles.headerContent}>
-            <View style={styles.row}>
+            <View style={globalStyles.row}>
               <TouchableOpacity onPress={onCoverRefresh}>
                 {loading ? (
                   <ActivityIndicator
@@ -184,13 +157,13 @@ export default function MineScreen() {
                 <ThemedText style={styles.userText}>没在听</ThemedText>
                 <ThemedText style={styles.userTips}>层楼终究误少年</ThemedText>
               </View>
-              <View style={styles.row}>
+              <View style={globalStyles.row}>
                 <ThemedText>个人中心</ThemedText>
                 <IconSymbol name="chevron-right" />
               </View>
             </View>
           </View>
-          <View style={styles.rowAround}>
+          <View style={[globalStyles.row, globalStyles.justifyAround]}>
             <TouchableOpacity style={styles.headerItem}>
               <ThemedText style={styles.headerMenuCount}>36</ThemedText>
               <ThemedText style={styles.headerMenuText}>发布</ThemedText>
@@ -209,118 +182,45 @@ export default function MineScreen() {
             </TouchableOpacity>
           </View>
         </View>
-        {/* <ThemedView style={styles.grid}>
-          <ThemedText type="subtitle" style={{ paddingHorizontal: 10 }}>
-            我的功能
-          </ThemedText>
-          <View style={styles.gridContent}>
-            <TouchableOpacity style={styles.gridItem} onPress={clearStorage}>
-              <IconSymbol name="delete-sweep" size={35} />
-              <ThemedText>清除缓存</ThemedText>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.gridItem} onPress={openViewer}>
-              <IconSymbol name="photo-library" size={35} />
-              <ThemedText>愉悦心情</ThemedText>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.gridItem} onPress={openModal}>
-              <IconSymbol name="table-view" size={35} />
-              <ThemedText>测试弹窗</ThemedText>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.gridItem} onPress={setMode}>
-              <IconSymbol
-                name={isDark ? "dark-mode" : "light-mode"}
-                size={35}
-              />
-              <ThemedText>{isDark ? "深色模式" : "浅色模式"}</ThemedText>
-            </TouchableOpacity>
-          </View>
-        </ThemedView> */}
         <ThemedView
           darkColor="rgba(0,0,0,0.5)"
           lightColor="rgba(255,255,255,0.5)"
           style={styles.grid}
         >
           <ThemedText type="subtitle" style={{ paddingHorizontal: 10 }}>
-            常用功能
+            我的功能
           </ThemedText>
-          <View style={styles.cellStyle}>
-            <View style={[styles.row, { gap: 10 }]}>
-              <IconSymbol name={isDark ? "dark-mode" : "light-mode"} />
-              <ThemedText style={styles.cellTitle}>
+          <View style={styles.gridContent}>
+            <TouchableOpacity style={styles.gridItem} onPress={setMode}>
+              <IconSymbol
+                name={isDark ? "dark-mode" : "light-mode"}
+                size={35}
+              />
+              <ThemedText bold="bold">
                 {isDark ? "深色模式" : "浅色模式"}
               </ThemedText>
-            </View>
-            <Switch
-              thumbColor={theme.text}
-              ios_backgroundColor={theme.primary}
-              onValueChange={setMode}
-              value={isDark}
-            />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.gridItem} onPress={clearStorage}>
+              <IconSymbol name="delete-sweep" size={35} />
+              <ThemedText bold="bold">清除缓存</ThemedText>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.gridItem} onPress={openViewer}>
+              <IconSymbol name="photo-library" size={35} />
+              <ThemedText bold="bold">愉悦心情</ThemedText>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.gridItem} onPress={openSettings}>
+              <IconSymbol name="settings" size={35} />
+              <ThemedText bold="bold">应用设置</ThemedText>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.gridItem} onPress={openModal}>
+              <IconSymbol name="table-view" size={35} />
+              <ThemedText bold="bold">测试弹窗</ThemedText>
+            </TouchableOpacity>
           </View>
-          <View style={styles.cellStyle}>
-            <View style={[styles.row, { gap: 10 }]}>
-              <IconSymbol name="delete-sweep" />
-              <ThemedText style={styles.cellTitle}>主题设置</ThemedText>
-            </View>
-            <View style={{ width: "60%" }}>
-              <Animated.ScrollView
-                scrollEventThrottle={16}
-                style={{ height: 40 }}
-                horizontal={true}
-                contentContainerStyle={[styles.row, { gap: 5 }]}
-              >
-                {colors.map((v, idx) => {
-                  return (
-                    <TouchableOpacity
-                      key={idx}
-                      style={[
-                        styles.color,
-                        {
-                          backgroundColor: v,
-                          borderColor:
-                            v === theme.primary ? theme.text : "transparent",
-                        },
-                      ]}
-                      onPress={() => setThemeColor({ primary: v })}
-                    />
-                  );
-                })}
-              </Animated.ScrollView>
-            </View>
-            {/* <IconSymbol name="chevron-right" /> */}
-          </View>
-          <TouchableOpacity style={styles.cellStyle} onPress={clearStorage}>
-            <View style={[styles.row, { gap: 10 }]}>
-              <IconSymbol name="delete-sweep" />
-              <ThemedText style={styles.cellTitle}>清除缓存</ThemedText>
-            </View>
-            <IconSymbol name="chevron-right" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.cellStyle} onPress={openViewer}>
-            <View style={[styles.row, { gap: 10 }]}>
-              <IconSymbol name="photo-library" />
-              <ThemedText style={styles.cellTitle}>愉悦心情</ThemedText>
-            </View>
-            <IconSymbol name="chevron-right" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.cellStyle} onPress={openModal}>
-            <View style={[styles.row, { gap: 10 }]}>
-              <IconSymbol name="table-view" />
-              <ThemedText style={styles.cellTitle}>弹窗测试</ThemedText>
-            </View>
-            <IconSymbol name="chevron-right" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.cellStyle} onPress={openAbout}>
-            <View style={[styles.row, { gap: 10 }]}>
-              <IconSymbol name="supervisor-account" />
-              <ThemedText style={styles.cellTitle}>关于我们</ThemedText>
-            </View>
-            <IconSymbol name="chevron-right" />
-          </TouchableOpacity>
         </ThemedView>
       </Animated.ScrollView>
       <ThemedModal modalVisible={modalVisible} closeModal={closeModal} />
-    </ThemedView>
+    </ThemedNavigation>
   );
 }
 
@@ -329,20 +229,10 @@ const styles = StyleSheet.create({
     flex: 1,
     position: "relative",
   },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
   rowAround: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-around",
-  },
-  color: {
-    height: 24,
-    width: 24,
-    borderRadius: 12,
-    borderWidth: 2,
   },
   reactLogo: {
     height: 70,
@@ -355,15 +245,6 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderEndEndRadius: 12,
     borderStartEndRadius: 12,
-  },
-  headerBar: {
-    height: Constants.statusBarHeight,
-  },
-  headerTool: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: 15,
   },
   headerItem: {
     width: "20%",
@@ -386,7 +267,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: "100%",
     height: "100%",
-    opacity: 0.3,
+    opacity: 0.2,
   },
   headerContent: {
     paddingHorizontal: 15,
@@ -419,14 +300,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginTop: 10,
   },
-  cellStyle: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 5,
-  },
-  cellTitle: {
-    fontSize: 20,
-    paddingVertical: 10,
+  rightText: {
+    marginRight: 10,
   },
 });

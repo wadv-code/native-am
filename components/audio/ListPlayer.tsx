@@ -1,18 +1,12 @@
 import {
   Alert,
   FlatList,
-  ImageBackground,
   Platform,
   RefreshControl,
   StyleSheet,
-  TouchableOpacity,
-  View,
   type TextProps,
 } from "react-native";
 import Constants from "expo-constants";
-import { ThemedText } from "../theme/ThemedText";
-import { ThemedView } from "../theme/ThemedView";
-import { IconSymbol } from "../ui";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
 import { useEffect, useRef, useState } from "react";
@@ -26,16 +20,16 @@ import {
 } from "@/utils/lib";
 import { emitter } from "@/utils/mitt";
 import { IndexItem } from "../index/IndexItem";
-import { useThemeColor } from "@/hooks/useThemeColor";
 import { storageManager } from "@/storage";
 import { useRouter } from "expo-router";
+import { ThemedNavigation } from "../theme/ThemedNavigation";
+import { ThemedText } from "../theme/ThemedText";
 
 type ListPlayerProps = TextProps & {
   closeModal: () => void;
 };
 
 const ListPlayer = ({ closeModal }: ListPlayerProps) => {
-  const { theme } = useThemeColor();
   const router = useRouter();
   const [isHappy, setIsHappy] = useState(false);
   const [refreshing, setRefreshing] = useState<boolean>(false);
@@ -119,31 +113,15 @@ const ListPlayer = ({ closeModal }: ListPlayerProps) => {
   }, [audioInfo]);
 
   return (
-    <ThemedView style={styles.container}>
-      <View style={styles.headerContainer}>
-        <TouchableOpacity onPress={closeModal}>
-          <IconSymbol
-            color={theme.text}
-            name="keyboard-arrow-down"
-            size={Platform.OS === "android" ? 35 : 25}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => setIsHappy(!isHappy)}
-          style={styles.right}
-        >
-          <ThemedText>
-            {items.length}/{total}
-          </ThemedText>
-          <ThemedText style={{ fontWeight: "bold" }}>
-            {isHappy ? "退出愉悦心情" : "愉悦心情"}
-          </ThemedText>
-        </TouchableOpacity>
-      </View>
-      <ImageBackground
-        style={[styles.backgroundImage, { opacity: isHappy ? 1 : 0.3 }]}
-        src={audioInfo.cover}
-      />
+    <ThemedNavigation
+      statusBar={true}
+      isImage={true}
+      style={styles.viewContainer}
+      onBack={closeModal}
+      isHappy={isHappy}
+      leftIcon="keyboard-arrow-down"
+      onRight={() => setIsHappy(!isHappy)}
+    >
       <FlatList
         data={items}
         style={{
@@ -165,39 +143,13 @@ const ListPlayer = ({ closeModal }: ListPlayerProps) => {
           },
         })}
       />
-    </ThemedView>
+    </ThemedNavigation>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  viewContainer: {
     flex: 1,
-  },
-  headerContainer: {
-    width: "100%",
-    paddingTop: Constants.statusBarHeight,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    position: "relative",
-    zIndex: 1,
-  },
-  backgroundImage: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    flex: 1,
-    flexDirection: "row",
-    width: "100%",
-    height: "100%",
-  },
-  right: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
   },
 });
 

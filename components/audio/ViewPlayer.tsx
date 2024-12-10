@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import Constants from "expo-constants";
 import { IconSymbol } from "@/components/ui";
 import { ThemedText } from "@/components/theme/ThemedText";
 import { emitter } from "@/utils/mitt";
@@ -9,13 +8,12 @@ import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
 import { useAppDispatch } from "@/hooks/useStore";
 import { formatMilliseconds, formatPath } from "@/utils/lib";
-import { ThemedView } from "../theme/ThemedView";
 import { GetCover } from "@/api/api";
+import { ThemedNavigation } from "../theme/ThemedNavigation";
 import {
   ActivityIndicator,
   Animated,
   Easing,
-  ImageBackground,
   Platform,
   StyleSheet,
   TouchableOpacity,
@@ -108,7 +106,7 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
     try {
       const path = formatPath(audioInfo.parent || "/", audioInfo.name);
       setLoading(true);
-      const data = await GetCover({ type: "json" });
+      const data = await GetCover({ type: "json", mode: "3,5,8" });
       if (data.url) {
         const uri = __DEV__ ? data.url : data.url.replace(/http:/g, "https:");
         handleCoverItems({ key: path, value: uri });
@@ -176,8 +174,26 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
   const opacityStyle = { opacity: animatedOpacity };
 
   return (
-    <ThemedView style={styles.viewContainer}>
-      <View style={styles.headerContainer}>
+    <ThemedNavigation
+      statusBar={true}
+      isImage={true}
+      style={styles.viewContainer}
+      onBack={closeModal}
+      isHappy={isHappy}
+      leftIcon="keyboard-arrow-down"
+      onRight={() => setIsHappy(!isHappy)}
+      rightText={
+        <TouchableOpacity
+          onPress={() => setIsHappy(!isHappy)}
+          style={styles.rightText}
+        >
+          <ThemedText style={{ fontWeight: "bold" }}>
+            {isHappy ? "退出愉悦心情" : "愉悦心情"}
+          </ThemedText>
+        </TouchableOpacity>
+      }
+    >
+      {/* <View style={styles.headerContainer}>
         <TouchableOpacity onPress={closeModal}>
           <IconSymbol
             color={theme.text}
@@ -190,11 +206,11 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
             {isHappy ? "退出愉悦心情" : "愉悦心情"}
           </ThemedText>
         </TouchableOpacity>
-      </View>
-      <ImageBackground
+      </View> */}
+      {/* <ImageBackground
         style={[styles.backgroundImage, { opacity: isHappy ? 1 : 0.1 }]}
         src={audioInfo.cover}
-      />
+      /> */}
       <TouchableOpacity onPress={onCoverRefresh} style={styles.animatedImage}>
         {loading ? (
           <ActivityIndicator
@@ -255,7 +271,7 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
           </TouchableOpacity>
         </View>
       </Animated.View>
-    </ThemedView>
+    </ThemedNavigation>
   );
 };
 
@@ -265,16 +281,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-  },
-  headerContainer: {
-    width: "100%",
-    paddingTop: Constants.statusBarHeight,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
     position: "relative",
-    zIndex: 1,
+  },
+  rightText: {
+    marginRight: 10,
   },
   infoTitle: {
     fontSize: 20,
@@ -316,17 +326,6 @@ const styles = StyleSheet.create({
     elevation: 2, // Android上的阴影效果
     overflow: "hidden",
     position: "absolute",
-  },
-  backgroundImage: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    flex: 1,
-    flexDirection: "row",
-    width: "100%",
-    height: "100%",
   },
   toolbar: {
     flexDirection: "row",

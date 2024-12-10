@@ -47,7 +47,11 @@ export default function RootLayout() {
           <Stack.Screen name="+not-found" />
           <Stack.Screen name="views/search" options={{ headerShown: false }} />
           <Stack.Screen name="views/viewer" options={{ headerShown: false }} />
-          <Stack.Screen name="views/about" />
+          <Stack.Screen name="views/about" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="views/settings"
+            options={{ headerShown: false }}
+          />
         </Stack>
         <StatusBar style="auto" />
       </ThemeProvider>

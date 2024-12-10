@@ -2,6 +2,7 @@ import { Modal, Pressable, StyleSheet, type TextProps } from "react-native";
 import { ThemedView } from "./ThemedView";
 import { ThemedText } from "./ThemedText";
 import { DefaultTheme } from "@/constants/Colors";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 export type ThemedModalProps = TextProps & {
   modalVisible: boolean;
@@ -12,6 +13,7 @@ export default function ThemedModal({
   modalVisible,
   closeModal,
 }: ThemedModalProps) {
+  const { theme } = useThemeColor();
   return (
     <Modal
       animationType="slide"
@@ -24,7 +26,7 @@ export default function ThemedModal({
         <ThemedView style={styles.modalView}>
           <ThemedText style={styles.modalText}>Hello World!</ThemedText>
           <Pressable
-            style={[styles.button, styles.buttonClose]}
+            style={[styles.button, { backgroundColor: theme.primary }]}
             onPress={() => closeModal()}
           >
             <ThemedText style={styles.textStyle}>Hide Modal</ThemedText>
@@ -75,12 +77,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 10,
     elevation: 2,
-  },
-  buttonOpen: {
-    backgroundColor: "#F194FF",
-  },
-  buttonClose: {
-    backgroundColor: DefaultTheme.colors.primary,
   },
   textStyle: {
     color: "white",
