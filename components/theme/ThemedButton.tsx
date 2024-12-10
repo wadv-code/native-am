@@ -1,6 +1,6 @@
-import { Button, type ButtonProps, type TextProps } from "react-native";
+import { Button, type ButtonProps } from "react-native";
 
-import { useTheme } from "@/hooks/useThemeColor";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 export type ThemedButtonProps = ButtonProps & {
   title: string;
@@ -16,33 +16,7 @@ export function ThemedButton({
   type = "default",
   ...rest
 }: ThemedButtonProps) {
-  const theme = useTheme();
+  const { theme } = useThemeColor();
 
   return <Button title={title} color={theme.primary} {...rest} />;
 }
-
-// const styles = StyleSheet.create({
-//   default: {
-//     fontSize: 16,
-//     lineHeight: 24,
-//   },
-//   defaultSemiBold: {
-//     fontSize: 16,
-//     lineHeight: 24,
-//     fontWeight: "600",
-//   },
-//   title: {
-//     fontSize: 32,
-//     fontWeight: "bold",
-//     lineHeight: 32,
-//   },
-//   subtitle: {
-//     fontSize: 20,
-//     fontWeight: "bold",
-//   },
-//   link: {
-//     lineHeight: 30,
-//     fontSize: 16,
-//     color: "#0a7ea4",
-//   },
-// });

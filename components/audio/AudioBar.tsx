@@ -1,6 +1,6 @@
 import { ThemedText } from "../theme/ThemedText";
 import { ThemedView } from "../theme/ThemedView";
-import { useTheme } from "@/hooks/useThemeColor";
+import { useThemeColor } from "@/hooks/useThemeColor";
 import { IconSymbol } from "../ui";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "@/store";
@@ -24,7 +24,7 @@ type AudioBarProps = {
 };
 
 const AudioBar = ({ onPress }: AudioBarProps) => {
-  const theme = useTheme();
+  const { theme } = useThemeColor();
   const dispatch = useDispatch();
   const audioState = useSelector((state: RootState) => state.audio);
   const { audioInfo, loading, playing, durationFormat, currentFormat } =
@@ -44,7 +44,7 @@ const AudioBar = ({ onPress }: AudioBarProps) => {
             bottom: 90,
           },
           default: {
-            bottom: 55,
+            bottom: 58,
           },
         }),
       ]}
@@ -64,7 +64,7 @@ const AudioBar = ({ onPress }: AudioBarProps) => {
         {loading ? (
           <ActivityIndicator
             size={30}
-            color="white"
+            color={theme.primary}
             style={[styles.imageStyle]}
           />
         ) : (

@@ -8,7 +8,7 @@ import { ThemedText } from "@/components/theme/ThemedText";
 import { useRouter } from "expo-router";
 import type { OptionType } from "@/components/audio/MusicPlayer";
 import { GetCover } from "@/api/api";
-import { useTheme } from "@/hooks/useThemeColor";
+import { useThemeColor } from "@/hooks/useThemeColor";
 import { ThemedView } from "@/components/theme/ThemedView";
 import {
   ActivityIndicator,
@@ -22,7 +22,7 @@ import {
 
 const ImageScreen = () => {
   const mode = useColorScheme();
-  const theme = useTheme();
+  const { theme } = useThemeColor();
   const [index, setIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState<OptionType[]>([]);

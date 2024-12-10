@@ -2,10 +2,9 @@ import React, { useState } from "react";
 import { Tabs } from "expo-router";
 import { Platform } from "react-native";
 import { AudioBar } from "@/components/audio";
-import { useTheme } from "@/hooks/useThemeColor";
+import { useThemeColor } from "@/hooks/useThemeColor";
 import { HapticTab } from "@/components/HapticTab";
 import { useColorScheme } from "@/hooks/useColorScheme";
-import { HeaderBar } from "@/components/sys";
 import { MusicPlayer } from "@/components/audio/MusicPlayer";
 import { IconSymbol } from "@/components/ui";
 import TabBarBackground from "@/components/ui/TabBarBackground";
@@ -16,7 +15,7 @@ import {
 
 export default function TabLayout() {
   const mode = useColorScheme();
-  const theme = useTheme();
+  const { theme } = useThemeColor();
   const [visible, setVisible] = useState(false);
   const [modalType, setModalType] = useState<ModalPlayerType>("view");
 
@@ -33,7 +32,7 @@ export default function TabLayout() {
   return (
     <>
       <Tabs
-        initialRouteName="mine"
+        initialRouteName="index"
         screenOptions={{
           tabBarActiveBackgroundColor: theme.backgroundPrimary,
           tabBarInactiveBackgroundColor: theme.background,
@@ -47,7 +46,9 @@ export default function TabLayout() {
               // Use a transparent background on iOS to show the blur effect
               position: "absolute",
             },
-            default: {},
+            default: {
+              borderColor: theme.border,
+            },
           }),
         }}
       >

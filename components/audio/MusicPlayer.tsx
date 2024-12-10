@@ -139,6 +139,7 @@ const MusicPlayer = (props: MusicPlayerProps) => {
   }, [audioInfo.raw_url]);
 
   const onAudioChange = (audio: GetItemsResItem) => {
+    dispatch(setLoading(true));
     dispatch(setAudioInfoAsync(audio));
   };
 

@@ -1,7 +1,7 @@
 import { Modal, Pressable, StyleSheet, type TextProps } from "react-native";
 import { ThemedView } from "./ThemedView";
 import { ThemedText } from "./ThemedText";
-import { Colors } from "@/constants/Colors";
+import { DefaultTheme } from "@/constants/Colors";
 
 export type ThemedModalProps = TextProps & {
   modalVisible: boolean;
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F194FF",
   },
   buttonClose: {
-    backgroundColor: Colors.light.primary,
+    backgroundColor: DefaultTheme.colors.primary,
   },
   textStyle: {
     color: "white",

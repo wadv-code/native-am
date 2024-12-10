@@ -1,7 +1,7 @@
 import type { GetItemsResItem } from "@/api";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { getIconSymbol } from "@/utils/lib";
-import { useTheme } from "@/hooks/useThemeColor";
+import { useThemeColor } from "@/hooks/useThemeColor";
 import { ThemedText } from "../theme/ThemedText";
 import { IconSymbol } from "../ui";
 import React from "react";
@@ -17,7 +17,7 @@ const SearchItem = React.memo(
   (option: SearchItemProps) => {
     const { item, onPress } = option;
     const { id, name, is_dir, parent, sizeFormat } = item;
-    const theme = useTheme();
+    const { theme } = useThemeColor();
 
     return (
       <TouchableOpacity

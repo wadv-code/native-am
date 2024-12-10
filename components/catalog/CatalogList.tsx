@@ -1,7 +1,7 @@
 import { IndexItem } from "@/components/index/IndexItem";
 import type { GetItemsResItem } from "@/api";
 import type { ThemedViewProps } from "@/components/theme/ThemedView";
-import { useTheme } from "@/hooks/useThemeColor";
+import { useThemeColor } from "@/hooks/useThemeColor";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -23,7 +23,6 @@ type CatalogListProps = ThemedViewProps & {
   handleItem?: (item: GetItemsResItem) => void;
 };
 
-const ITEM_HEIGHT = 50;
 const state: Recordable<number> = {};
 
 const CatalogList = (props: CatalogListProps) => {
@@ -32,7 +31,7 @@ const CatalogList = (props: CatalogListProps) => {
   const [refreshing, setRefreshing] = useState(loading);
   const scrollYRef = useRef(0);
   const { onRefresh, handleItem } = props;
-  const theme = useTheme();
+  const { theme } = useThemeColor();
 
   const click = (item: GetItemsResItem) => {
     state[path] = scrollYRef.current || 0;
@@ -53,7 +52,7 @@ const CatalogList = (props: CatalogListProps) => {
   };
 
   const renderItem: ListRenderItem<GetItemsResItem> = ({ item }) => {
-    return <IndexItem item={item} height={ITEM_HEIGHT} onPress={click} />;
+    return <IndexItem item={item} onPress={click} />;
   };
 
   const getItem = (_data: unknown, index: number) => {

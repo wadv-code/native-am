@@ -1,14 +1,13 @@
 import type { GetItemsResItem } from "@/api";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { getIconSymbol } from "@/utils/lib";
-import { useTheme } from "@/hooks/useThemeColor";
+import { useThemeColor } from "@/hooks/useThemeColor";
 import { ThemedText } from "../theme/ThemedText";
 import { IconSymbol } from "../ui";
 import React from "react";
 
 type ItemProps = {
   item: GetItemsResItem;
-  height?: number;
   onPress: (option: GetItemsResItem) => void;
 };
 
@@ -16,11 +15,11 @@ export type IndexItemProps = ItemProps;
 
 const IndexItem = React.memo(
   (option: IndexItemProps) => {
-    const { item, height = 50, onPress } = option;
+    const { item, onPress } = option;
     const { id, name, is_dir, sizeFormat, modifiedFormat } = item;
-    const theme = useTheme();
+    const { theme } = useThemeColor();
     return (
-      <View key={id} style={[styles.itemContainer, { height }]}>
+      <View key={id} style={styles.itemContainer}>
         <TouchableOpacity
           style={styles.leftContainer}
           onPress={() => onPress && onPress(item)}
@@ -45,7 +44,7 @@ const IndexItem = React.memo(
         <TouchableOpacity style={styles.rightContainer}>
           <ThemedText style={styles.timeStyle}>{modifiedFormat}</ThemedText>
           <IconSymbol
-            size={20}
+            size={24}
             name={is_dir ? "keyboard-arrow-right" : "more-vert"}
           />
         </TouchableOpacity>
@@ -63,6 +62,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    paddingVertical: 7,
   },
   leftContainer: {
     flex: 1,
@@ -84,7 +84,6 @@ const styles = StyleSheet.create({
   },
   timeStyle: {
     fontSize: 12,
-    marginRight: 5,
   },
   leftSymbol: {
     marginRight: 5,

@@ -4,7 +4,7 @@ import { IconSymbol } from "@/components/ui";
 import { ThemedText } from "@/components/theme/ThemedText";
 import { emitter } from "@/utils/mitt";
 import Slider from "@react-native-community/slider";
-import { useTheme } from "@/hooks/useThemeColor";
+import { useThemeColor } from "@/hooks/useThemeColor";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
 import { useAppDispatch } from "@/hooks/useStore";
@@ -32,7 +32,7 @@ type ViewPlayerProps = {
 };
 
 const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
-  const theme = useTheme();
+  const { theme } = useThemeColor();
   const [loading, setLoading] = useState(false);
   const [isHappy, setIsHappy] = useState(false);
   const [value, setValue] = useState(0);

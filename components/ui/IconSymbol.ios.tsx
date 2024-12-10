@@ -1,4 +1,4 @@
-import { useTheme } from "@/hooks/useThemeColor";
+import { useThemeColor } from "@/hooks/useThemeColor";
 import type { MaterialIconsName } from "@/types";
 import { SymbolView, SymbolWeight } from "expo-symbols";
 import { StyleProp, ViewStyle } from "react-native";
@@ -45,7 +45,7 @@ export function IconSymbol({
   style?: StyleProp<ViewStyle>;
   weight?: SymbolWeight;
 }) {
-  const theme = useTheme();
+  const theme = useThemeColor();
   return (
     <SymbolView
       weight={weight}

@@ -26,7 +26,7 @@ import {
 } from "@/utils/lib";
 import { emitter } from "@/utils/mitt";
 import { IndexItem } from "../index/IndexItem";
-import { useTheme } from "@/hooks/useThemeColor";
+import { useThemeColor } from "@/hooks/useThemeColor";
 import { storageManager } from "@/storage";
 import { useRouter } from "expo-router";
 
@@ -35,7 +35,7 @@ type ListPlayerProps = TextProps & {
 };
 
 const ListPlayer = ({ closeModal }: ListPlayerProps) => {
-  const theme = useTheme();
+  const { theme } = useThemeColor();
   const router = useRouter();
   const [isHappy, setIsHappy] = useState(false);
   const [refreshing, setRefreshing] = useState<boolean>(false);

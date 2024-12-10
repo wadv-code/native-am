@@ -1,7 +1,7 @@
 import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { IconSymbol } from "../ui";
 import { ThemedText } from "../theme/ThemedText";
-import { useTheme } from "@/hooks/useThemeColor";
+import { useThemeColor } from "@/hooks/useThemeColor";
 import { useEffect, useRef, useState } from "react";
 import { HeaderBar } from "./HeaderBar";
 
@@ -11,7 +11,7 @@ type HeaderSearchBarProps = {
 };
 
 const HeaderSearchBar = ({ keywords, onSeatch }: HeaderSearchBarProps) => {
-  const theme = useTheme();
+  const { theme } = useThemeColor();
   const inputRef = useRef<TextInput>(null);
   const [search, setSearch] = useState("");
   const handleSearch = (query: string) => {

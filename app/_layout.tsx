@@ -3,30 +3,19 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import "react-native-reanimated";
-import { useColorScheme } from "@/hooks/useColorScheme";
-import { Appearance, SafeAreaView } from "react-native";
-import { useTheme } from "@/hooks/useThemeColor";
+import { Appearance } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { storageManager } from "@/storage";
 import { Provider } from "react-redux";
 import { store } from "@/store";
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-} from "@react-navigation/native";
-
-// // player
-// import setApp from "@/player/services";
-// setApp();
+import { ThemeProvider } from "@/components/theme/ThemeContext";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const { setColorScheme } = Appearance;
-  const mode = useColorScheme();
-  const theme = useTheme();
+  // const theme = useContext(ThemeContext);
 
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
@@ -52,24 +41,16 @@ export default function RootLayout() {
 
   return (
     <Provider store={store}>
-      <SafeAreaView style={{ backgroundColor: theme.background, flex: 1 }}>
-        <ThemeProvider value={mode === "dark" ? DarkTheme : DefaultTheme}>
-          <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="+not-found" />
-            <Stack.Screen
-              name="views/search"
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="views/viewer"
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen name="views/about" />
-          </Stack>
-          <StatusBar style="auto" />
-        </ThemeProvider>
-      </SafeAreaView>
+      <ThemeProvider>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="+not-found" />
+          <Stack.Screen name="views/search" options={{ headerShown: false }} />
+          <Stack.Screen name="views/viewer" options={{ headerShown: false }} />
+          <Stack.Screen name="views/about" />
+        </Stack>
+        <StatusBar style="auto" />
+      </ThemeProvider>
     </Provider>
   );
 }

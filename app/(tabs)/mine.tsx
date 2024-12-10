@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   Alert,
   Appearance,
   ImageBackground,
@@ -13,27 +14,54 @@ import Constants from "expo-constants";
 import { ThemedText } from "@/components/theme/ThemedText";
 import { ThemedView } from "@/components/theme/ThemedView";
 import { useBottomTabOverflow } from "@/components/ui/TabBarBackground";
-import { useTheme } from "@/hooks/useThemeColor";
+import { useThemeColor } from "@/hooks/useThemeColor";
 import { IconSymbol } from "@/components/ui";
 import type { RootState } from "@/store";
 import { useSelector } from "react-redux";
 import ThemeImage from "@/components/theme/ThemeImage";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { storageManager } from "@/storage";
 import ThemedModal from "@/components/theme/ThemedModal";
 import { useRouter } from "expo-router";
+import { formatPath } from "@/utils/lib";
+import { useAppDispatch } from "@/hooks/useStore";
+import {
+  handleCoverItems,
+  setAudioInfo,
+  setLoading,
+} from "@/store/slices/audioSlice";
+import { GetCover } from "@/api/api";
 
 export default function MineScreen() {
-  const theme = useTheme();
+  const { theme, setThemeColor } = useThemeColor();
   const mode = useColorScheme();
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const [isDark, setIsDark] = useState(mode === "dark");
+  const [colors, setColors] = useState<string[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const bottom = useBottomTabOverflow();
   const audio = useSelector((state: RootState) => state.audio);
-  const { audioInfo } = audio;
+  const { loading, audioInfo } = audio;
   const { setColorScheme } = Appearance;
+
+  const onCoverRefresh = async () => {
+    try {
+      const path = formatPath(audioInfo.parent || "/", audioInfo.name);
+      dispatch(setLoading(true));
+      const data = await GetCover({ type: "json" });
+      if (data.url) {
+        const uri = __DEV__ ? data.url : data.url.replace(/http:/g, "https:");
+        handleCoverItems({ key: path, value: uri });
+        dispatch(setAudioInfo({ ...audioInfo, cover: uri }));
+      }
+    } catch {
+      console.log("图片加载失败");
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
 
   const clearStorage = () => {
     Alert.alert(
@@ -69,10 +97,46 @@ export default function MineScreen() {
 
   const setMode = () => {
     const colorScheme = mode === "dark" ? "light" : "dark";
-    setIsDark(!isDark);
     setColorScheme(colorScheme);
+    setIsDark(!isDark);
     storageManager.set("color_scheme", colorScheme);
   };
+
+  const takeColors = () => {
+    if (!theme) return;
+    const keys = [
+      "danger",
+      "success",
+      "warning",
+      "pink",
+      "purple",
+      "deepPurple",
+      "indigo",
+      "blue",
+      "lightBlue",
+      "cyan",
+      "teal",
+      "lightGreen",
+      "lime",
+      "yellow",
+      "amber",
+      "deepOrange",
+      "brown",
+      "blueGrey",
+      "grey",
+    ];
+    const list: string[] = [];
+
+    keys.forEach((key) => {
+      // @ts-ignore
+      const color: string = theme[key];
+      if (color) list.push(color);
+    });
+
+    setColors(list);
+  };
+
+  useEffect(takeColors, [theme]);
   return (
     <ThemedView style={styles.container}>
       <ImageBackground
@@ -101,11 +165,21 @@ export default function MineScreen() {
           </View>
           <View style={styles.headerContent}>
             <View style={styles.row}>
-              <ThemeImage
-                src={audioInfo.cover}
-                style={styles.reactLogo}
-                resizeMode="cover"
-              />
+              <TouchableOpacity onPress={onCoverRefresh}>
+                {loading ? (
+                  <ActivityIndicator
+                    size={30}
+                    color={theme.primary}
+                    style={styles.reactLogo}
+                  />
+                ) : (
+                  <ThemeImage
+                    src={audioInfo.cover}
+                    style={styles.reactLogo}
+                    resizeMode="cover"
+                  />
+                )}
+              </TouchableOpacity>
               <View style={{ flexGrow: 1 }}>
                 <ThemedText style={styles.userText}>没在听</ThemedText>
                 <ThemedText style={styles.userTips}>层楼终究误少年</ThemedText>
@@ -135,7 +209,7 @@ export default function MineScreen() {
             </TouchableOpacity>
           </View>
         </View>
-        <ThemedView style={styles.grid}>
+        {/* <ThemedView style={styles.grid}>
           <ThemedText type="subtitle" style={{ paddingHorizontal: 10 }}>
             我的功能
           </ThemedText>
@@ -160,8 +234,12 @@ export default function MineScreen() {
               <ThemedText>{isDark ? "深色模式" : "浅色模式"}</ThemedText>
             </TouchableOpacity>
           </View>
-        </ThemedView>
-        <ThemedView style={styles.grid}>
+        </ThemedView> */}
+        <ThemedView
+          darkColor="rgba(0,0,0,0.5)"
+          lightColor="rgba(255,255,255,0.5)"
+          style={styles.grid}
+        >
           <ThemedText type="subtitle" style={{ paddingHorizontal: 10 }}>
             常用功能
           </ThemedText>
@@ -174,10 +252,42 @@ export default function MineScreen() {
             </View>
             <Switch
               thumbColor={theme.text}
-              ios_backgroundColor="#3e3e3e"
+              ios_backgroundColor={theme.primary}
               onValueChange={setMode}
               value={isDark}
             />
+          </View>
+          <View style={styles.cellStyle}>
+            <View style={[styles.row, { gap: 10 }]}>
+              <IconSymbol name="delete-sweep" />
+              <ThemedText style={styles.cellTitle}>主题设置</ThemedText>
+            </View>
+            <View style={{ width: "60%" }}>
+              <Animated.ScrollView
+                scrollEventThrottle={16}
+                style={{ height: 40 }}
+                horizontal={true}
+                contentContainerStyle={[styles.row, { gap: 5 }]}
+              >
+                {colors.map((v, idx) => {
+                  return (
+                    <TouchableOpacity
+                      key={idx}
+                      style={[
+                        styles.color,
+                        {
+                          backgroundColor: v,
+                          borderColor:
+                            v === theme.primary ? theme.text : "transparent",
+                        },
+                      ]}
+                      onPress={() => setThemeColor({ primary: v })}
+                    />
+                  );
+                })}
+              </Animated.ScrollView>
+            </View>
+            {/* <IconSymbol name="chevron-right" /> */}
           </View>
           <TouchableOpacity style={styles.cellStyle} onPress={clearStorage}>
             <View style={[styles.row, { gap: 10 }]}>
@@ -228,10 +338,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-around",
   },
+  color: {
+    height: 24,
+    width: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+  },
   reactLogo: {
     height: 70,
     width: 70,
-    borderRadius: 10,
+    borderRadius: 5,
     marginRight: 10,
   },
   header: {
