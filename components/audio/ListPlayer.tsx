@@ -117,7 +117,7 @@ const ListPlayer = ({ closeModal }: ListPlayerProps) => {
       statusBar={true}
       isImage={true}
       style={styles.viewContainer}
-      onBack={closeModal}
+      onLeft={closeModal}
       isHappy={isHappy}
       leftIcon="keyboard-arrow-down"
       onRight={() => setIsHappy(!isHappy)}

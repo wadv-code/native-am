@@ -35,8 +35,8 @@ type ThemedNavigationProps = PropsWithChildren<
     isHappy?: boolean;
     isImage?: boolean;
     src?: string;
-    onBack?: () => void;
-    onRight?: () => void;
+    onLeft?: () => void | boolean;
+    onRight?: () => void | boolean;
   }
 >;
 
@@ -55,7 +55,7 @@ const ThemedNavigation = (props: ThemedNavigationProps) => {
     src,
     iconSize,
   } = props;
-  const { onBack, onRight } = props;
+  const { onLeft, onRight } = props;
   const { theme } = useThemeColor();
   const router = useRouter();
   const audio = useSelector((state: RootState) => state.audio);
@@ -63,24 +63,36 @@ const ThemedNavigation = (props: ThemedNavigationProps) => {
   const [currentSrc, setCurrentSrc] = useState<string | undefined>(src);
 
   const onCanBack = () => {
-    if (onBack) {
-      onBack();
+    if (onLeft) {
+      const refresh = onLeft();
+      if (refresh) handleCurrentSrc();
     } else {
       const canGoBack = router.canGoBack();
       if (canGoBack) router.back();
     }
   };
 
-  useEffect(() => {
-    if (!currentSrc) {
-      (async () => {
-        const { coverItems } = await getStorageAsync();
-        if (coverItems.length) {
-          const option = coverItems[randomNum(coverItems.length - 1)];
-          if (option) setCurrentSrc(option.value);
-        }
-      })();
+  const onCanRight = () => {
+    if (onRight) {
+      const refresh = onRight();
+      if (refresh) handleCurrentSrc();
+    } else {
+      handleCurrentSrc();
     }
+  };
+
+  const handleCurrentSrc = async () => {
+    const { coverItems } = await getStorageAsync();
+    if (coverItems.length) {
+      const option = coverItems[randomNum(coverItems.length - 1)];
+      if (option) setCurrentSrc(option.value);
+    } else {
+      setCurrentSrc(audioInfo.cover);
+    }
+  };
+
+  useEffect(() => {
+    if (!currentSrc) handleCurrentSrc();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -117,7 +129,7 @@ const ThemedNavigation = (props: ThemedNavigationProps) => {
                 globalStyles.justifyCenter,
                 styles.action,
               ]}
-              onPress={onRight}
+              onPress={onCanRight}
             >
               <IconSymbol
                 color={theme.text}

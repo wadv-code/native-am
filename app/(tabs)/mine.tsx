@@ -100,8 +100,9 @@ export default function MineScreen() {
     storageManager.set("color_scheme", colorScheme);
   };
 
-  const onBack = () => {
-    console.log("onBack");
+  const onLeft = () => {
+    console.log("onLeft");
+    return true;
   };
 
   return (
@@ -115,7 +116,7 @@ export default function MineScreen() {
           <IconSymbol name="settings" style={{ color: theme.text }} />
         </TouchableOpacity>
       }
-      onBack={onBack}
+      onLeft={onLeft}
     >
       <Animated.ScrollView
         ref={scrollRef}
