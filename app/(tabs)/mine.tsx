@@ -1,20 +1,18 @@
 import Animated, { useAnimatedRef } from "react-native-reanimated";
 import { ThemedText } from "@/components/theme/ThemedText";
-import { ThemedView } from "@/components/theme/ThemedView";
 import { useBottomTabOverflow } from "@/components/ui/TabBarBackground";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { IconSymbol } from "@/components/ui";
 import type { RootState } from "@/store";
 import { useSelector } from "react-redux";
 import ThemeImage from "@/components/theme/ThemeImage";
-import { useState } from "react";
-import { storageManager } from "@/storage";
-import ThemedModal from "@/components/theme/ThemedModal";
 import { useRouter } from "expo-router";
 import { formatPath } from "@/utils/lib";
 import { useAppDispatch } from "@/hooks/useStore";
 import { GetCover } from "@/api/api";
 import { globalStyles } from "@/styles";
+import { ThemedNavigation } from "@/components/theme/ThemedNavigation";
+import MineGrid from "@/components/mine/MineGrid";
 import {
   handleCoverItems,
   setAudioInfo,
@@ -22,27 +20,19 @@ import {
 } from "@/store/slices/audioSlice";
 import {
   ActivityIndicator,
-  Alert,
-  Appearance,
   StyleSheet,
   TouchableOpacity,
-  useColorScheme,
   View,
 } from "react-native";
-import { ThemedNavigation } from "@/components/theme/ThemedNavigation";
+import { gridItems } from "@/components/mine/util";
 
 export default function MineScreen() {
   const { theme } = useThemeColor();
-  const mode = useColorScheme();
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const [isDark, setIsDark] = useState(mode === "dark");
-  const [modalVisible, setModalVisible] = useState(false);
-  const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const bottom = useBottomTabOverflow();
   const audio = useSelector((state: RootState) => state.audio);
   const { loading, audioInfo } = audio;
-  const { setColorScheme } = Appearance;
 
   const onCoverRefresh = async () => {
     try {
@@ -61,43 +51,8 @@ export default function MineScreen() {
     }
   };
 
-  const clearStorage = () => {
-    Alert.alert(
-      "Confirmation",
-      "Are you sure you want to proceed?",
-      [
-        {
-          text: "Cancel",
-          onPress: () => console.log("Cancel Pressed"),
-          style: "cancel",
-        },
-        { text: "OK", onPress: () => storageManager.clear() },
-      ],
-      { cancelable: false }
-    );
-  };
-
-  const closeModal = () => {
-    setModalVisible(false);
-  };
-
-  const openModal = () => {
-    setModalVisible(true);
-  };
-
   const openSettings = () => {
     router.navigate("/views/settings");
-  };
-
-  const openViewer = () => {
-    router.navigate("/views/viewer");
-  };
-
-  const setMode = () => {
-    const colorScheme = mode === "dark" ? "light" : "dark";
-    setColorScheme(colorScheme);
-    setIsDark(!isDark);
-    storageManager.set("color_scheme", colorScheme);
   };
 
   const onLeft = () => {
@@ -119,24 +74,11 @@ export default function MineScreen() {
       onLeft={onLeft}
     >
       <Animated.ScrollView
-        ref={scrollRef}
         scrollEventThrottle={16}
         scrollIndicatorInsets={{ bottom }}
         contentContainerStyle={{ paddingBottom: bottom }}
       >
         <View style={styles.header}>
-          {/* <View style={styles.headerBar}></View>
-          <View style={styles.headerTool}>
-            <TouchableOpacity>
-              <IconSymbol
-                name="qr-code-scanner"
-                style={{ color: theme.text }}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={openSettings}>
-              <IconSymbol name="settings" style={{ color: theme.text }} />
-            </TouchableOpacity>
-          </View> */}
           <View style={styles.headerContent}>
             <View style={globalStyles.row}>
               <TouchableOpacity onPress={onCoverRefresh}>
@@ -183,44 +125,8 @@ export default function MineScreen() {
             </TouchableOpacity>
           </View>
         </View>
-        <ThemedView
-          darkColor="rgba(0,0,0,0.5)"
-          lightColor="rgba(255,255,255,0.5)"
-          style={styles.grid}
-        >
-          <ThemedText type="subtitle" style={{ paddingHorizontal: 10 }}>
-            我的功能
-          </ThemedText>
-          <View style={styles.gridContent}>
-            <TouchableOpacity style={styles.gridItem} onPress={setMode}>
-              <IconSymbol
-                name={isDark ? "dark-mode" : "light-mode"}
-                size={35}
-              />
-              <ThemedText bold="bold">
-                {isDark ? "深色模式" : "浅色模式"}
-              </ThemedText>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.gridItem} onPress={clearStorage}>
-              <IconSymbol name="delete-sweep" size={35} />
-              <ThemedText bold="bold">清除缓存</ThemedText>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.gridItem} onPress={openViewer}>
-              <IconSymbol name="photo-library" size={35} />
-              <ThemedText bold="bold">愉悦心情</ThemedText>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.gridItem} onPress={openSettings}>
-              <IconSymbol name="settings" size={35} />
-              <ThemedText bold="bold">应用设置</ThemedText>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.gridItem} onPress={openModal}>
-              <IconSymbol name="table-view" size={35} />
-              <ThemedText bold="bold">测试弹窗</ThemedText>
-            </TouchableOpacity>
-          </View>
-        </ThemedView>
+        <MineGrid items={gridItems} title="我的功能" />
       </Animated.ScrollView>
-      <ThemedModal modalVisible={modalVisible} closeModal={closeModal} />
     </ThemedNavigation>
   );
 }
@@ -229,11 +135,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     position: "relative",
-  },
-  rowAround: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-around",
   },
   reactLogo: {
     height: 70,
@@ -280,26 +181,6 @@ const styles = StyleSheet.create({
   },
   userTips: {
     marginTop: 5,
-  },
-  grid: {
-    flex: 1,
-    marginHorizontal: "2%",
-    marginTop: 10,
-    padding: 10,
-    borderRadius: 10,
-  },
-  gridContent: {
-    flexGrow: 1,
-    display: "flex",
-    flexWrap: "wrap",
-    flexDirection: "row",
-    marginBottom: 5,
-  },
-  gridItem: {
-    width: "25%",
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 10,
   },
   rightText: {
     marginRight: 10,

@@ -5,6 +5,16 @@ export const globalStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
+  rowBetween: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  rowAround: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-around",
+  },
   column: {
     flexDirection: "column",
     alignItems: "center",

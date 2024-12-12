@@ -50,7 +50,7 @@ const ThemedNavigation = (props: ThemedNavigationProps) => {
     isImage,
     leftIcon = "chevron-left",
     rightIcon = "cake",
-    opacity = 0.5,
+    opacity = 0.3,
     rightText,
     src,
     iconSize,

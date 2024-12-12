@@ -52,6 +52,10 @@ export default function RootLayout() {
             name="views/settings"
             options={{ headerShown: false }}
           />
+          <Stack.Screen
+            name="views/image-server"
+            options={{ headerShown: false }}
+          />
         </Stack>
         <StatusBar style="auto" />
       </ThemeProvider>

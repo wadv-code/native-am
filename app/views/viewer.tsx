@@ -131,7 +131,7 @@ const ImageScreen = () => {
           />
         </TouchableOpacity>
         <TouchableOpacity style={globalStyles.row} onPress={handleDelete}>
-          <IconSymbol name="delete" />
+          <IconSymbol name="delete-outline" />
           {/* <ThemedText style={{ fontWeight: "bold" }}>💗</ThemedText> */}
         </TouchableOpacity>
       </View>
