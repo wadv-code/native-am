@@ -10,13 +10,13 @@ export type ThemedInputProps = TextInputProps & {
   bold?: boolean;
 };
 
-export function ThemedInput({ ...rest }: ThemedInputProps) {
+export function ThemedInput({ style, ...rest }: ThemedInputProps) {
   const { theme } = useThemeColor();
 
   return (
     <TextInput
       {...rest}
-      style={{ color: theme.text, fontSize: 18 }}
+      style={[style, { color: theme.text, fontSize: 18 }]}
       placeholderTextColor={theme.text}
     />
   );

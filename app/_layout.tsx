@@ -53,7 +53,11 @@ export default function RootLayout() {
             options={{ headerShown: false }}
           />
           <Stack.Screen
-            name="views/image-server"
+            name="views/image-server/image-server"
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="views/image-server/image-server-edit"
             options={{ headerShown: false }}
           />
         </Stack>

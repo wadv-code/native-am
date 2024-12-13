@@ -49,7 +49,7 @@ const ThemedNavigation = (props: ThemedNavigationProps) => {
     isHappy,
     isImage,
     leftIcon = "chevron-left",
-    rightIcon = "cake",
+    rightIcon = "refresh",
     opacity = 0.3,
     rightText,
     src,
@@ -121,7 +121,7 @@ const ThemedNavigation = (props: ThemedNavigationProps) => {
               name={leftIcon}
             />
           </TouchableOpacity>
-          <ThemedText type="title">{title}</ThemedText>
+          <ThemedText type="subtitle">{title}</ThemedText>
           {rightText || (
             <TouchableOpacity
               style={[

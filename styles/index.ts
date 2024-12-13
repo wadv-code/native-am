@@ -19,6 +19,10 @@ export const globalStyles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "center",
   },
+  columnBetween: {
+    flexDirection: "column",
+    alignContent: "space-between",
+  },
   justifyCenter: {
     justifyContent: "center",
   },
@@ -27,6 +31,9 @@ export const globalStyles = StyleSheet.create({
   },
   justifyBetween: {
     justifyContent: "space-between",
+  },
+  flexGrow: {
+    flexGrow: 1,
   },
   bold: {
     fontWeight: "bold",

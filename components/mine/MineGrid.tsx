@@ -79,8 +79,8 @@ const MineGrid = ({ style, items, title }: MineGridProps) => {
 
   return (
     <ThemedView
-      darkColor="rgba(0,0,0,0.5)"
-      lightColor="rgba(255,255,255,0.5)"
+      darkColor="rgba(0,0,0,0.3)"
+      lightColor="rgba(255,255,255,0.3)"
       style={[styles.grid, style]}
     >
       {title && (
