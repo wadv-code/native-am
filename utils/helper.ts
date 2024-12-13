@@ -1,7 +1,8 @@
 export const isObject = (val: unknown) =>
   val !== null && typeof val === "object";
 export const isArray = Array.isArray;
-export const isNumber = (val: number) => typeof val === "number";
+export const isNumber = (val: any) => typeof val === "number";
+export const isString = (val: any) => typeof val === "string";
 // const NO = () => false;
 // const isOn = (key) =>
 //   key.charCodeAt(0) === 111 &&
@@ -23,7 +24,6 @@ export const isNumber = (val: number) => typeof val === "number";
 // const isDate = (val) => toTypeString(val) === "[object Date]";
 // const isRegExp = (val) => toTypeString(val) === "[object RegExp]";
 // const isFunction = (val) => typeof val === "function";
-// const isString = (val) => typeof val === "string";
 // const isSymbol = (val) => typeof val === "symbol";
 // const isPromise = (val) => {
 //   return (

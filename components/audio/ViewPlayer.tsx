@@ -105,11 +105,10 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
     try {
       const path = formatPath(audioInfo.parent || "/", audioInfo.name);
       setLoading(true);
-      const data = await GetCover();
-      if (data.url) {
-        const uri = __DEV__ ? data.url : data.url.replace(/http:/g, "https:");
-        handleCoverItems({ key: path, value: uri });
-        dispatch(setAudioInfo({ ...audioInfo, cover: uri }));
+      const url = await GetCover();
+      if (url) {
+        handleCoverItems({ key: path, value: url });
+        dispatch(setAudioInfo({ ...audioInfo, cover: url }));
       }
     } catch {
       console.log("图片加载失败");

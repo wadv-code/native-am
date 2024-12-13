@@ -1,5 +1,6 @@
 import type { MaterialIconsName } from "@/types";
 import dayjs, { type ConfigType } from "dayjs";
+import { isString } from "./helper";
 
 // token
 export const TokenKey = "Authorization";
@@ -180,3 +181,35 @@ export function capitalizeFirstLetter(str?: string) {
  * @param num
  */
 export const randomNum = (num: number) => Math.floor(Math.random() * (num + 1));
+
+/**
+ * 找出所有网址
+ * @param obj
+ * @param urls
+ * @returns
+ */
+export function findAllUrls(obj: any, urls: string[] = []): string[] {
+  if (isString(obj) && isValidUrl(obj)) {
+    urls.push(obj);
+  } else if (typeof obj === "object") {
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        findAllUrls(obj[key], urls);
+      }
+    }
+  } else if (Array.isArray(obj)) {
+    obj.forEach((element) => findAllUrls(element, urls));
+  }
+  return urls;
+}
+
+/**
+ * 是否是网址
+ * @param str
+ * @returns
+ */
+export function isValidUrl(str: string): boolean {
+  const urlPattern =
+    /^([hH][tT]{2}[pP]:\/\/|[hH][tT]{2}[pP][sS]:\/\/)(([A-Za-z0-9-~]+).)+([A-Za-z0-9-~\/])+$/;
+  return urlPattern.test(str);
+}

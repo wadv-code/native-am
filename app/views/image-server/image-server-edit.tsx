@@ -9,15 +9,18 @@ import { useBottomTabOverflow } from "@/components/ui/TabBarBackground";
 import { storageManager } from "@/storage";
 import { globalStyles } from "@/styles";
 import { Button, Input, Text } from "@rneui/themed";
+import axios from "axios";
 import { router } from "expo-router";
 import { useRouteInfo } from "expo-router/build/hooks";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import Animated from "react-native-reanimated";
 
 const ImageServerEdit = () => {
   const info = useRouteInfo();
   const bottom = useBottomTabOverflow();
+  const notParsing = useRef(false);
+  const [analysis, setAnalysis] = useState("");
   const [item, setItem] = useState<ServerItem>({
     id: "",
     title: "",
@@ -78,6 +81,47 @@ const ImageServerEdit = () => {
   const onItemChange = (key: keyof ServerItem, value: string) => {
     setItem({ ...item, [key]: value });
   };
+
+  const onBlur = () => {
+    const option = new URL(analysis);
+    const origin = option.origin; // 包括协议、主机名和端口（如果有的话）
+    const pathname = option.pathname; // 路径部分
+    const fullUrlWithoutParams = `${origin}${pathname}`;
+    item.url = fullUrlWithoutParams;
+    item.title = item.title || pathname;
+    // 提取参数部分
+    const params: ServerItemParam[] = [];
+    option.searchParams.forEach((value, key) => {
+      params.push({ key, value });
+    });
+    item.params = params;
+    notParsing.current = true;
+    setItem({ ...item });
+  };
+
+  useEffect(() => {
+    if (notParsing.current) {
+      notParsing.current = false;
+      return;
+    }
+    if (item.url) {
+      const param: Recordable<string> = {};
+      if (item) {
+        item.params.forEach((v) => {
+          param[v.key] = v.value;
+        });
+      } else {
+        param.type = "json";
+        param.mode = "8";
+      }
+      const url = axios.getUri({
+        url: item ? item.url : "https://3650000.xyz/api/",
+        method: "get",
+        params: param,
+      });
+      setAnalysis(url);
+    }
+  }, [item]);
 
   useEffect(() => {
     getItem();
@@ -141,6 +185,18 @@ const ImageServerEdit = () => {
             );
           })}
         </View>
+
+        <View>
+          <Text style={{ marginLeft: 10 }}>解析网址：</Text>
+          <Input
+            value={analysis}
+            placeholder="解析网址"
+            multiline={true}
+            onChangeText={(value) => setAnalysis(value)}
+            onBlur={onBlur}
+          />
+        </View>
+
         <View style={styles.action}>
           <Button color="warning" onPress={handleAddParams}>
             添加参数

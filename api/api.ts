@@ -6,7 +6,7 @@ import type {
   GetDetailParams,
   GetSearchParams,
 } from ".";
-import { formatFileSize, formatTimeAgo } from "@/utils/lib";
+import { findAllUrls, formatFileSize, formatTimeAgo } from "@/utils/lib";
 import { getImageServerDefaultItem } from "@/components/mine/util";
 
 /**
@@ -66,17 +66,25 @@ export async function GetSearch(data: GetSearchParams) {
  * @constructor
  * @param params
  */
-export async function GetCover() {
+export async function GetCover(): Promise<string> {
   const item = await getImageServerDefaultItem();
-  const param: Recordable<string> = { type: "json", mode: "8" };
+  const param: Recordable<string> = {};
   if (item) {
     item.params.forEach((v) => {
       param[v.key] = v.value;
     });
+  } else {
+    param.type = "json";
+    param.mode = "8";
   }
-  return request<string>({
+  return request({
     url: item ? item.url : "https://3650000.xyz/api/",
     method: "get",
     params: param,
+  }).then((res) => {
+    const urls = findAllUrls(res);
+    const url = urls.length ? urls[0] : "https://3650000.xyz/api/";
+    const uri = __DEV__ ? url : url.replace(/http:/g, "https:");
+    return uri;
   });
 }

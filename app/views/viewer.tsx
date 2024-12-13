@@ -40,16 +40,15 @@ const ImageScreen = () => {
     if (loading) return;
     try {
       setLoading(true);
-      const data = await GetCover();
-      if (data.url) {
-        const uri = __DEV__ ? data.url : data.url.replace(/http:/g, "https:");
-        const option = { key: Date.now().toString(), value: uri };
+      const url = await GetCover();
+      if (url) {
+        const option = { key: Date.now().toString(), value: url };
         if (order >= 1) {
           await setImagesAsync([...images, option]);
         } else {
           await setImagesAsync([option, ...images]);
         }
-        return uri;
+        return url;
       }
     } catch {
       console.log("图片加载失败");
