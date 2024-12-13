@@ -35,15 +35,15 @@ const MineGrid = ({ style, items, title }: MineGridProps) => {
 
   const clearStorage = () => {
     Alert.alert(
-      "Confirmation",
-      "Are you sure you want to proceed?",
+      "提示",
+      "确认要清除缓存吗？",
       [
         {
-          text: "Cancel",
+          text: "取消",
           onPress: () => console.log("Cancel Pressed"),
           style: "cancel",
         },
-        { text: "OK", onPress: () => storageManager.clear() },
+        { text: "确认清除", onPress: () => storageManager.clear() },
       ],
       { cancelable: false }
     );
@@ -87,7 +87,11 @@ const MineGrid = ({ style, items, title }: MineGridProps) => {
       lightColor="rgba(255,255,255,0.3)"
       style={[styles.grid, style]}
     >
-      {title && <Text style={{ paddingHorizontal: 10 }}>{title}</Text>}
+      {title && (
+        <Text style={{ paddingHorizontal: 10, fontSize: 18, marginTop: 10 }}>
+          {title}
+        </Text>
+      )}
       <View style={styles.gridContent}>
         {items.map((item, index) => {
           return (
@@ -97,7 +101,7 @@ const MineGrid = ({ style, items, title }: MineGridProps) => {
               onPress={() => handleItem(item)}
             >
               <IconSymbol name={item.icon} size={35} />
-              <Text>{item.title}</Text>
+              <Text style={styles.text}>{item.title}</Text>
             </TouchableOpacity>
           );
         })}
@@ -127,6 +131,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginTop: 10,
+  },
+  text: {
+    marginTop: 5,
   },
 });
 

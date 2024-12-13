@@ -1,4 +1,4 @@
-import { Platform, View, type ViewProps } from "react-native";
+import { Platform, StyleSheet, View, type ViewProps } from "react-native";
 import Constants from "expo-constants";
 import { StatusBar, type StatusBarStyle } from "expo-status-bar";
 
@@ -14,13 +14,10 @@ const HeaderBar = ({ statusBarStyle = "auto", style }: HeaderBarProps) => {
   );
 };
 
-const styles = Platform.select({
-  android: {
-    container: {
-      height: Constants.statusBarHeight,
-    },
+const styles = StyleSheet.create({
+  container: {
+    height: Constants.statusBarHeight,
   },
-  default: {},
 });
 
 export { HeaderBar, HeaderBarProps };

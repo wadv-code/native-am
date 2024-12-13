@@ -26,6 +26,23 @@ const MAPPING = {
   "snippet-folder": "folder.fill.badge.gearshape",
   "file-present": "text.bubble.fill",
   "keyboard-arrow-down": "chevron.down",
+  "light-mode": "sun.rain.fill",
+  "dark-mode": "moon.stars.fill",
+  settings: "gearshape.fill",
+  "chevron-left": "chevron.left",
+  "chevron-right": "chevron.right",
+  "qr-code-scanner": "qrcode.viewfinder",
+  "delete-sweep": "trash.circle",
+  "photo-library": "photo.on.rectangle",
+  "developer-board": "livephoto",
+  "table-view": "macwindow.on.rectangle",
+  "account-circle": "person.crop.circle",
+  palette: "paintpalette",
+  refresh: "arrow.clockwise",
+  "supervisor-account": "person.2.badge.key.fill",
+  "keyboard-double-arrow-right": "chevron.right.2",
+  "keyboard-double-arrow-left": "chevron.left.2",
+  delete: "delete.backward",
 } as Partial<
   Record<MaterialIconsName, import("expo-symbols").SymbolViewProps["name"]>
 >;
@@ -34,7 +51,7 @@ export type IconSymbolName = keyof typeof MAPPING;
 
 export function IconSymbol({
   name,
-  size = 16,
+  size = 24,
   color,
   style,
   weight = "regular",

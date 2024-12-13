@@ -157,7 +157,7 @@ const ImageScreen = () => {
           <IconSymbol
             name="arrow-left"
             style={{ color: theme.colors.grey0 }}
-            size={Platform.OS === "android" ? 60 : 40}
+            size={Platform.OS === "android" ? 50 : 30}
           />
         </TouchableOpacity>
         <View style={styles.center}>
@@ -173,7 +173,7 @@ const ImageScreen = () => {
           <IconSymbol
             name="arrow-right"
             style={{ color: theme.colors.grey0 }}
-            size={Platform.OS === "android" ? 60 : 40}
+            size={Platform.OS === "android" ? 50 : 30}
           />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => setIndex(images.length - 1)}>
@@ -234,7 +234,8 @@ const styles = StyleSheet.create({
     right: 0,
     width: "100%",
     zIndex: 1,
-    paddingVertical: 5,
+    paddingTop: 10,
+    paddingBottom: 20,
   },
 });
 export default ImageScreen;

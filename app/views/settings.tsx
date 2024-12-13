@@ -132,7 +132,7 @@ const SettingsScreen = () => {
       </View>
       <View style={styles.cellStyle}>
         <View style={[globalStyles.row, { gap: 10 }]}>
-          <IconSymbol name="delete-sweep" />
+          <IconSymbol name="palette" />
           <Text style={styles.cellTitle}>主题设置</Text>
         </View>
         <View style={{ width: "60%" }}>
@@ -177,7 +177,8 @@ const SettingsScreen = () => {
         </View>
         <IconSymbol name="chevron-right" />
       </TouchableOpacity>
-      <Button title="我知道了" />
+      <Button title="我是主题色按钮" />
+      <Button title="我是主题色按钮" type="outline" />
     </ThemedNavigation>
   );
 };
@@ -186,6 +187,7 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     paddingHorizontal: 10,
+    gap: 10,
   },
   cellStyle: {
     flexDirection: "row",

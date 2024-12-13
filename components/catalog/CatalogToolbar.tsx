@@ -203,7 +203,7 @@ const CatalogToolbar: React.FC<ToolbarProps> = (props) => {
           })}
         </Animated.ScrollView>
         <TouchableOpacity style={styles.searchIcon} onPress={openSearch}>
-          <Text style={{ fontSize: 18 }}>🔍搜索</Text>
+          <Text style={{ fontSize: 16 }}>🔍搜索</Text>
         </TouchableOpacity>
       </View>
       <View style={styles.filterContainer}>

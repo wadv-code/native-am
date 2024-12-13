@@ -311,7 +311,7 @@ const styles = StyleSheet.create({
   toolbar: {
     flexDirection: "row",
     alignItems: "center",
-    paddingBottom: 10,
+    paddingBottom: 20,
   },
 });
 

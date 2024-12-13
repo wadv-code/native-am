@@ -153,6 +153,7 @@ const styles = StyleSheet.create({
   headerMenuText: {
     fontSize: 18,
     textAlign: "center",
+    marginTop: 5,
   },
   headerMenuCount: {
     fontWeight: "bold",
