@@ -1,6 +1,4 @@
-import { ThemedText } from "../theme/ThemedText";
 import { ThemedView } from "../theme/ThemedView";
-import { useThemeColor } from "@/hooks/useThemeColor";
 import { IconSymbol } from "../ui";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "@/store";
@@ -13,8 +11,8 @@ import {
   ImageBackground,
   TouchableOpacity,
 } from "react-native";
-import ThemeImage from "../theme/ThemeImage";
 import type { ModalPlayerType } from "./ModalPlayer";
+import { Image, Text, useTheme } from "@rneui/themed";
 
 // const sound =
 //   "http://nm.hzwima.com:8000/%E5%91%A8%E6%9D%B0%E4%BC%A6-%E7%A8%BB%E9%A6%99.mp3";
@@ -24,7 +22,7 @@ type AudioBarProps = {
 };
 
 const AudioBar = ({ onPress }: AudioBarProps) => {
-  const { theme } = useThemeColor();
+  const { theme } = useTheme();
   const dispatch = useDispatch();
   const audioState = useSelector((state: RootState) => state.audio);
   const { audioInfo, loading, playing, durationFormat, currentFormat } =
@@ -64,20 +62,20 @@ const AudioBar = ({ onPress }: AudioBarProps) => {
         {loading ? (
           <ActivityIndicator
             size={30}
-            color={theme.primary}
+            color={theme.colors.primary}
             style={[styles.imageStyle]}
           />
         ) : (
-          <ThemeImage src={audioInfo?.cover} style={styles.imageStyle} />
+          <Image src={audioInfo?.cover} containerStyle={styles.imageStyle} />
         )}
         <View style={{ flex: 1 }}>
-          <ThemedText style={{ fontSize: 16 }} numberOfLines={1}>
+          <Text style={{ fontSize: 16 }} numberOfLines={1}>
             {audioInfo?.name ?? "没有音乐可播放"}
-          </ThemedText>
+          </Text>
           <View>
-            <ThemedText style={styles.timeStyle}>
+            <Text style={styles.timeStyle}>
               {currentFormat}/{durationFormat}
-            </ThemedText>
+            </Text>
           </View>
         </View>
       </TouchableOpacity>

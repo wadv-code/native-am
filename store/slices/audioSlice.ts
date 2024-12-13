@@ -94,8 +94,7 @@ export const setAudioInfoAsync = createAsyncThunk<
   audio.cover = coverItem ? coverItem.value : "";
   if (!audio.cover) {
     try {
-      // "3,5,6,8,9"
-      const data = await GetCover({ type: "json", mode: "3,5,8" });
+      const data = await GetCover();
       if (data.url) {
         const uri = __DEV__ ? data.url : data.url.replace(/http:/g, "https:");
         audio.cover = uri;

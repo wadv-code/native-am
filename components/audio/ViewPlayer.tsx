@@ -1,15 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { IconSymbol } from "@/components/ui";
-import { ThemedText } from "@/components/theme/ThemedText";
 import { emitter } from "@/utils/mitt";
 import Slider from "@react-native-community/slider";
-import { useThemeColor } from "@/hooks/useThemeColor";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
 import { useAppDispatch } from "@/hooks/useStore";
 import { formatMilliseconds, formatPath } from "@/utils/lib";
 import { GetCover } from "@/api/api";
 import { ThemedNavigation } from "../theme/ThemedNavigation";
+import { Text, useTheme } from "@rneui/themed";
 import {
   ActivityIndicator,
   Animated,
@@ -30,7 +29,7 @@ type ViewPlayerProps = {
 };
 
 const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
-  const { theme } = useThemeColor();
+  const { theme } = useTheme();
   const [loading, setLoading] = useState(false);
   const [isHappy, setIsHappy] = useState(false);
   const [value, setValue] = useState(0);
@@ -106,7 +105,7 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
     try {
       const path = formatPath(audioInfo.parent || "/", audioInfo.name);
       setLoading(true);
-      const data = await GetCover({ type: "json", mode: "3,5,8" });
+      const data = await GetCover();
       if (data.url) {
         const uri = __DEV__ ? data.url : data.url.replace(/http:/g, "https:");
         handleCoverItems({ key: path, value: uri });
@@ -187,35 +186,17 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
           onPress={() => setIsHappy(!isHappy)}
           style={styles.rightText}
         >
-          <ThemedText style={{ fontWeight: "bold" }}>
+          <Text style={{ fontWeight: "bold" }}>
             {isHappy ? "退出愉悦心情" : "愉悦心情"}
-          </ThemedText>
+          </Text>
         </TouchableOpacity>
       }
     >
-      {/* <View style={styles.headerContainer}>
-        <TouchableOpacity onPress={closeModal}>
-          <IconSymbol
-            color={theme.text}
-            name="keyboard-arrow-down"
-            size={Platform.OS === "android" ? 35 : 25}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setIsHappy(!isHappy)}>
-          <ThemedText style={{ fontWeight: "bold" }}>
-            {isHappy ? "退出愉悦心情" : "愉悦心情"}
-          </ThemedText>
-        </TouchableOpacity>
-      </View> */}
-      {/* <ImageBackground
-        style={[styles.backgroundImage, { opacity: isHappy ? 1 : 0.1 }]}
-        src={audioInfo.cover}
-      /> */}
       <TouchableOpacity onPress={onCoverRefresh} style={styles.animatedImage}>
         {loading ? (
           <ActivityIndicator
             size={100}
-            color={theme.primary}
+            color={theme.colors.primary}
             style={styles.screen}
           />
         ) : (
@@ -226,13 +207,13 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
         )}
       </TouchableOpacity>
       <Animated.View style={[styles.infoContainer, animatedStyle]}>
-        <ThemedText style={styles.infoTitle}>{audioInfo.name}</ThemedText>
-        <ThemedText style={[styles.parent, { color: theme.icon }]}>
+        <Text style={styles.infoTitle}>{audioInfo.name}</Text>
+        <Text style={[styles.parent, { color: theme.colors.grey0 }]}>
           {audioInfo.parent}
-        </ThemedText>
-        <ThemedText style={{ color: theme.icon }}>
+        </Text>
+        <Text style={{ color: theme.colors.grey0 }}>
           {audioInfo.modifiedFormat}
-        </ThemedText>
+        </Text>
         <Slider
           value={value}
           onSlidingStart={onSlidingStart}
@@ -240,14 +221,14 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
           onValueChange={onValueChange}
           minimumValue={0}
           maximumValue={1}
-          minimumTrackTintColor={theme.primary}
-          thumbTintColor={theme.primary}
+          minimumTrackTintColor={theme.colors.primary}
+          thumbTintColor={theme.colors.primary}
           step={0.01}
           style={{ width: "90%" }}
         />
         <View style={styles.time}>
-          <ThemedText>{dragCurrent || currentFormat}</ThemedText>
-          <ThemedText>{durationFormat}</ThemedText>
+          <Text>{dragCurrent || currentFormat}</Text>
+          <Text>{durationFormat}</Text>
         </View>
         <View style={styles.toolbar}>
           <TouchableOpacity>

@@ -4,12 +4,12 @@ import { storageManager } from "@/storage";
 import { ReactNativeZoomableView } from "@openspacelabs/react-native-zoomable-view";
 import { IconSymbol } from "@/components/ui";
 import Constants from "expo-constants";
-import { ThemedText } from "@/components/theme/ThemedText";
 import { useRouter } from "expo-router";
 import type { OptionType } from "@/components/audio/MusicPlayer";
 import { GetCover } from "@/api/api";
-import { useThemeColor } from "@/hooks/useThemeColor";
 import { ThemedView } from "@/components/theme/ThemedView";
+import { globalStyles } from "@/styles";
+import { Text, useTheme } from "@rneui/themed";
 import {
   ActivityIndicator,
   Image,
@@ -19,11 +19,10 @@ import {
   useColorScheme,
   View,
 } from "react-native";
-import { globalStyles } from "@/styles";
 
 const ImageScreen = () => {
   const mode = useColorScheme();
-  const { theme } = useThemeColor();
+  const { theme } = useTheme();
   const [index, setIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState<OptionType[]>([]);
@@ -41,7 +40,7 @@ const ImageScreen = () => {
     if (loading) return;
     try {
       setLoading(true);
-      const data = await GetCover({ type: "json", mode: "3,5,8" });
+      const data = await GetCover();
       if (data.url) {
         const uri = __DEV__ ? data.url : data.url.replace(/http:/g, "https:");
         const option = { key: Date.now().toString(), value: uri };
@@ -132,7 +131,7 @@ const ImageScreen = () => {
         </TouchableOpacity>
         <TouchableOpacity style={globalStyles.row} onPress={handleDelete}>
           <IconSymbol name="delete-outline" />
-          {/* <ThemedText style={{ fontWeight: "bold" }}>💗</ThemedText> */}
+          {/* <Text style={{ fontWeight: "bold" }}>💗</Text> */}
         </TouchableOpacity>
       </View>
       <ReactNativeZoomableView maxZoom={30}>
@@ -150,37 +149,37 @@ const ImageScreen = () => {
         <TouchableOpacity onPress={() => setIndex(0)}>
           <IconSymbol
             name="keyboard-double-arrow-left"
-            style={{ color: theme.text }}
+            style={{ color: theme.colors.grey0 }}
             size={Platform.OS === "android" ? 40 : 20}
           />
         </TouchableOpacity>
         <TouchableOpacity onPress={prevPicture}>
           <IconSymbol
             name="arrow-left"
-            style={{ color: theme.text }}
+            style={{ color: theme.colors.grey0 }}
             size={Platform.OS === "android" ? 60 : 40}
           />
         </TouchableOpacity>
         <View style={styles.center}>
           {loading ? (
-            <ActivityIndicator size={40} color={theme.text} />
+            <ActivityIndicator size={40} color={theme.colors.grey0} />
           ) : (
-            <ThemedText style={styles.centerText}>
+            <Text style={styles.centerText}>
               {index + 1}/{images.length}
-            </ThemedText>
+            </Text>
           )}
         </View>
         <TouchableOpacity onPress={nextPicture}>
           <IconSymbol
             name="arrow-right"
-            style={{ color: theme.text }}
+            style={{ color: theme.colors.grey0 }}
             size={Platform.OS === "android" ? 60 : 40}
           />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => setIndex(images.length - 1)}>
           <IconSymbol
             name="keyboard-double-arrow-right"
-            style={{ color: theme.text }}
+            style={{ color: theme.colors.grey0 }}
             size={Platform.OS === "android" ? 40 : 20}
           />
         </TouchableOpacity>

@@ -1,7 +1,5 @@
-import { ThemedText } from "@/components/theme/ThemedText";
 import { HeaderBar } from "../sys";
 import { IconSymbol } from "../ui";
-import { useThemeColor } from "@/hooks/useThemeColor";
 import { globalStyles } from "@/styles";
 import { useRouter } from "expo-router";
 import { useSelector } from "react-redux";
@@ -22,6 +20,7 @@ import {
 import type { MaterialIconsName } from "@/types";
 import { getStorageAsync } from "@/store/slices/audioSlice";
 import { randomNum } from "@/utils/lib";
+import { Text, useTheme } from "@rneui/themed";
 
 type ThemedNavigationProps = PropsWithChildren<
   ThemedViewProps & {
@@ -56,7 +55,7 @@ const ThemedNavigation = (props: ThemedNavigationProps) => {
     iconSize,
   } = props;
   const { onLeft, onRight } = props;
-  const { theme } = useThemeColor();
+  const { theme } = useTheme();
   const router = useRouter();
   const audio = useSelector((state: RootState) => state.audio);
   const { audioInfo } = audio;
@@ -116,12 +115,12 @@ const ThemedNavigation = (props: ThemedNavigationProps) => {
             onPress={onCanBack}
           >
             <IconSymbol
-              color={theme.text}
+              color={theme.colors.grey0}
               size={iconSize ?? 28}
               name={leftIcon}
             />
           </TouchableOpacity>
-          <ThemedText type="subtitle">{title}</ThemedText>
+          <Text>{title}</Text>
           {rightText || (
             <TouchableOpacity
               style={[
@@ -132,7 +131,7 @@ const ThemedNavigation = (props: ThemedNavigationProps) => {
               onPress={onCanRight}
             >
               <IconSymbol
-                color={theme.text}
+                color={theme.colors.grey0}
                 size={iconSize ?? 28}
                 name={rightIcon}
               />

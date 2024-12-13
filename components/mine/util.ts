@@ -51,7 +51,14 @@ export const getServerItems = (): ServerItem[] => {
 };
 
 export type GetImageServerItemsFn = () => Promise<ServerItem[]>;
+export type getImageServerDefaultItemFn = () => Promise<ServerItem | undefined>;
 
 export const getImageServerItems: GetImageServerItemsFn = async () => {
   return (await storageManager.get("server_items")) || getServerItems();
 };
+
+export const getImageServerDefaultItem: getImageServerDefaultItemFn =
+  async () => {
+    const list = await getImageServerItems();
+    return list.find((f) => f.isDefault);
+  };

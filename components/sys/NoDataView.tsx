@@ -1,12 +1,12 @@
 import { StyleSheet, View } from "react-native";
 import { IconSymbol } from "../ui";
-import { ThemedText } from "../theme/ThemedText";
+import { Text } from "@rneui/themed";
 
 const NoDataView = () => {
   return (
     <View style={styles.noDataContainer}>
       <IconSymbol name="playlist-remove" size={40} />
-      <ThemedText style={styles.noDataText}>No data available</ThemedText>
+      <Text style={styles.noDataText}>No data available</Text>
     </View>
   );
 };

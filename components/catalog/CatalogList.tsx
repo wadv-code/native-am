@@ -1,20 +1,20 @@
-import { IndexItem } from "@/components/index/IndexItem";
 import type { GetItemsResItem } from "@/api";
-import type { ThemedViewProps } from "@/components/theme/ThemedView";
-import { useThemeColor } from "@/hooks/useThemeColor";
+import { useTheme } from "@rneui/themed";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Platform,
   RefreshControl,
   StyleSheet,
+  ViewProps,
   VirtualizedList,
   type ListRenderItem,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from "react-native";
+import { CatalogItem } from "./CatalogItem";
 
-type CatalogListProps = ThemedViewProps & {
+type CatalogListProps = ViewProps & {
   path: string;
   total: number;
   loading?: boolean;
@@ -31,7 +31,7 @@ const CatalogList = (props: CatalogListProps) => {
   const [refreshing, setRefreshing] = useState(loading);
   const scrollYRef = useRef(0);
   const { onRefresh, handleItem } = props;
-  const { theme } = useThemeColor();
+  const { theme } = useTheme();
 
   const click = (item: GetItemsResItem) => {
     state[path] = scrollYRef.current || 0;
@@ -52,7 +52,7 @@ const CatalogList = (props: CatalogListProps) => {
   };
 
   const renderItem: ListRenderItem<GetItemsResItem> = ({ item }) => {
-    return <IndexItem item={item} onPress={click} />;
+    return <CatalogItem item={item} onPress={click} />;
   };
 
   const getItem = (_data: unknown, index: number) => {
@@ -80,8 +80,8 @@ const CatalogList = (props: CatalogListProps) => {
     return (
       <ActivityIndicator
         size={50}
-        color={theme.primary}
-        style={[styles.loading, { backgroundColor: theme.background }]}
+        color={theme.colors.primary}
+        style={[styles.loading, { backgroundColor: theme.colors.background }]}
       />
     );
   }

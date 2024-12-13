@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { IconSymbol } from "../ui";
-import { ThemedText } from "../theme/ThemedText";
 import { ThemedView, type ThemedViewProps } from "../theme/ThemedView";
 import { useRouter, type Href } from "expo-router";
 import { storageManager } from "@/storage";
+import { useColorScheme } from "@/hooks/useColorScheme";
+import { Text, useTheme } from "@rneui/themed";
 import ThemedModal from "../theme/ThemedModal";
 import type { GridItem } from "./util";
-import { useColorScheme } from "@/hooks/useColorScheme";
 import {
   Alert,
   Appearance,
@@ -21,6 +21,7 @@ export type MineGridProps = ThemedViewProps & {
 };
 
 const MineGrid = ({ style, items, title }: MineGridProps) => {
+  const { updateTheme } = useTheme();
   const router = useRouter();
   const mode = useColorScheme();
   const [modalVisible, setModalVisible] = useState(false);
@@ -74,6 +75,9 @@ const MineGrid = ({ style, items, title }: MineGridProps) => {
     item.icon = colorScheme === "dark" ? "dark-mode" : "light-mode";
     item.title = colorScheme === "dark" ? "深色模式" : "浅色模式";
     setColorScheme(colorScheme);
+    updateTheme({
+      mode: colorScheme,
+    });
     storageManager.set("color_scheme", colorScheme);
   };
 
@@ -83,11 +87,7 @@ const MineGrid = ({ style, items, title }: MineGridProps) => {
       lightColor="rgba(255,255,255,0.3)"
       style={[styles.grid, style]}
     >
-      {title && (
-        <ThemedText type="subtitle" style={{ paddingHorizontal: 10 }}>
-          {title}
-        </ThemedText>
-      )}
+      {title && <Text style={{ paddingHorizontal: 10 }}>{title}</Text>}
       <View style={styles.gridContent}>
         {items.map((item, index) => {
           return (
@@ -97,7 +97,7 @@ const MineGrid = ({ style, items, title }: MineGridProps) => {
               onPress={() => handleItem(item)}
             >
               <IconSymbol name={item.icon} size={35} />
-              <ThemedText bold="bold">{item.title}</ThemedText>
+              <Text>{item.title}</Text>
             </TouchableOpacity>
           );
         })}

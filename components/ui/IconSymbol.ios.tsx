@@ -1,5 +1,5 @@
-import { useThemeColor } from "@/hooks/useThemeColor";
 import type { MaterialIconsName } from "@/types";
+import { useTheme } from "@rneui/themed";
 import { SymbolView, SymbolWeight } from "expo-symbols";
 import { StyleProp, ViewStyle } from "react-native";
 
@@ -15,7 +15,7 @@ const MAPPING = {
   "more-vert": "ellipsis",
   folder: "folder.fill",
   photo: "photo",
-  "music-note": "music.note",
+  "music-note": "house.fill",
   "arrow-upward": "arrow.up",
   "arrow-downward": "arrow.down",
   "sort-by-alpha": "arrow.up.and.down.text.horizontal",
@@ -45,11 +45,11 @@ export function IconSymbol({
   style?: StyleProp<ViewStyle>;
   weight?: SymbolWeight;
 }) {
-  const theme = useThemeColor();
+  const { theme } = useTheme();
   return (
     <SymbolView
       weight={weight}
-      tintColor={color ?? theme.icon}
+      tintColor={color ?? theme.colors.grey0}
       resizeMode="scaleAspectFit"
       name={MAPPING[name] ?? "0.circle"}
       style={[

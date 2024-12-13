@@ -1,23 +1,22 @@
 import type { GetItemsResItem } from "@/api";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { getIconSymbol } from "@/utils/lib";
-import { useThemeColor } from "@/hooks/useThemeColor";
-import { ThemedText } from "../theme/ThemedText";
 import { IconSymbol } from "../ui";
 import React from "react";
+import { Text, useTheme } from "@rneui/themed";
 
 type ItemProps = {
   item: GetItemsResItem;
   onPress: (option: GetItemsResItem) => void;
 };
 
-export type IndexItemProps = ItemProps;
+export type CatalogItemProps = ItemProps;
 
-const IndexItem = React.memo(
-  (option: IndexItemProps) => {
+const CatalogItem = React.memo(
+  (option: CatalogItemProps) => {
     const { item, onPress } = option;
     const { id, name, is_dir, sizeFormat, modifiedFormat } = item;
-    const { theme } = useThemeColor();
+    const { theme } = useTheme();
     return (
       <View key={id} style={styles.itemContainer}>
         <TouchableOpacity
@@ -27,22 +26,18 @@ const IndexItem = React.memo(
           <IconSymbol
             size={26}
             name={getIconSymbol(name, is_dir)}
-            color={theme.primary}
+            color={theme.colors.primary}
             style={styles.leftSymbol}
           />
           <View>
-            <ThemedText
-              numberOfLines={2}
-              ellipsizeMode="tail"
-              style={styles.title}
-            >
+            <Text numberOfLines={2} ellipsizeMode="tail" style={styles.title}>
               {name}
-            </ThemedText>
-            <ThemedText style={styles.size}>{sizeFormat}</ThemedText>
+            </Text>
+            <Text style={styles.size}>{sizeFormat}</Text>
           </View>
         </TouchableOpacity>
         <TouchableOpacity style={styles.rightContainer}>
-          <ThemedText style={styles.timeStyle}>{modifiedFormat}</ThemedText>
+          <Text style={styles.timeStyle}>{modifiedFormat}</Text>
           <IconSymbol
             size={24}
             name={is_dir ? "keyboard-arrow-right" : "more-vert"}
@@ -90,6 +85,6 @@ const styles = StyleSheet.create({
   },
 });
 
-IndexItem.displayName = "IndexItem";
+CatalogItem.displayName = "CatalogItem";
 
-export { IndexItem };
+export { CatalogItem };

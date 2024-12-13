@@ -1,11 +1,8 @@
-import Animated, { useAnimatedRef } from "react-native-reanimated";
-import { ThemedText } from "@/components/theme/ThemedText";
+import Animated from "react-native-reanimated";
 import { useBottomTabOverflow } from "@/components/ui/TabBarBackground";
-import { useThemeColor } from "@/hooks/useThemeColor";
 import { IconSymbol } from "@/components/ui";
 import type { RootState } from "@/store";
 import { useSelector } from "react-redux";
-import ThemeImage from "@/components/theme/ThemeImage";
 import { useRouter } from "expo-router";
 import { formatPath } from "@/utils/lib";
 import { useAppDispatch } from "@/hooks/useStore";
@@ -25,9 +22,10 @@ import {
   View,
 } from "react-native";
 import { gridItems } from "@/components/mine/util";
+import { Image, Text, useTheme } from "@rneui/themed";
 
 export default function MineScreen() {
-  const { theme } = useThemeColor();
+  const { theme } = useTheme();
   const router = useRouter();
   const dispatch = useAppDispatch();
   const bottom = useBottomTabOverflow();
@@ -38,7 +36,7 @@ export default function MineScreen() {
     try {
       const path = formatPath(audioInfo.parent || "/", audioInfo.name);
       dispatch(setLoading(true));
-      const data = await GetCover({ type: "json", mode: "3,5,8" });
+      const data = await GetCover();
       if (data.url) {
         const uri = __DEV__ ? data.url : data.url.replace(/http:/g, "https:");
         handleCoverItems({ key: path, value: uri });
@@ -68,7 +66,7 @@ export default function MineScreen() {
       style={styles.container}
       rightText={
         <TouchableOpacity onPress={openSettings} style={styles.rightText}>
-          <IconSymbol name="settings" style={{ color: theme.text }} />
+          <IconSymbol name="settings" style={{ color: theme.colors.grey0 }} />
         </TouchableOpacity>
       }
       onLeft={onLeft}
@@ -85,43 +83,43 @@ export default function MineScreen() {
                 {loading ? (
                   <ActivityIndicator
                     size={30}
-                    color={theme.primary}
+                    color={theme.colors.primary}
                     style={styles.reactLogo}
                   />
                 ) : (
-                  <ThemeImage
+                  <Image
                     src={audioInfo.cover}
-                    style={styles.reactLogo}
+                    containerStyle={styles.reactLogo}
                     resizeMode="cover"
                   />
                 )}
               </TouchableOpacity>
               <View style={{ flexGrow: 1 }}>
-                <ThemedText style={styles.userText}>没在听</ThemedText>
-                <ThemedText style={styles.userTips}>层楼终究误少年</ThemedText>
+                <Text style={styles.userText}>没在听</Text>
+                <Text style={styles.userTips}>层楼终究误少年</Text>
               </View>
               <View style={globalStyles.row}>
-                <ThemedText>个人中心</ThemedText>
+                <Text>个人中心</Text>
                 <IconSymbol name="chevron-right" />
               </View>
             </View>
           </View>
           <View style={[globalStyles.row, globalStyles.justifyAround]}>
             <TouchableOpacity style={styles.headerItem}>
-              <ThemedText style={styles.headerMenuCount}>36</ThemedText>
-              <ThemedText style={styles.headerMenuText}>发布</ThemedText>
+              <Text style={styles.headerMenuCount}>36</Text>
+              <Text style={styles.headerMenuText}>发布</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.headerItem}>
-              <ThemedText style={styles.headerMenuCount}>2</ThemedText>
-              <ThemedText style={styles.headerMenuText}>草稿</ThemedText>
+              <Text style={styles.headerMenuCount}>2</Text>
+              <Text style={styles.headerMenuText}>草稿</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.headerItem}>
-              <ThemedText style={styles.headerMenuCount}>16</ThemedText>
-              <ThemedText style={styles.headerMenuText}>收藏</ThemedText>
+              <Text style={styles.headerMenuCount}>16</Text>
+              <Text style={styles.headerMenuText}>收藏</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.headerItem}>
-              <ThemedText style={styles.headerMenuCount}>8</ThemedText>
-              <ThemedText style={styles.headerMenuText}>浏览历史</ThemedText>
+              <Text style={styles.headerMenuCount}>8</Text>
+              <Text style={styles.headerMenuText}>浏览历史</Text>
             </TouchableOpacity>
           </View>
         </View>

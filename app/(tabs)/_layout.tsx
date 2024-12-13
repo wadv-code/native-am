@@ -1,21 +1,19 @@
 import React, { useState } from "react";
 import { Tabs } from "expo-router";
 import { Platform } from "react-native";
-import { AudioBar } from "@/components/audio";
-import { useThemeColor } from "@/hooks/useThemeColor";
+import { useTheme } from "@rneui/themed";
 import { HapticTab } from "@/components/HapticTab";
-import { useColorScheme } from "@/hooks/useColorScheme";
-import { MusicPlayer } from "@/components/audio/MusicPlayer";
-import { IconSymbol } from "@/components/ui";
+import { IconSymbol } from "@/components/ui/IconSymbol";
 import TabBarBackground from "@/components/ui/TabBarBackground";
+import { MusicPlayer } from "@/components/audio/MusicPlayer";
+import { AudioBar } from "@/components/audio";
 import {
   ModalPlayer,
   type ModalPlayerType,
 } from "@/components/audio/ModalPlayer";
 
 export default function TabLayout() {
-  const mode = useColorScheme();
-  const { theme } = useThemeColor();
+  const { theme } = useTheme();
   const [visible, setVisible] = useState(false);
   const [modalType, setModalType] = useState<ModalPlayerType>("view");
 
@@ -28,26 +26,25 @@ export default function TabLayout() {
     await new Promise((resolve) => setTimeout(resolve, 100));
     setVisible(true);
   };
-
   return (
     <>
       <Tabs
-        initialRouteName="index"
         screenOptions={{
-          tabBarActiveBackgroundColor: theme.backgroundPrimary,
-          tabBarInactiveBackgroundColor: theme.background,
-          tabBarActiveTintColor: mode === "dark" ? theme.text : theme.primary,
+          tabBarActiveBackgroundColor: theme.colors.background,
+          tabBarInactiveBackgroundColor: theme.colors.background,
+          tabBarActiveTintColor:
+            theme.mode === "dark" ? theme.colors.grey0 : theme.colors.primary,
+          tabBarInactiveTintColor: theme.colors.grey3,
           headerShown: false,
           tabBarButton: HapticTab,
           tabBarBackground: TabBarBackground,
-          tabBarLabelStyle: { fontSize: 12 },
           tabBarStyle: Platform.select({
             ios: {
               // Use a transparent background on iOS to show the blur effect
               position: "absolute",
             },
             default: {
-              borderColor: theme.border,
+              borderColor: theme.colors.white,
             },
           }),
         }}

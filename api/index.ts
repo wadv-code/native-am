@@ -56,11 +56,6 @@ export type GetDetailRes = {
   raw_url: string;
 };
 
-export type GetCoverParams = {
-  type: string;
-  mode?: number | string;
-};
-
 export type GetCoverRes = {
   code: number;
   url: string;

@@ -3,11 +3,11 @@ import type {
   GetItemsRes,
   GetDetailRes,
   GetItemsParams,
-  GetCoverParams,
   GetDetailParams,
   GetSearchParams,
 } from ".";
 import { formatFileSize, formatTimeAgo } from "@/utils/lib";
+import { getImageServerDefaultItem } from "@/components/mine/util";
 
 /**
  * 获取列表
@@ -66,10 +66,17 @@ export async function GetSearch(data: GetSearchParams) {
  * @constructor
  * @param params
  */
-export async function GetCover(params: GetCoverParams) {
+export async function GetCover() {
+  const item = await getImageServerDefaultItem();
+  const param: Recordable<string> = { type: "json", mode: "8" };
+  if (item) {
+    item.params.forEach((v) => {
+      param[v.key] = v.value;
+    });
+  }
   return request<string>({
-    url: "https://3650000.xyz/api/",
+    url: item ? item.url : "https://3650000.xyz/api/",
     method: "get",
-    params: params,
+    params: param,
   });
 }

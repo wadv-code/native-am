@@ -1,10 +1,9 @@
+import React from "react";
 import type { GetItemsResItem } from "@/api";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { Text, useTheme } from "@rneui/themed";
 import { getIconSymbol } from "@/utils/lib";
-import { useThemeColor } from "@/hooks/useThemeColor";
-import { ThemedText } from "../theme/ThemedText";
 import { IconSymbol } from "../ui";
-import React from "react";
 
 type ItemProps = {
   item: GetItemsResItem;
@@ -17,7 +16,7 @@ const SearchItem = React.memo(
   (option: SearchItemProps) => {
     const { item, onPress } = option;
     const { id, name, is_dir, parent, sizeFormat } = item;
-    const { theme } = useThemeColor();
+    const { theme } = useTheme();
 
     return (
       <TouchableOpacity
@@ -29,24 +28,24 @@ const SearchItem = React.memo(
           <IconSymbol
             size={26}
             name={getIconSymbol(name, is_dir)}
-            color={theme.primary}
+            color={theme.colors.primary}
             style={styles.leftSymbol}
           />
           <View>
-            <ThemedText
+            <Text
               numberOfLines={2}
               ellipsizeMode="tail"
               style={{ fontSize: 14 }}
             >
               {name}
-            </ThemedText>
-            <ThemedText style={[styles.size, { color: theme.primary }]}>
+            </Text>
+            <Text style={[styles.size, { color: theme.colors.primary }]}>
               {parent}
-            </ThemedText>
+            </Text>
           </View>
         </View>
         <View style={styles.rightContainer}>
-          <ThemedText style={styles.timeStyle}>{sizeFormat}</ThemedText>
+          <Text style={styles.timeStyle}>{sizeFormat}</Text>
           <IconSymbol
             size={20}
             name={is_dir ? "keyboard-arrow-right" : "more-vert"}

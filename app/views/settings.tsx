@@ -1,14 +1,13 @@
-import { ThemedText } from "@/components/theme/ThemedText";
 import { IconSymbol } from "@/components/ui";
 import { useColorScheme } from "@/hooks/useColorScheme";
-import { useThemeColor } from "@/hooks/useThemeColor";
 import { globalStyles } from "@/styles";
 import { useEffect, useState } from "react";
 import Animated from "react-native-reanimated";
 import { storageManager } from "@/storage";
 import { useRouter } from "expo-router";
 import { ThemedNavigation } from "@/components/theme/ThemedNavigation";
-import { ThemedInput } from "@/components/theme/ThemedInput";
+import { Button, Text, useTheme } from "@rneui/themed";
+import { Colors } from "@/constants/Colors";
 import {
   Alert,
   Appearance,
@@ -17,23 +16,20 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { ThemedButton } from "@/components/theme/ThemedButton";
 
 const SettingsScreen = () => {
-  const themeConfig = {
-    image: "https://3650000.xyz/api/",
-  };
   const router = useRouter();
   const mode = useColorScheme();
-  const { theme, setThemeColor } = useThemeColor();
-  const [isDark, setIsDark] = useState(mode === "dark");
+  const { theme, updateTheme } = useTheme();
   const [colors, setColors] = useState<string[]>([]);
   const { setColorScheme } = Appearance;
 
   const setMode = () => {
     const colorScheme = mode === "dark" ? "light" : "dark";
     setColorScheme(colorScheme);
-    setIsDark(!isDark);
+    updateTheme({
+      mode: colorScheme,
+    });
     storageManager.set("color_scheme", colorScheme);
   };
 
@@ -84,11 +80,35 @@ const SettingsScreen = () => {
 
     keys.forEach((key) => {
       // @ts-ignore
-      const color: string = theme[key];
+      const color: string = theme.colors[key];
       if (color) list.push(color);
     });
 
     setColors(list);
+  };
+
+  const setThemePrimary = (color: string) => {
+    if (color !== theme.colors.primary) {
+      updateTheme({
+        darkColors: {
+          primary: color,
+        },
+        lightColors: {
+          primary: color,
+        },
+      });
+      storageManager.set("theme_primary", color);
+    } else {
+      updateTheme({
+        darkColors: {
+          primary: Colors.dark.primary,
+        },
+        lightColors: {
+          primary: Colors.light.primary,
+        },
+      });
+      storageManager.remove("theme_primary");
+    }
   };
 
   useEffect(takeColors, [theme]);
@@ -96,22 +116,24 @@ const SettingsScreen = () => {
     <ThemedNavigation style={styles.container} isImage={true} statusBar={true}>
       <View style={styles.cellStyle}>
         <View style={[globalStyles.row, { gap: 10 }]}>
-          <IconSymbol name={isDark ? "dark-mode" : "light-mode"} />
-          <ThemedText style={styles.cellTitle}>
-            {isDark ? "深色模式" : "浅色模式"}
-          </ThemedText>
+          <IconSymbol
+            name={theme.mode === "dark" ? "dark-mode" : "light-mode"}
+          />
+          <Text style={styles.cellTitle}>
+            {theme.mode === "dark" ? "深色模式" : "浅色模式"}
+          </Text>
         </View>
         <Switch
-          thumbColor={theme.text}
-          ios_backgroundColor={theme.primary}
+          thumbColor={theme.colors.grey0}
+          ios_backgroundColor={theme.colors.primary}
           onValueChange={setMode}
-          value={isDark}
+          value={theme.mode === "dark"}
         />
       </View>
       <View style={styles.cellStyle}>
         <View style={[globalStyles.row, { gap: 10 }]}>
           <IconSymbol name="delete-sweep" />
-          <ThemedText style={styles.cellTitle}>主题设置</ThemedText>
+          <Text style={styles.cellTitle}>主题设置</Text>
         </View>
         <View style={{ width: "60%" }}>
           <Animated.ScrollView
@@ -129,10 +151,12 @@ const SettingsScreen = () => {
                     {
                       backgroundColor: v,
                       borderColor:
-                        v === theme.primary ? theme.text : "transparent",
+                        v === theme.colors.primary
+                          ? theme.colors.grey0
+                          : "transparent",
                     },
                   ]}
-                  onPress={() => setThemeColor({ primary: v })}
+                  onPress={() => setThemePrimary(v)}
                 />
               );
             })}
@@ -142,31 +166,18 @@ const SettingsScreen = () => {
       <TouchableOpacity style={styles.cellStyle} onPress={clearStorage}>
         <View style={[globalStyles.row, { gap: 10 }]}>
           <IconSymbol name="delete-sweep" />
-          <ThemedText style={styles.cellTitle}>清除缓存</ThemedText>
+          <Text style={styles.cellTitle}>清除缓存</Text>
         </View>
         <IconSymbol name="chevron-right" />
       </TouchableOpacity>
       <TouchableOpacity style={styles.cellStyle} onPress={openAbout}>
         <View style={[globalStyles.row, { gap: 10 }]}>
           <IconSymbol name="supervisor-account" />
-          <ThemedText style={styles.cellTitle}>关于我们</ThemedText>
+          <Text style={styles.cellTitle}>关于我们</Text>
         </View>
         <IconSymbol name="chevron-right" />
       </TouchableOpacity>
-      <TouchableOpacity style={styles.cellStyleColumn} onPress={openAbout}>
-        <View style={[globalStyles.row, { gap: 10 }]}>
-          <IconSymbol name="image" />
-          <ThemedText style={styles.cellTitle}>图片服务器</ThemedText>
-        </View>
-        <ThemedInput
-          placeholder="输入图片服务器地址"
-          placeholderTextColor={theme.icon}
-          value={themeConfig.image}
-        />
-      </TouchableOpacity>
-      <View style={{ marginTop: 20 }}>
-        <ThemedButton title="主题按钮" />
-      </View>
+      <Button title="我知道了" />
     </ThemedNavigation>
   );
 };

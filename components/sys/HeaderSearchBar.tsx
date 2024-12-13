@@ -1,9 +1,8 @@
 import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { IconSymbol } from "../ui";
-import { ThemedText } from "../theme/ThemedText";
-import { useThemeColor } from "@/hooks/useThemeColor";
 import { useEffect, useRef, useState } from "react";
 import { HeaderBar } from "./HeaderBar";
+import { Text, useTheme } from "@rneui/themed";
 
 type HeaderSearchBarProps = {
   keywords?: string;
@@ -11,7 +10,7 @@ type HeaderSearchBarProps = {
 };
 
 const HeaderSearchBar = ({ keywords, onSeatch }: HeaderSearchBarProps) => {
-  const { theme } = useThemeColor();
+  const { theme } = useTheme();
   const inputRef = useRef<TextInput>(null);
   const [search, setSearch] = useState("");
   const handleSearch = (query: string) => {
@@ -35,8 +34,8 @@ const HeaderSearchBar = ({ keywords, onSeatch }: HeaderSearchBarProps) => {
         style={[
           styles.container,
           {
-            backgroundColor: theme.backgroundPrimary,
-            borderColor: theme.tabIconDefault,
+            backgroundColor: theme.colors.background,
+            borderColor: theme.colors.greyOutline,
           },
         ]}
       >
@@ -46,11 +45,11 @@ const HeaderSearchBar = ({ keywords, onSeatch }: HeaderSearchBarProps) => {
         <TextInput
           ref={inputRef}
           placeholder="Search..."
-          placeholderTextColor={theme.icon}
+          placeholderTextColor={theme.colors.grey3}
           value={search}
           onChangeText={(query) => setSearch(query)}
           onEndEditing={() => handleSearch(search)}
-          style={[styles.input, { color: theme.text }]}
+          style={[styles.input, { color: theme.colors.grey3 }]}
         />
         {search ? (
           <TouchableOpacity style={styles.closeIcon} onPress={handleClear}>
@@ -58,10 +57,10 @@ const HeaderSearchBar = ({ keywords, onSeatch }: HeaderSearchBarProps) => {
           </TouchableOpacity>
         ) : null}
         <TouchableOpacity
-          style={[styles.search, { backgroundColor: theme.primary }]}
+          style={[styles.search, { backgroundColor: theme.colors.primary }]}
           onPress={() => handleSearch(search)}
         >
-          <ThemedText style={styles.searchText}>搜索</ThemedText>
+          <Text style={styles.searchText}>搜索</Text>
         </TouchableOpacity>
       </View>
     </>

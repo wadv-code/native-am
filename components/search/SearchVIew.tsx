@@ -1,16 +1,22 @@
 import { GetSearch } from "@/api/api";
-import ParallaxView from "@/components/ParallaxView";
 import { HeaderSearchBar } from "@/components/sys/HeaderSearchBar";
+import { useEffect, useRef, useState } from "react";
+import type { GetItemsResItem, GetSearchParams } from "@/api";
+import { emitter } from "@/utils/mitt";
+import { SearchItem } from "../search/SearchItem";
+import { useRouter } from "expo-router";
+import { useRoute, type RouteProp } from "@react-navigation/native";
+import type { RootStackParamList } from "@/types";
+import { IconSymbol } from "../ui";
+import { storageManager } from "@/storage";
+import { Text } from "@rneui/themed";
+import { ThemedView } from "../theme/ThemedView";
 import {
   formatFileSize,
   formatPath,
   formatTimeAgo,
   isAudioFile,
 } from "@/utils/lib";
-import { useEffect, useRef, useState } from "react";
-import type { GetItemsResItem, GetSearchParams } from "@/api";
-import { emitter } from "@/utils/mitt";
-import { ThemedText } from "@/components/theme/ThemedText";
 import {
   Alert,
   Animated,
@@ -21,12 +27,6 @@ import {
   View,
   type ViewProps,
 } from "react-native";
-import { SearchItem } from "../search/SearchItem";
-import { useRouter } from "expo-router";
-import { useRoute, type RouteProp } from "@react-navigation/native";
-import type { RootStackParamList } from "@/types";
-import { IconSymbol } from "../ui";
-import { storageManager } from "@/storage";
 
 const default_per_page = 30;
 
@@ -133,7 +133,7 @@ const SearchView = ({ style }: SearchViewProps) => {
   // }, []);
 
   return (
-    <ParallaxView style={[styles.container, style]}>
+    <ThemedView style={[styles.container, style]}>
       <HeaderSearchBar keywords={params.keywords} onSeatch={onRefresh} />
       <View style={styles.toolbar}>
         <IconSymbol size={22} name="snippet-folder" />
@@ -143,11 +143,11 @@ const SearchView = ({ style }: SearchViewProps) => {
           horizontal={true}
           contentContainerStyle={styles.scrollView}
         >
-          <ThemedText> {params.parent}</ThemedText>
+          <Text> {params.parent}</Text>
         </Animated.ScrollView>
-        <ThemedText style={styles.total}>
+        <Text style={styles.total}>
           {items.length}/{total}
-        </ThemedText>
+        </Text>
       </View>
       <FlatList
         data={items}
@@ -168,7 +168,7 @@ const SearchView = ({ style }: SearchViewProps) => {
           },
         })}
       />
-    </ParallaxView>
+    </ThemedView>
   );
 };
 

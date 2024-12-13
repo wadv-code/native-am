@@ -1,16 +1,14 @@
-import ParallaxView from "@/components/ParallaxView";
 import { HeaderBar } from "@/components/sys";
-import { ThemedText } from "@/components/theme/ThemedText";
+import { Button } from "@rneui/themed";
+import { ThemedView } from "@/components/theme/ThemedView";
 
-const IndexScreen = () => {
+export default function HomeScreen() {
   return (
-    <ParallaxView>
+    <ThemedView style={{ flex: 1, gap: 10, paddingHorizontal: 10 }}>
       <HeaderBar />
-      <ThemedText type="title" style={{ textAlign: "center" }}>
-        Index
-      </ThemedText>
-    </ParallaxView>
+      <Button title="Solid" />
+      <Button title="Outline" type="outline" />
+      <Button title="Clear" type="clear" />
+    </ThemedView>
   );
-};
-
-export default IndexScreen;
+}

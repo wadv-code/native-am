@@ -1,6 +1,5 @@
 import { CatalogList } from "@/components/catalog/CatalogList";
 import { useEffect, useState } from "react";
-import ParallaxView from "../ParallaxView";
 import { HeaderBar, type ToolbarSortOrder } from "../sys";
 import { CatalogToolbar } from "./CatalogToolbar";
 import { Alert, StyleSheet } from "react-native";
@@ -8,6 +7,7 @@ import { GetItems } from "@/api/api";
 import { storageManager } from "@/storage";
 import { formatPath, isAudioFile } from "@/utils/lib";
 import { emitter } from "@/utils/mitt";
+import { ThemedView } from "@/components/theme/ThemedView";
 import type { GetItemsParams, GetItemsResItem } from "@/api";
 
 const default_per_page = 1000;
@@ -113,7 +113,7 @@ const CatalogView = ({ path = "/" }: CatalogViewProps) => {
   }, [params]);
 
   return (
-    <ParallaxView style={styles.container}>
+    <ThemedView style={styles.container}>
       <HeaderBar />
       <CatalogToolbar
         path={params.path}
@@ -129,11 +129,12 @@ const CatalogView = ({ path = "/" }: CatalogViewProps) => {
         handleItem={handleItem}
         onRefresh={onRefresh}
       />
-    </ParallaxView>
+    </ThemedView>
   );
 };
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     paddingHorizontal: 10,
   },
 });

@@ -1,3 +1,18 @@
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store";
+import { useEffect, useRef, useState } from "react";
+import type { GetItemsParams, GetItemsResItem } from "@/api";
+import { GetItems } from "@/api/api";
+import { emitter } from "@/utils/mitt";
+import { storageManager } from "@/storage";
+import { useRouter } from "expo-router";
+import { ThemedNavigation } from "../theme/ThemedNavigation";
+import {
+  formatFileSize,
+  formatPath,
+  formatTimeAgo,
+  isAudioFile,
+} from "@/utils/lib";
 import {
   Alert,
   FlatList,
@@ -6,24 +21,7 @@ import {
   StyleSheet,
   type TextProps,
 } from "react-native";
-import Constants from "expo-constants";
-import { useSelector } from "react-redux";
-import type { RootState } from "@/store";
-import { useEffect, useRef, useState } from "react";
-import type { GetItemsParams, GetItemsResItem } from "@/api";
-import { GetItems } from "@/api/api";
-import {
-  formatFileSize,
-  formatPath,
-  formatTimeAgo,
-  isAudioFile,
-} from "@/utils/lib";
-import { emitter } from "@/utils/mitt";
-import { IndexItem } from "../index/IndexItem";
-import { storageManager } from "@/storage";
-import { useRouter } from "expo-router";
-import { ThemedNavigation } from "../theme/ThemedNavigation";
-import { ThemedText } from "../theme/ThemedText";
+import { CatalogItem } from "../catalog/CatalogItem";
 
 type ListPlayerProps = TextProps & {
   closeModal: () => void;
@@ -129,7 +127,7 @@ const ListPlayer = ({ closeModal }: ListPlayerProps) => {
         }}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <IndexItem item={item} onPress={handleItem} />
+          <CatalogItem item={item} onPress={handleItem} />
         )}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />

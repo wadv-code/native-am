@@ -1,4 +1,3 @@
-import type { GetItemsResItem } from "@/api";
 import type { MaterialIconsName } from "@/types";
 import dayjs, { type ConfigType } from "dayjs";
 
@@ -42,7 +41,7 @@ export function isStringifiedJSON(str: string | null) {
     const jsonObj = JSON.parse(str);
     // 检查解析结果是否为对象或数组，因为JSON.stringify通常将对象或数组转为字符串
     return jsonObj && (typeof jsonObj === "object" || Array.isArray(jsonObj));
-  } catch (e) {
+  } catch {
     // 如果解析失败，说明不是有效的JSON字符串
     return false;
   }

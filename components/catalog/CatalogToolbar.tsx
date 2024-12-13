@@ -5,14 +5,13 @@ import {
   Animated,
   BackHandler,
 } from "react-native";
-import { ThemedView } from "../theme/ThemedView";
 import { IconSymbol } from "../ui";
-import { ThemedText } from "../theme/ThemedText";
 import React, { useEffect, useRef, useState } from "react";
 import { storageManager } from "@/storage";
 import { useRouter } from "expo-router";
 import type { MaterialIconsName } from "@/types";
 import { useIsFocused } from "@react-navigation/native";
+import { Text } from "@rneui/themed";
 
 // 排序方式
 const orders = ["name", "time", "size"] as const;
@@ -55,7 +54,7 @@ const CatalogToolbar: React.FC<ToolbarProps> = (props) => {
   const [sort, setSort] = useState<ToolbarSort>("descending");
   const [order, setOrder] = useState<ToolbarOrder>("time");
   const isInitialRender = useRef<boolean>(false);
-  const navigation = useRouter();
+  const router = useRouter();
 
   const onRoot = () => {
     setItems([]);
@@ -68,7 +67,7 @@ const CatalogToolbar: React.FC<ToolbarProps> = (props) => {
   };
 
   const openSearch = () => {
-    navigation.navigate({
+    router.navigate({
       pathname: "/views/search",
       params: {
         path: path ?? "/",
@@ -175,7 +174,7 @@ const CatalogToolbar: React.FC<ToolbarProps> = (props) => {
   }, [path]);
 
   return (
-    <ThemedView>
+    <View>
       <View style={styles.row}>
         <TouchableOpacity onPress={onRoot}>
           <IconSymbol size={24} name="snippet-folder" />
@@ -198,39 +197,39 @@ const CatalogToolbar: React.FC<ToolbarProps> = (props) => {
                   style={{ marginHorizontal: 3 }}
                   name="arrow-right"
                 />
-                <ThemedText style={styles.text}>{item.name}</ThemedText>
+                <Text style={styles.text}>{item.name}</Text>
               </TouchableOpacity>
             );
           })}
         </Animated.ScrollView>
         <TouchableOpacity style={styles.searchIcon} onPress={openSearch}>
-          <ThemedText style={{ fontSize: 18 }}>🔍搜索</ThemedText>
+          <Text style={{ fontSize: 18 }}>🔍搜索</Text>
         </TouchableOpacity>
       </View>
       <View style={styles.filterContainer}>
-        <ThemedText
+        <Text
           style={[styles.smallText, { width: "63%" }]}
           numberOfLines={1}
           ellipsizeMode="tail"
         >
           {getName()}
-        </ThemedText>
+        </Text>
         <View style={styles.toolbar}>
-          <ThemedText style={styles.smallText}>{rightText}</ThemedText>
+          <Text style={styles.smallText}>{rightText}</Text>
           <TouchableOpacity style={styles.row} onPress={onOrder}>
             <IconSymbol
               style={{ marginRight: 3 }}
               size={16}
               name="sort-by-alpha"
             />
-            <ThemedText style={styles.smallText}>{order}</ThemedText>
+            <Text style={styles.smallText}>{order}</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={onSort}>
             <IconSymbol size={18} name={getOrderIcon()} />
           </TouchableOpacity>
         </View>
       </View>
-    </ThemedView>
+    </View>
   );
 };
 
