@@ -1,3 +1,4 @@
+import { GetCover } from "@/api/api";
 import {
   getImageServerItems,
   type ServerItem,
@@ -8,18 +9,27 @@ import { IconSymbol } from "@/components/ui";
 import { useBottomTabOverflow } from "@/components/ui/TabBarBackground";
 import { storageManager } from "@/storage";
 import { globalStyles } from "@/styles";
-import { Button, Input, Text } from "@rneui/themed";
+import { isString } from "@/utils/helper";
+import { Button, Image, Input, Text, useTheme } from "@rneui/themed";
 import axios from "axios";
 import { router } from "expo-router";
 import { useRouteInfo } from "expo-router/build/hooks";
 import { useEffect, useRef, useState } from "react";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import Animated from "react-native-reanimated";
 
 const ImageServerEdit = () => {
   const info = useRouteInfo();
   const bottom = useBottomTabOverflow();
   const notParsing = useRef(false);
+  const { theme } = useTheme();
+  const [url, setUrl] = useState("");
+  const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState("");
   const [item, setItem] = useState<ServerItem>({
     id: "",
@@ -88,7 +98,7 @@ const ImageServerEdit = () => {
     const pathname = option.pathname; // 路径部分
     const fullUrlWithoutParams = `${origin}${pathname}`;
     item.url = fullUrlWithoutParams;
-    item.title = item.title || pathname;
+    item.title = item.title || origin;
     // 提取参数部分
     const params: ServerItemParam[] = [];
     option.searchParams.forEach((value, key) => {
@@ -97,6 +107,12 @@ const ImageServerEdit = () => {
     item.params = params;
     notParsing.current = true;
     setItem({ ...item });
+  };
+
+  const handleFetch = async () => {
+    setLoading(true);
+    const url = await GetCover(item);
+    if (isString(url)) setUrl(url);
   };
 
   useEffect(() => {
@@ -197,15 +213,41 @@ const ImageServerEdit = () => {
           />
         </View>
 
-        <View style={styles.action}>
+        <View style={[styles.action, globalStyles.rowAround]}>
           <Button color="warning" onPress={handleAddParams}>
             添加参数
           </Button>
-          <Button onPress={handleSave}>保存编辑</Button>
-          <Button type="outline" onPress={handleBack}>
-            返回
+          <Button color="secondary" loading={loading} onPress={handleFetch}>
+            测试
           </Button>
+          <Button onPress={handleSave}>保存编辑</Button>
         </View>
+
+        {!!url && (
+          <>
+            <TouchableOpacity
+              style={[globalStyles.rowCenter, { marginVertical: 20 }]}
+              onPress={() => setUrl("")}
+            >
+              <Image
+                src={url}
+                PlaceholderContent={
+                  loading ? (
+                    <ActivityIndicator
+                      size={50}
+                      style={globalStyles.screen}
+                      color={theme.colors.primary}
+                    />
+                  ) : undefined
+                }
+                onLoadStart={() => setLoading(true)}
+                onLoadEnd={() => setLoading(false)}
+                containerStyle={styles.image}
+              />
+            </TouchableOpacity>
+            <Text>路径：{url}</Text>
+          </>
+        )}
       </Animated.ScrollView>
     </ThemedNavigation>
   );
@@ -224,8 +266,15 @@ const styles = StyleSheet.create({
     width: "40%",
   },
   action: {
+    height: 40,
     gap: 10,
     paddingHorizontal: 10,
+  },
+  image: {
+    width: 150,
+    height: 150,
+    borderRadius: 10,
+    backgroundColor: "transparent",
   },
 });
 

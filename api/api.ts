@@ -7,7 +7,10 @@ import type {
   GetSearchParams,
 } from ".";
 import { findAllUrls, formatFileSize, formatTimeAgo } from "@/utils/lib";
-import { getImageServerDefaultItem } from "@/components/mine/util";
+import {
+  getImageServerDefaultItem,
+  type ServerItem,
+} from "@/components/mine/util";
 
 /**
  * 获取列表
@@ -66,11 +69,11 @@ export async function GetSearch(data: GetSearchParams) {
  * @constructor
  * @param params
  */
-export async function GetCover(): Promise<string> {
-  const item = await getImageServerDefaultItem();
+export async function GetCover(item?: ServerItem): Promise<string> {
+  const row = item || (await getImageServerDefaultItem());
   const param: Recordable<string> = {};
-  if (item) {
-    item.params.forEach((v) => {
+  if (row) {
+    row.params.forEach((v) => {
       param[v.key] = v.value;
     });
   } else {
@@ -78,7 +81,7 @@ export async function GetCover(): Promise<string> {
     param.mode = "8";
   }
   return request({
-    url: item ? item.url : "https://3650000.xyz/api/",
+    url: row ? row.url : "https://3650000.xyz/api/",
     method: "get",
     params: param,
   }).then((res) => {

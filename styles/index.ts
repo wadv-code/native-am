@@ -1,6 +1,10 @@
 import { StyleSheet } from "react-native";
 
 export const globalStyles = StyleSheet.create({
+  screen: {
+    width: "100%",
+    height: "100%",
+  },
   row: {
     flexDirection: "row",
     alignItems: "center",
@@ -14,6 +18,11 @@ export const globalStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-around",
+  },
+  rowCenter: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
   },
   column: {
     flexDirection: "column",
