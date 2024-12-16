@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
 import { useAppDispatch } from "@/hooks/useStore";
 import { formatMilliseconds, formatPath } from "@/utils/lib";
-import { GetCover } from "@/api/api";
+import { GetCover, GetMusic } from "@/api/api";
 import { ThemedNavigation } from "../theme/ThemedNavigation";
 import { Text, useTheme } from "@rneui/themed";
 import {
@@ -23,6 +23,7 @@ import {
   setAudioInfo,
   setPlaying,
 } from "@/store/slices/audioSlice";
+import { globalStyles } from "@/styles";
 
 type ViewPlayerProps = {
   closeModal: () => void;
@@ -30,13 +31,10 @@ type ViewPlayerProps = {
 
 const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
   const { theme } = useTheme();
-  const [loading, setLoading] = useState(false);
-  const [isHappy, setIsHappy] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [value, setValue] = useState(0);
   const [dragCurrent, setDragCurrent] = useState<string | undefined>();
   const rotateAnimation = useRef(new Animated.Value(0)).current;
-  const animatedValue = useRef(new Animated.Value(0)).current;
-  const animatedOpacity = useRef(new Animated.Value(0)).current;
   const dispatch = useAppDispatch();
   const audio = useSelector((state: RootState) => state.audio);
   const {
@@ -46,7 +44,9 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
     durationFormat,
     current,
     duration,
+    loading,
   } = audio;
+  const [isMusic, setIsMusic] = useState(!audioInfo.parent);
 
   const spin = rotateAnimation.interpolate({
     inputRange: [0, 1],
@@ -86,14 +86,13 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
   };
 
   const startAnimation = () => {
-    Animated.loop(
-      Animated.timing(rotateAnimation, {
-        toValue: 1,
-        duration: 30000,
-        useNativeDriver: true,
-        easing: Easing.linear,
-      })
-    ).start();
+    rotateAnimation.setValue(0);
+    Animated.timing(rotateAnimation, {
+      toValue: 1,
+      duration: 30000,
+      useNativeDriver: true,
+      easing: Easing.linear,
+    }).start(startAnimation);
   };
 
   const stopAnimation = () => {
@@ -101,10 +100,10 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
   };
 
   const onCoverRefresh = async () => {
-    if (loading) return;
+    if (refreshing) return;
     try {
       const path = formatPath(audioInfo.parent || "/", audioInfo.name);
-      setLoading(true);
+      setRefreshing(true);
       const url = await GetCover();
       if (url) {
         handleCoverItems({ key: path, value: url });
@@ -113,7 +112,28 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
     } catch {
       console.log("图片加载失败");
     } finally {
-      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  const nextPress = async () => {
+    if (loading || refreshing) return;
+    try {
+      setRefreshing(true);
+      const { info } = await GetMusic();
+      if (info) {
+        const id = info.id.toString();
+        emitter.emit("onAudioChange", {
+          id,
+          name: info.name,
+          auther: info.auther,
+          raw_url: info.url,
+          cover: info.pic_url,
+        });
+      }
+    } finally {
+      setRefreshing(false);
+      // dispatch(setLoading(false));
     }
   };
 
@@ -126,50 +146,10 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
   }, [rotateAnimation]);
 
   useEffect(() => {
-    if (isHappy) {
-      Animated.timing(animatedValue, {
-        toValue: -500, // 目标位置（假设屏幕外是负值）
-        duration: 1000, // 动画时长（毫秒）
-        useNativeDriver: true, // 使用原生动画驱动（性能更好）
-      }).start(() => {
-        animatedValue.stopAnimation();
-      });
-      Animated.timing(animatedOpacity, {
-        toValue: 0, // 目标位置（假设屏幕外是负值）
-        duration: 1000, // 动画时长（毫秒）
-        useNativeDriver: true, // 使用原生动画驱动（性能更好）
-      }).start(() => {
-        animatedOpacity.stopAnimation();
-      });
-    } else {
-      Animated.timing(animatedValue, {
-        toValue: 0, // 目标位置（假设屏幕外是负值）
-        duration: 1000, // 动画时长（毫秒）
-        useNativeDriver: true, // 使用原生动画驱动（性能更好）
-      }).start(() => {
-        animatedValue.stopAnimation();
-      });
-      Animated.timing(animatedOpacity, {
-        toValue: 1, // 目标位置（假设屏幕外是负值）
-        duration: 1000, // 动画时长（毫秒）
-        useNativeDriver: true, // 使用原生动画驱动（性能更好）
-      }).start(() => {
-        animatedOpacity.stopAnimation();
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isHappy]);
-
-  useEffect(() => {
     setValue(parseFloat((current / duration).toFixed(2)));
     if (dragCurrent) setDragCurrent(undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current]);
-
-  const animatedStyle = {
-    transform: [{ translateX: animatedValue }],
-  };
-  const opacityStyle = { opacity: animatedOpacity };
 
   return (
     <ThemedNavigation
@@ -177,36 +157,36 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
       isImage={true}
       style={styles.viewContainer}
       onLeft={closeModal}
-      isHappy={isHappy}
       leftIcon="keyboard-arrow-down"
-      onRight={() => setIsHappy(!isHappy)}
       rightText={
         <TouchableOpacity
-          onPress={() => setIsHappy(!isHappy)}
+          onPress={() => setIsMusic(!isMusic)}
           style={styles.rightText}
         >
           <Text style={{ fontWeight: "bold" }}>
-            {isHappy ? "退出愉悦心情" : "愉悦心情"}
+            {isMusic ? "退出音乐模式" : "进入音乐模式"}
           </Text>
         </TouchableOpacity>
       }
     >
-      <TouchableOpacity onPress={onCoverRefresh} style={styles.animatedImage}>
-        {loading ? (
-          <ActivityIndicator
-            size={100}
-            color={theme.colors.primary}
-            style={styles.screen}
-          />
-        ) : (
-          <Animated.Image
-            src={audioInfo.cover}
-            style={[styles.cover, rotateStyle, opacityStyle]}
-          />
-        )}
-      </TouchableOpacity>
-      <Animated.View style={[styles.infoContainer, animatedStyle]}>
+      <View style={styles.animatedImage}>
+        <TouchableOpacity
+          onPress={onCoverRefresh}
+          style={[styles.cover, rotateStyle]}
+        >
+          {(refreshing || loading) && (
+            <ActivityIndicator
+              size={100}
+              color={theme.colors.primary}
+              style={styles.indicator}
+            />
+          )}
+          <Animated.Image src={audioInfo.cover} style={globalStyles.screen} />
+        </TouchableOpacity>
+      </View>
+      <Animated.View style={styles.infoContainer}>
         <Text style={styles.infoTitle}>{audioInfo.name}</Text>
+        <Text style={styles.parent}>{audioInfo.auther}</Text>
         <Text style={[styles.parent, { color: theme.colors.grey0 }]}>
           {audioInfo.parent}
         </Text>
@@ -230,7 +210,7 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
           <Text>{durationFormat}</Text>
         </View>
         <View style={styles.toolbar}>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={nextPress}>
             <IconSymbol
               name="arrow-left"
               size={Platform.OS === "android" ? 50 : 30}
@@ -243,7 +223,7 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
               style={{ marginHorizontal: 30 }}
             />
           </TouchableOpacity>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={nextPress}>
             <IconSymbol
               name="arrow-right"
               size={Platform.OS === "android" ? 50 : 30}
@@ -256,7 +236,14 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
 };
 
 const styles = StyleSheet.create({
-  screen: { width: "100%", height: "100%" },
+  indicator: {
+    width: "100%",
+    height: "100%",
+    position: "absolute",
+    left: 0,
+    top: 0,
+    zIndex: 1,
+  },
   viewContainer: {
     flex: 1,
     justifyContent: "center",
@@ -269,10 +256,10 @@ const styles = StyleSheet.create({
   infoTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    marginBottom: 10,
+    marginBottom: 5,
   },
   animatedImage: {
-    flex: 1,
+    flexGrow: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -287,7 +274,6 @@ const styles = StyleSheet.create({
   },
   parent: {
     fontSize: 14,
-    fontWeight: "bold",
   },
   time: {
     width: "100%",
@@ -305,7 +291,7 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 2, // Android上的阴影效果
     overflow: "hidden",
-    position: "absolute",
+    borderWidth: 35,
   },
   toolbar: {
     flexDirection: "row",

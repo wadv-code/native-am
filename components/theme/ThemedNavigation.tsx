@@ -116,7 +116,7 @@ const ThemedNavigation = (props: ThemedNavigationProps) => {
           >
             <IconSymbol
               color={theme.colors.grey0}
-              size={iconSize ?? 28}
+              size={iconSize ?? 22}
               name={leftIcon}
             />
           </TouchableOpacity>
@@ -132,7 +132,7 @@ const ThemedNavigation = (props: ThemedNavigationProps) => {
             >
               <IconSymbol
                 color={theme.colors.grey0}
-                size={iconSize ?? 28}
+                size={iconSize ?? 22}
                 name={rightIcon}
               />
             </TouchableOpacity>

@@ -7,12 +7,9 @@ import { emitter } from "@/utils/mitt";
 import { storageManager } from "@/storage";
 import { useRouter } from "expo-router";
 import { ThemedNavigation } from "../theme/ThemedNavigation";
-import {
-  formatFileSize,
-  formatPath,
-  formatTimeAgo,
-  isAudioFile,
-} from "@/utils/lib";
+import { formatPath, isAudioFile } from "@/utils/lib";
+import { CatalogItem } from "../catalog/CatalogItem";
+import { Text } from "@rneui/themed";
 import {
   Alert,
   FlatList,
@@ -21,7 +18,6 @@ import {
   StyleSheet,
   type TextProps,
 } from "react-native";
-import { CatalogItem } from "../catalog/CatalogItem";
 
 type ListPlayerProps = TextProps & {
   closeModal: () => void;
@@ -49,18 +45,7 @@ const ListPlayer = ({ closeModal }: ListPlayerProps) => {
       setRefreshing(true);
       const { data } = await GetItems(params);
       setTotal(data.total);
-      setItems([
-        ...data.content.map((item) => {
-          item.id = Math.random().toString();
-          item.parent = params.path;
-          // item.modified = dayjs(item.modified || Date.now()).format(
-          //   "YYYY-MM-DD hh:ss"
-          // );
-          item.modifiedFormat = formatTimeAgo(item.modified);
-          item.sizeFormat = formatFileSize(item.size);
-          return item;
-        }),
-      ]);
+      setItems([...data.content]);
     } catch {
       return Promise.reject("onFetch Request Error");
     } finally {
@@ -118,6 +103,11 @@ const ListPlayer = ({ closeModal }: ListPlayerProps) => {
       onLeft={closeModal}
       isHappy={isHappy}
       leftIcon="keyboard-arrow-down"
+      rightText={
+        <Text
+          style={styles.rightText}
+        >{`${items.length}条 共${total}条记录`}</Text>
+      }
       onRight={() => setIsHappy(!isHappy)}
     >
       <FlatList
@@ -148,6 +138,10 @@ const ListPlayer = ({ closeModal }: ListPlayerProps) => {
 const styles = StyleSheet.create({
   viewContainer: {
     flex: 1,
+  },
+  rightText: {
+    marginRight: 10,
+    fontSize: 16,
   },
 });
 

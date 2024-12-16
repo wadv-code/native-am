@@ -3,6 +3,8 @@ import { IconSymbol } from "../ui";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "@/store";
 import { setPlaying } from "@/store/slices/audioSlice";
+import type { ModalPlayerType } from "./ModalPlayer";
+import { Image, Text, useTheme } from "@rneui/themed";
 import {
   View,
   Platform,
@@ -11,8 +13,6 @@ import {
   ImageBackground,
   TouchableOpacity,
 } from "react-native";
-import type { ModalPlayerType } from "./ModalPlayer";
-import { Image, Text, useTheme } from "@rneui/themed";
 
 // const sound =
 //   "http://nm.hzwima.com:8000/%E5%91%A8%E6%9D%B0%E4%BC%A6-%E7%A8%BB%E9%A6%99.mp3";

@@ -13,6 +13,8 @@ import {
   type NativeSyntheticEvent,
 } from "react-native";
 import { CatalogItem } from "./CatalogItem";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store";
 
 type CatalogListProps = ViewProps & {
   path: string;
@@ -32,10 +34,13 @@ const CatalogList = (props: CatalogListProps) => {
   const scrollYRef = useRef(0);
   const { onRefresh, handleItem } = props;
   const { theme } = useTheme();
+  const { audioInfo } = useSelector((state: RootState) => state.audio);
 
   const click = (item: GetItemsResItem) => {
-    state[path] = scrollYRef.current || 0;
-    handleItem && handleItem(item);
+    if (audioInfo.id !== item.id) {
+      state[path] = scrollYRef.current || 0;
+      handleItem && handleItem(item);
+    }
   };
 
   const onScrollToIndexFailed = () => {

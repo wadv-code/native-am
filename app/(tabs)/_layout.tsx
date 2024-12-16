@@ -32,8 +32,7 @@ export default function TabLayout() {
         screenOptions={{
           tabBarActiveBackgroundColor: theme.colors.background,
           tabBarInactiveBackgroundColor: theme.colors.background,
-          tabBarActiveTintColor:
-            theme.mode === "dark" ? theme.colors.grey0 : theme.colors.primary,
+          tabBarActiveTintColor: theme.colors.primary,
           tabBarInactiveTintColor: theme.colors.grey3,
           headerShown: false,
           tabBarButton: HapticTab,
@@ -44,7 +43,7 @@ export default function TabLayout() {
               position: "absolute",
             },
             default: {
-              borderColor: theme.colors.white,
+              borderColor: theme.colors.primary,
             },
           }),
         }}

@@ -3,7 +3,6 @@ import { HeaderSearchBar } from "@/components/sys/HeaderSearchBar";
 import { useEffect, useRef, useState } from "react";
 import type { GetItemsResItem, GetSearchParams } from "@/api";
 import { emitter } from "@/utils/mitt";
-import { SearchItem } from "../search/SearchItem";
 import { useRouter } from "expo-router";
 import { useRoute, type RouteProp } from "@react-navigation/native";
 import type { RootStackParamList } from "@/types";
@@ -11,12 +10,8 @@ import { IconSymbol } from "../ui";
 import { storageManager } from "@/storage";
 import { Text } from "@rneui/themed";
 import { ThemedView } from "../theme/ThemedView";
-import {
-  formatFileSize,
-  formatPath,
-  formatTimeAgo,
-  isAudioFile,
-} from "@/utils/lib";
+import { CatalogItem } from "../catalog/CatalogItem";
+import { formatPath, isAudioFile } from "@/utils/lib";
 import {
   Alert,
   Animated,
@@ -53,15 +48,6 @@ const SearchView = ({ style }: SearchViewProps) => {
     try {
       setRefreshing(true);
       const { data } = await GetSearch(params);
-      data.content.forEach((item) => {
-        item.id = Math.random().toString();
-        // item.parent = params.path;
-        // item.modified = dayjs(item.modified || Date.now()).format(
-        //   "YYYY-MM-DD hh:ss"
-        // );
-        item.modifiedFormat = formatTimeAgo(item.modified);
-        item.sizeFormat = formatFileSize(item.size);
-      });
       setTotal(data.total);
       setItems([...items, ...data.content]);
     } catch {
@@ -133,8 +119,8 @@ const SearchView = ({ style }: SearchViewProps) => {
   // }, []);
 
   return (
-    <ThemedView style={[styles.container, style]}>
-      <HeaderSearchBar keywords={params.keywords} onSeatch={onRefresh} />
+    <ThemedView style={style}>
+      <HeaderSearchBar keywords={params.keywords} onSearch={onRefresh} />
       <View style={styles.toolbar}>
         <IconSymbol size={22} name="snippet-folder" />
         <Animated.ScrollView
@@ -153,7 +139,7 @@ const SearchView = ({ style }: SearchViewProps) => {
         data={items}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <SearchItem item={item} onPress={handleItem} />
+          <CatalogItem item={item} showParent={true} onPress={handleItem} />
         )}
         onEndReached={onEndReached}
         refreshControl={
@@ -173,9 +159,6 @@ const SearchView = ({ style }: SearchViewProps) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 10,
-  },
   total: {
     paddingLeft: 5,
   },
@@ -184,6 +167,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     height: 30,
+    paddingHorizontal: 10,
   },
   scrollView: {
     paddingRight: 20,

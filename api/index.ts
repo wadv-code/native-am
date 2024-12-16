@@ -34,6 +34,7 @@ export type GetItemsResItem = {
   thumb?: string;
   type?: number;
   cover?: string;
+  auther?: string;
 };
 
 // 请求参数

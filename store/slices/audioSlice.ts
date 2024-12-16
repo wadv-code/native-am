@@ -1,6 +1,7 @@
 import type { GetDetailParams, GetItemsResItem } from "@/api";
 import { GetCover, GetDetail } from "@/api/api";
 import { storageManager } from "@/storage";
+import { IMAGE_DEFAULT_URL } from "@/utils";
 import { formatMilliseconds, formatPath } from "@/utils/lib";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { Alert } from "react-native";
@@ -115,9 +116,11 @@ const initialState: AudioSlice = {
   currentFormat: "00:00",
   durationFormat: "00:00",
   audioInfo: {
-    id: "1",
-    name: "还没有音乐可以播放",
-    cover: "http://3650000.xyz/api/",
+    id: "",
+    name: "暂时没用可播放的音乐",
+    auther: "",
+    raw_url: "",
+    cover: IMAGE_DEFAULT_URL,
   },
 };
 

@@ -12,6 +12,7 @@ import { useRouter } from "expo-router";
 import type { MaterialIconsName } from "@/types";
 import { useIsFocused } from "@react-navigation/native";
 import { Text } from "@rneui/themed";
+import { globalStyles } from "@/styles";
 
 // 排序方式
 const orders = ["name", "time", "size"] as const;
@@ -93,8 +94,8 @@ const CatalogToolbar: React.FC<ToolbarProps> = (props) => {
 
   const getOrderIcon: () => MaterialIconsName = () => {
     const icons: Record<ToolbarSort, MaterialIconsName> = {
-      ascending: "arrow-downward",
-      descending: "arrow-upward",
+      ascending: "arrow-upward",
+      descending: "arrow-downward",
     };
     return icons[sort];
   };
@@ -174,8 +175,8 @@ const CatalogToolbar: React.FC<ToolbarProps> = (props) => {
   }, [path]);
 
   return (
-    <View>
-      <View style={styles.row}>
+    <View style={styles.container}>
+      <View style={globalStyles.row}>
         <TouchableOpacity onPress={onRoot}>
           <IconSymbol size={24} name="snippet-folder" />
         </TouchableOpacity>
@@ -206,7 +207,7 @@ const CatalogToolbar: React.FC<ToolbarProps> = (props) => {
           <Text style={{ fontSize: 16 }}>🔍搜索</Text>
         </TouchableOpacity>
       </View>
-      <View style={styles.filterContainer}>
+      <View style={globalStyles.rowBetween}>
         <Text
           style={[styles.smallText, { width: "63%" }]}
           numberOfLines={1}
@@ -216,7 +217,7 @@ const CatalogToolbar: React.FC<ToolbarProps> = (props) => {
         </Text>
         <View style={styles.toolbar}>
           <Text style={styles.smallText}>{rightText}</Text>
-          <TouchableOpacity style={styles.row} onPress={onOrder}>
+          <TouchableOpacity style={globalStyles.row} onPress={onOrder}>
             <IconSymbol
               style={{ marginRight: 3 }}
               size={16}
@@ -234,13 +235,8 @@ const CatalogToolbar: React.FC<ToolbarProps> = (props) => {
 };
 
 const styles = StyleSheet.create({
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  filterContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+  container: {
+    paddingHorizontal: 10,
   },
   icon: {
     marginLeft: 5,

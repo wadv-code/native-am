@@ -1,17 +1,14 @@
+import axios from "axios";
+import Animated from "react-native-reanimated";
 import { GetCover } from "@/api/api";
-import {
-  getImageServerItems,
-  type ServerItem,
-  type ServerItemParam,
-} from "@/components/mine/util";
 import { ThemedNavigation } from "@/components/theme/ThemedNavigation";
 import { IconSymbol } from "@/components/ui";
 import { useBottomTabOverflow } from "@/components/ui/TabBarBackground";
 import { storageManager } from "@/storage";
 import { globalStyles } from "@/styles";
+import { IMAGE_DEFAULT_URL } from "@/utils";
 import { isString } from "@/utils/helper";
 import { Button, Image, Input, Text, useTheme } from "@rneui/themed";
-import axios from "axios";
 import { router } from "expo-router";
 import { useRouteInfo } from "expo-router/build/hooks";
 import { useEffect, useRef, useState } from "react";
@@ -21,7 +18,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import Animated from "react-native-reanimated";
+import {
+  getImageServerItems,
+  type ServerItem,
+  type ServerItemParam,
+} from "@/components/mine/util";
 
 const ImageServerEdit = () => {
   const info = useRouteInfo();
@@ -131,7 +132,7 @@ const ImageServerEdit = () => {
         param.mode = "8";
       }
       const url = axios.getUri({
-        url: item ? item.url : "https://3650000.xyz/api/",
+        url: item ? item.url : IMAGE_DEFAULT_URL,
         method: "get",
         params: param,
       });
@@ -224,7 +225,7 @@ const ImageServerEdit = () => {
         </View>
 
         {!!url && (
-          <>
+          <View>
             <TouchableOpacity
               style={[globalStyles.rowCenter, { marginVertical: 20 }]}
               onPress={() => setUrl("")}
@@ -246,7 +247,7 @@ const ImageServerEdit = () => {
               />
             </TouchableOpacity>
             <Text>路径：{url}</Text>
-          </>
+          </View>
         )}
       </Animated.ScrollView>
     </ThemedNavigation>

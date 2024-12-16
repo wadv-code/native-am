@@ -30,7 +30,12 @@ const CatalogView = ({ path = "/" }: CatalogViewProps) => {
 
   const onFetch = async (refresh?: boolean) => {
     try {
+      setItems([]);
       setLoading(true);
+      // 由于目录是特殊的树结构，传统的memo下钻和返回过快，更新负荷过大，所以每次都重新渲染性能最佳。
+      // 接口有缓存机制，太快，这里延迟一会儿，等待清理列表。
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      // 请求
       const { data } = await GetItems(params, refresh);
       setTotal(data.total);
       setSortOrderItems(data.content);
@@ -80,20 +85,20 @@ const CatalogView = ({ path = "/" }: CatalogViewProps) => {
       if (sortOrder.order === "time") {
         if (sortOrder.sort === "ascending") {
           return (
-            new Date(b.modified || Date.now()).getTime() -
-            new Date(a.modified || Date.now()).getTime()
+            new Date(a.modified || Date.now()).getTime() -
+            new Date(b.modified || Date.now()).getTime()
           );
         } else {
           return (
-            new Date(a.modified || Date.now()).getTime() -
-            new Date(b.modified || Date.now()).getTime()
+            new Date(b.modified || Date.now()).getTime() -
+            new Date(a.modified || Date.now()).getTime()
           );
         }
       } else if (sortOrder.order === "size") {
         if (sortOrder.sort === "ascending") {
-          return (b.size || 0) - (a.size || 0);
-        } else {
           return (a.size || 0) - (b.size || 0);
+        } else {
+          return (b.size || 0) - (a.size || 0);
         }
       } else {
         if (sortOrder.sort === "ascending") {
@@ -135,7 +140,7 @@ const CatalogView = ({ path = "/" }: CatalogViewProps) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 10,
+    // paddingHorizontal: 10,
   },
 });
 

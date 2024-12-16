@@ -24,7 +24,7 @@ const ImageServer = () => {
       [
         {
           text: "取消",
-          onPress: () => console.log("Cancel Pressed"),
+          onPress: () => console.log("取消"),
           style: "cancel",
         },
         { text: "确认删除", onPress: () => handleRemove(index) },

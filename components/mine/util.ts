@@ -1,5 +1,6 @@
 import { storageManager } from "@/storage";
 import type { MaterialIconsName } from "@/types";
+import { IMAGE_DEFAULT_URL } from "@/utils";
 import type { Href } from "expo-router";
 
 export type GridItem = {
@@ -39,7 +40,7 @@ export const getServerItems = (): ServerItem[] => {
   return [
     {
       id: "1",
-      url: "https://3650000.xyz/api/",
+      url: IMAGE_DEFAULT_URL,
       title: "3650000",
       params: [
         { key: "type", value: "json" },

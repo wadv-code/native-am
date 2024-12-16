@@ -5,17 +5,16 @@ import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import "react-native-reanimated";
-import {
-  createTheme,
-  ThemeProvider,
-  type CreateThemeOptions,
-} from "@rneui/themed";
-import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Provider } from "react-redux";
 import { store } from "@/store";
 import { Appearance, SafeAreaView } from "react-native";
 import { storageManager } from "@/storage";
 import { Colors } from "@/constants/Colors";
+import {
+  createTheme,
+  ThemeProvider,
+  type CreateThemeOptions,
+} from "@rneui/themed";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -51,6 +50,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     getCreateThemeOptions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (!theme) {
@@ -62,7 +62,7 @@ export default function RootLayout() {
   }
 
   return (
-    <SafeAreaProvider
+    <SafeAreaView
       style={{
         flex: 1,
         backgroundColor:
@@ -81,6 +81,6 @@ export default function RootLayout() {
           <StatusBar style="auto" />
         </ThemeProvider>
       </Provider>
-    </SafeAreaProvider>
+    </SafeAreaView>
   );
 }

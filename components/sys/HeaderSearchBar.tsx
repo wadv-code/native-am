@@ -3,20 +3,23 @@ import { IconSymbol } from "../ui";
 import { useEffect, useRef, useState } from "react";
 import { HeaderBar } from "./HeaderBar";
 import { Text, useTheme } from "@rneui/themed";
+import { storageManager } from "@/storage";
 
 type HeaderSearchBarProps = {
   keywords?: string;
-  onSeatch?: (keyword?: string) => void;
+  onSearch?: (keyword?: string) => void;
 };
 
-const HeaderSearchBar = ({ keywords, onSeatch }: HeaderSearchBarProps) => {
+const HeaderSearchBar = ({ keywords, onSearch }: HeaderSearchBarProps) => {
   const { theme } = useTheme();
   const inputRef = useRef<TextInput>(null);
   const [search, setSearch] = useState("");
+
   const handleSearch = (query: string) => {
     const isFocused = inputRef.current?.isFocused();
     if (isFocused) return inputRef.current?.blur();
-    onSeatch && onSeatch(query);
+    onSearch && onSearch(query);
+    storageManager.set("keywords", query);
   };
 
   const handleClear = () => {
@@ -24,15 +27,18 @@ const HeaderSearchBar = ({ keywords, onSeatch }: HeaderSearchBarProps) => {
   };
 
   useEffect(() => {
-    setSearch(keywords || "");
+    (async () => {
+      const value = keywords || (await storageManager.get("keywords")) || "";
+      setSearch(value);
+    })();
   }, [keywords]);
 
   return (
-    <>
+    <View style={styles.container}>
       <HeaderBar />
       <View
         style={[
-          styles.container,
+          styles.viewContainer,
           {
             backgroundColor: theme.colors.background,
             borderColor: theme.colors.greyOutline,
@@ -49,7 +55,7 @@ const HeaderSearchBar = ({ keywords, onSeatch }: HeaderSearchBarProps) => {
           value={search}
           onChangeText={(query) => setSearch(query)}
           onEndEditing={() => handleSearch(search)}
-          style={[styles.input, { color: theme.colors.grey3 }]}
+          style={[styles.input, { color: theme.colors.grey0 }]}
         />
         {search ? (
           <TouchableOpacity style={styles.closeIcon} onPress={handleClear}>
@@ -63,11 +69,14 @@ const HeaderSearchBar = ({ keywords, onSeatch }: HeaderSearchBarProps) => {
           <Text style={styles.searchText}>搜索</Text>
         </TouchableOpacity>
       </View>
-    </>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    paddingHorizontal: 10,
+  },
   search: {
     width: 70,
     height: "85%",
@@ -82,7 +91,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#ffffff",
   },
-  container: {
+  viewContainer: {
     width: "100%",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },

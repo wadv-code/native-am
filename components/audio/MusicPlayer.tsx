@@ -13,6 +13,7 @@ import {
   setDuration,
   setPlaying,
   setLoading,
+  setAudioInfo,
 } from "@/store/slices/audioSlice";
 
 Audio.setAudioModeAsync({
@@ -122,6 +123,7 @@ const MusicPlayer = (props: MusicPlayerProps) => {
         }
 
         if (playbackStatus.didJustFinish && !playbackStatus.isLooping) {
+          setAudioSeek(0, false);
           onFinish && onFinish();
         }
       }
@@ -140,12 +142,17 @@ const MusicPlayer = (props: MusicPlayerProps) => {
 
   const onAudioChange = (audio: GetItemsResItem) => {
     dispatch(setLoading(true));
-    dispatch(setAudioInfoAsync(audio));
+    if (audio.parent) {
+      dispatch(setAudioInfoAsync(audio));
+    } else {
+      dispatch(setAudioInfo(audio));
+    }
   };
 
-  const setAudioSeek = (value: number) => {
+  const setAudioSeek = async (value: number, play: boolean = true) => {
     dispatch(setCurrent(value));
-    soundObject.setPositionAsync(value);
+    await soundObject.setPositionAsync(value);
+    if (!play) await pauseAsync();
   };
 
   // const setNotifications = async () => {
@@ -165,7 +172,7 @@ const MusicPlayer = (props: MusicPlayerProps) => {
 
   useEffect(() => {
     storageManager.get("audio_info").then((audio) => {
-      if (audio && audio.parent) onAudioChange(audio);
+      if (audio && audio.id) onAudioChange(audio);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

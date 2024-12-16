@@ -7,6 +7,7 @@ export default function ViewsLayout() {
       <Stack.Screen name="search" options={{ headerShown: false }} />
       <Stack.Screen name="settings" options={{ headerShown: false }} />
       <Stack.Screen name="viewer" options={{ headerShown: false }} />
+      <Stack.Screen name="about" options={{ headerShown: false }} />
       <Stack.Screen
         name="image-server/image-server"
         options={{ headerShown: false }}

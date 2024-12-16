@@ -10,6 +10,7 @@ import { GetCover } from "@/api/api";
 import { ThemedView } from "@/components/theme/ThemedView";
 import { globalStyles } from "@/styles";
 import { Text, useTheme } from "@rneui/themed";
+import { IMAGE_DEFAULT_URL } from "@/utils";
 import {
   ActivityIndicator,
   Image,
@@ -19,6 +20,7 @@ import {
   useColorScheme,
   View,
 } from "react-native";
+import { isNumber } from "@/utils/helper";
 
 const ImageScreen = () => {
   const mode = useColorScheme();
@@ -26,7 +28,7 @@ const ImageScreen = () => {
   const [index, setIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState<OptionType[]>([]);
-  const [imageUrl, setImageUrl] = useState("http://3650000.xyz/api/");
+  const [imageUrl, setImageUrl] = useState(IMAGE_DEFAULT_URL);
   const isInitialRender = useRef<boolean>(false);
 
   const router = useRouter();
@@ -114,9 +116,14 @@ const ImageScreen = () => {
   useEffect(() => {
     (async () => {
       const { coverItems, viewerIndex } = await getStorageAsync();
-      setIndex(viewerIndex);
-      setImages([...coverItems]);
+      setIndex(isNumber(viewerIndex) ? viewerIndex : 0);
+      if (coverItems.length) {
+        setImages([...coverItems]);
+      } else {
+        setImages([{ key: Math.random().toString(), value: imageUrl }]);
+      }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

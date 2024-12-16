@@ -1,4 +1,4 @@
-import { Platform, StyleSheet, View, type ViewProps } from "react-native";
+import { StyleSheet, View, type ViewProps } from "react-native";
 import Constants from "expo-constants";
 import { StatusBar, type StatusBarStyle } from "expo-status-bar";
 

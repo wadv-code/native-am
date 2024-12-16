@@ -39,15 +39,15 @@ const SettingsScreen = () => {
 
   const clearStorage = () => {
     Alert.alert(
-      "Confirmation",
-      "Are you sure you want to proceed?",
+      "提示",
+      "确认要清除缓存吗？",
       [
         {
           text: "Cancel",
-          onPress: () => console.log("Cancel Pressed"),
+          onPress: () => console.log("取消"),
           style: "cancel",
         },
-        { text: "OK", onPress: () => storageManager.clear() },
+        { text: "确认清除", onPress: () => storageManager.clear() },
       ],
       { cancelable: false }
     );

@@ -1,4 +1,10 @@
 import request from "@/utils/request";
+import { IMAGE_DEFAULT_URL } from "@/utils";
+import { findAllUrls, formatContent } from "@/utils/lib";
+import {
+  getImageServerDefaultItem,
+  type ServerItem,
+} from "@/components/mine/util";
 import type {
   GetItemsRes,
   GetDetailRes,
@@ -6,11 +12,6 @@ import type {
   GetDetailParams,
   GetSearchParams,
 } from ".";
-import { findAllUrls, formatFileSize, formatTimeAgo } from "@/utils/lib";
-import {
-  getImageServerDefaultItem,
-  type ServerItem,
-} from "@/components/mine/util";
 
 /**
  * 获取列表
@@ -24,17 +25,9 @@ export async function GetItems(params: GetItemsParams, refresh?: boolean) {
     data: params,
     cache: true,
     refresh: refresh,
-  }).then(({ data }) => {
-    data.content.forEach((item) => {
-      item.id = Math.random().toString();
-      item.parent = item.parent || params.path || "/";
-      // item.modified = dayjs(item.modified || Date.now()).format(
-      //   "YYYY-MM-DD hh:ss"
-      // );
-      item.modifiedFormat = formatTimeAgo(item.modified);
-      item.sizeFormat = formatFileSize(item.size);
-    });
-    return { data };
+  }).then((res) => {
+    formatContent(res.data.content, params.path);
+    return res;
   });
 }
 
@@ -61,6 +54,9 @@ export async function GetSearch(data: GetSearchParams) {
     url: "/api/fs/search",
     method: "post",
     data,
+  }).then((res) => {
+    formatContent(res.data.content);
+    return res;
   });
 }
 
@@ -78,16 +74,40 @@ export async function GetCover(item?: ServerItem): Promise<string> {
     });
   } else {
     param.type = "json";
-    param.mode = "8";
+    param.mode = "2,8";
   }
   return request({
-    url: row ? row.url : "https://3650000.xyz/api/",
+    url: row ? row.url : IMAGE_DEFAULT_URL,
     method: "get",
     params: param,
   }).then((res) => {
     const urls = findAllUrls(res);
-    const url = urls.length ? urls[0] : "https://3650000.xyz/api/";
+    const url = urls.length ? urls[0] : IMAGE_DEFAULT_URL;
     const uri = __DEV__ ? url : url.replace(/http:/g, "https:");
     return uri;
+  });
+}
+
+export type MusicRes = {
+  id: number;
+  name: string;
+  auther: string;
+  pic_url: string;
+  url: string;
+  update_time: string;
+};
+
+/**
+ * 获取音乐
+ * @constructor
+ * @param params
+ */
+export async function GetMusic(bill: string = "热歌榜") {
+  return request<MusicRes>({
+    url: `https://api.vvhan.com/api/wyMusic/${bill}`,
+    method: "get",
+    params: {
+      type: "json",
+    },
   });
 }

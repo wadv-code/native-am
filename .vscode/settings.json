@@ -154,8 +154,8 @@
   "emmet.showSuggestionsAsSnippets": true,
   "emmet.triggerExpansionOnTab": false,
 
-  "errorLens.enabledDiagnosticLevels": ["warning", "error"],
-  "errorLens.excludeBySource": ["cSpell", "Grammarly", "eslint"],
+  // "errorLens.enabledDiagnosticLevels": ["warning", "error"],
+  // "errorLens.excludeBySource": ["cSpell", "Grammarly", "eslint"],
 
   "stylelint.enable": true,
   "stylelint.packageManager": "pnpm",
@@ -180,16 +180,16 @@
     "json5"
   ],
 
-  "tailwindCSS.experimental.classRegex": [
-    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
-  ],
+  // "tailwindCSS.experimental.classRegex": [
+  //   ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
+  // ],
 
-  "github.copilot.enable": {
-    "*": true,
-    "markdown": true,
-    "plaintext": false,
-    "yaml": false
-  },
+  // "github.copilot.enable": {
+  //   "*": true,
+  //   "markdown": true,
+  //   "plaintext": false,
+  //   "yaml": false
+  // },
 
   // "cssVariables.lookupFiles": ["packages/core/base/design/src/**/*.css"],
 
@@ -219,8 +219,11 @@
     "eslint.config.mjs": ".eslintignore,.prettierignore,.stylelintignore,.commitlintrc.*,.prettierrc.*,stylelint.config.*,.lintstagedrc.mjs,cspell.json",
     "tailwind.config.mjs": "postcss.*"
   },
-  "commentTranslate.hover.enabled": false,
-  "commentTranslate.multiLineMerge": true,
+  // "commentTranslate.hover.enabled": false,
+  // "commentTranslate.multiLineMerge": true,
   "vue.server.hybridMode": true,
-  "typescript.tsdk": "node_modules/typescript/lib"
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "[xml]": {
+    "editor.defaultFormatter": "redhat.vscode-xml"
+  }
 }

@@ -29,8 +29,8 @@ const MineGrid = ({ style, items, title }: MineGridProps) => {
 
   const { setColorScheme } = Appearance;
 
-  const openPage = (herf: Href) => {
-    router.navigate(herf);
+  const openPage = (href: Href) => {
+    router.navigate(href);
   };
 
   const clearStorage = () => {
@@ -40,7 +40,7 @@ const MineGrid = ({ style, items, title }: MineGridProps) => {
       [
         {
           text: "取消",
-          onPress: () => console.log("Cancel Pressed"),
+          onPress: () => console.log("取消"),
           style: "cancel",
         },
         { text: "确认清除", onPress: () => storageManager.clear() },
