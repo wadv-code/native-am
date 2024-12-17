@@ -32,7 +32,8 @@ export default function TabLayout() {
         screenOptions={{
           tabBarActiveBackgroundColor: theme.colors.background,
           tabBarInactiveBackgroundColor: theme.colors.background,
-          tabBarActiveTintColor: theme.colors.primary,
+          tabBarActiveTintColor:
+            theme.mode === "dark" ? theme.colors.grey0 : theme.colors.primary,
           tabBarInactiveTintColor: theme.colors.grey3,
           headerShown: false,
           tabBarButton: HapticTab,
@@ -54,6 +55,15 @@ export default function TabLayout() {
             title: "Home",
             tabBarIcon: ({ color }) => (
               <IconSymbol size={28} name="home" color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="collect"
+          options={{
+            title: "Collect",
+            tabBarIcon: ({ color }) => (
+              <IconSymbol size={28} name="star" color={color} />
             ),
           }}
         />

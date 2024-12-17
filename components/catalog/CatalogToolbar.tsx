@@ -9,35 +9,19 @@ import { IconSymbol } from "../ui";
 import React, { useEffect, useRef, useState } from "react";
 import { storageManager } from "@/storage";
 import { useRouter } from "expo-router";
-import type { MaterialIconsName } from "@/types";
 import { useIsFocused } from "@react-navigation/native";
 import { Text } from "@rneui/themed";
 import { globalStyles } from "@/styles";
-
-// 排序方式
-const orders = ["name", "time", "size"] as const;
-// 排序
-const sorts = ["descending", "ascending"] as const;
-
-// type ToolbarSynopsis = {
-//   total: number;
-//   pageSize: number;
-// };
-
-type ToolbarOrder = (typeof orders)[number];
-
-type ToolbarSort = (typeof sorts)[number];
-
-type ToolbarSortOrder = {
-  sort: ToolbarSort;
-  order: ToolbarOrder;
-};
+import { CatalogAction } from "./CatalogAction";
+import type { ActionSortOrder } from "@/types";
 
 type ToolbarProps = {
   rightText: string;
   path?: string;
   toPath?: (path: string) => void;
-  onSortOrder?: (order: ToolbarSortOrder) => void;
+  onSortOrder?: (order: ActionSortOrder) => void;
+  enableTouchBack?: boolean;
+  showOpenSearch?: boolean;
 };
 
 type HistoryItem = {
@@ -45,16 +29,18 @@ type HistoryItem = {
   parent: string;
 };
 
-const CatalogToolbar: React.FC<ToolbarProps> = (props) => {
-  const { rightText, path = "/" } = props;
+const CatalogToolbar = (props: ToolbarProps) => {
+  const {
+    rightText,
+    path = "/",
+    enableTouchBack = false,
+    showOpenSearch = false,
+  } = props;
   const { toPath, onSortOrder } = props;
   const isFocused = useIsFocused();
   const isFocusedRef = useRef<boolean>(false);
   const [items, setItems] = useState<HistoryItem[]>([]);
   const itemsRef = useRef<HistoryItem[]>(items);
-  const [sort, setSort] = useState<ToolbarSort>("descending");
-  const [order, setOrder] = useState<ToolbarOrder>("time");
-  const isInitialRender = useRef<boolean>(false);
   const router = useRouter();
 
   const onRoot = () => {
@@ -74,30 +60,6 @@ const CatalogToolbar: React.FC<ToolbarProps> = (props) => {
         path: path ?? "/",
       },
     });
-  };
-
-  const onOrder = () => {
-    const index = orders.findIndex((f) => f === order);
-    const orderString = orders[index + 1];
-    const value = orderString ?? orders[0];
-    setOrder(value);
-    storageManager.set("order_string", value);
-  };
-
-  const onSort = () => {
-    const index = sorts.findIndex((f) => f === sort);
-    const sortString = sorts[index + 1];
-    const value = sortString ?? sorts[0];
-    setSort(value);
-    storageManager.set("sort_string", value);
-  };
-
-  const getOrderIcon: () => MaterialIconsName = () => {
-    const icons: Record<ToolbarSort, MaterialIconsName> = {
-      ascending: "arrow-upward",
-      descending: "arrow-downward",
-    };
-    return icons[sort];
   };
 
   const getName = () => {
@@ -151,15 +113,7 @@ const CatalogToolbar: React.FC<ToolbarProps> = (props) => {
   }, [isFocused]);
 
   useEffect(() => {
-    if (!isInitialRender.current) {
-      isInitialRender.current = true;
-      return;
-    }
-    onSortOrder && onSortOrder({ sort, order });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sort, order]);
-
-  useEffect(() => {
+    if (!enableTouchBack) return;
     // 注册返回事件监听
     const backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
@@ -203,33 +157,17 @@ const CatalogToolbar: React.FC<ToolbarProps> = (props) => {
             );
           })}
         </Animated.ScrollView>
-        <TouchableOpacity style={styles.searchIcon} onPress={openSearch}>
-          <Text style={{ fontSize: 16 }}>🔍搜索</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={globalStyles.rowBetween}>
-        <Text
-          style={[styles.smallText, { width: "63%" }]}
-          numberOfLines={1}
-          ellipsizeMode="tail"
-        >
-          {getName()}
-        </Text>
-        <View style={styles.toolbar}>
-          <Text style={styles.smallText}>{rightText}</Text>
-          <TouchableOpacity style={globalStyles.row} onPress={onOrder}>
-            <IconSymbol
-              style={{ marginRight: 3 }}
-              size={16}
-              name="sort-by-alpha"
-            />
-            <Text style={styles.smallText}>{order}</Text>
+        {showOpenSearch && (
+          <TouchableOpacity style={styles.searchIcon} onPress={openSearch}>
+            <Text style={{ fontSize: 16 }}>🔍搜索</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={onSort}>
-            <IconSymbol size={18} name={getOrderIcon()} />
-          </TouchableOpacity>
-        </View>
+        )}
       </View>
+      <CatalogAction
+        rightText={rightText}
+        title={getName()}
+        onSortOrder={onSortOrder}
+      />
     </View>
   );
 };
@@ -272,4 +210,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export { CatalogToolbar, ToolbarSortOrder, ToolbarOrder, ToolbarSort };
+export { CatalogToolbar };

@@ -1,6 +1,5 @@
-import { CatalogList } from "@/components/catalog/CatalogList";
 import { useEffect, useState } from "react";
-import { HeaderBar, type ToolbarSortOrder } from "../sys";
+import { HeaderBar } from "../sys";
 import { CatalogToolbar } from "./CatalogToolbar";
 import { Alert, StyleSheet } from "react-native";
 import { GetItems } from "@/api/api";
@@ -9,6 +8,10 @@ import { formatPath, isAudioFile } from "@/utils/lib";
 import { emitter } from "@/utils/mitt";
 import { ThemedView } from "@/components/theme/ThemedView";
 import type { GetItemsParams, GetItemsResItem } from "@/api";
+import { CatalogList } from "./CatalogList";
+import { CatalogOverlay } from "./CatalogOverlay";
+import { getSortOrderItems, toggleCollect } from "@/utils/common";
+import type { ActionSortOrder } from "@/types";
 
 const default_per_page = 1000;
 
@@ -19,6 +22,7 @@ type CatalogViewProps = {
 const CatalogView = ({ path = "/" }: CatalogViewProps) => {
   const [total, setTotal] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
+  const [isVisible, setIsVisible] = useState<boolean>(false);
   const [items, setItems] = useState<GetItemsResItem[]>([]);
   const [params, setParams] = useState<GetItemsParams>({
     page: 1,
@@ -30,15 +34,15 @@ const CatalogView = ({ path = "/" }: CatalogViewProps) => {
 
   const onFetch = async (refresh?: boolean) => {
     try {
-      setItems([]);
       setLoading(true);
-      // 由于目录是特殊的树结构，传统的memo下钻和返回过快，更新负荷过大，所以每次都重新渲染性能最佳。
+      setItems([]);
+      // 由于目录是特殊的树结构，传统的memo下钻太快可能更新负荷过大，所以每次都重新渲染当前屏幕已显示的数据。
       // 接口有缓存机制，太快，这里延迟一会儿，等待清理列表。
       await new Promise((resolve) => setTimeout(resolve, 300));
       // 请求
       const { data } = await GetItems(params, refresh);
       setTotal(data.total);
-      setSortOrderItems(data.content);
+      setItems(await getSortOrderItems(data.content));
       storageManager.set("catalog_view_path", params.path);
     } catch {
       return Promise.reject("onFetch Request Error");
@@ -47,7 +51,21 @@ const CatalogView = ({ path = "/" }: CatalogViewProps) => {
     }
   };
 
-  const handleItem = (item: GetItemsResItem) => {
+  const updateItem = (id: string, key: keyof GetItemsResItem, value: any) => {
+    setItems((prevItems) => {
+      // 创建一个新数组来避免直接修改状态
+      return prevItems.map((item) => {
+        // 如果找到匹配的id，则返回一个新的对象来更新它
+        if (item.id === id) {
+          return { ...item, [key]: value };
+        }
+        // 否则返回原始对象
+        return item;
+      });
+    });
+  };
+
+  const onLeftPress = (item: GetItemsResItem) => {
     if (loading) return;
     if (item.is_dir) {
       const currentPath = formatPath(params.path, item.name);
@@ -63,6 +81,19 @@ const CatalogView = ({ path = "/" }: CatalogViewProps) => {
     }
   };
 
+  const onIconPress = async (item: GetItemsResItem) => {
+    const is_collect = await toggleCollect(item);
+    item.is_collect = is_collect;
+    updateItem(item.id, "is_collect", is_collect);
+  };
+
+  const onRightPress = (item: GetItemsResItem) => {
+    // if (item.is_dir) onLeftPress(item);
+    // else {
+    //   setIsVisible(true);
+    // }
+  };
+
   const onRefresh = () => {
     if (loading) return;
     params.per_page = default_per_page;
@@ -73,43 +104,9 @@ const CatalogView = ({ path = "/" }: CatalogViewProps) => {
     setParams({ ...params, path: target || "/" });
   };
 
-  const setSortOrderItems = async (
-    list: GetItemsResItem[],
-    option?: ToolbarSortOrder
-  ) => {
-    const sort = (await storageManager.get("sort_string")) ?? "descending";
-    const order = (await storageManager.get("order_string")) ?? "time";
-    const sortOrder = option ?? { sort, order };
-
-    list.sort((a, b) => {
-      if (sortOrder.order === "time") {
-        if (sortOrder.sort === "ascending") {
-          return (
-            new Date(a.modified || Date.now()).getTime() -
-            new Date(b.modified || Date.now()).getTime()
-          );
-        } else {
-          return (
-            new Date(b.modified || Date.now()).getTime() -
-            new Date(a.modified || Date.now()).getTime()
-          );
-        }
-      } else if (sortOrder.order === "size") {
-        if (sortOrder.sort === "ascending") {
-          return (a.size || 0) - (b.size || 0);
-        } else {
-          return (b.size || 0) - (a.size || 0);
-        }
-      } else {
-        if (sortOrder.sort === "ascending") {
-          return a.name.localeCompare(b.name, "zh-CN");
-        } else {
-          return b.name.localeCompare(a.name, "zh-CN");
-        }
-      }
-    });
-
-    setItems([...list]);
+  const onSortOrder = async (option: ActionSortOrder) => {
+    const list = await getSortOrderItems(items, option);
+    setItems(list);
   };
 
   useEffect(() => {
@@ -124,15 +121,23 @@ const CatalogView = ({ path = "/" }: CatalogViewProps) => {
         path={params.path}
         toPath={toPath}
         rightText={`${items.length}/${total}`}
-        onSortOrder={() => setSortOrderItems(items)}
+        onSortOrder={onSortOrder}
+        enableTouchBack={true}
+        showOpenSearch={true}
       />
       <CatalogList
         items={items}
         total={total}
         loading={loading}
         path={params.path}
-        handleItem={handleItem}
+        onIconPress={onIconPress}
+        onLeftPress={onLeftPress}
+        onRightPress={onRightPress}
         onRefresh={onRefresh}
+      />
+      <CatalogOverlay
+        isVisible={isVisible}
+        closeSheet={() => setIsVisible(false)}
       />
     </ThemedView>
   );

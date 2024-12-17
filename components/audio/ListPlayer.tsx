@@ -62,7 +62,7 @@ const ListPlayer = ({ closeModal }: ListPlayerProps) => {
     setParams({ ...params, page: 1 });
   };
 
-  const handleItem = async (item: GetItemsResItem) => {
+  const onLeftPress = async (item: GetItemsResItem) => {
     if (refreshing) return;
     if (item.is_dir) {
       await storageManager.set(
@@ -117,7 +117,7 @@ const ListPlayer = ({ closeModal }: ListPlayerProps) => {
         }}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <CatalogItem item={item} onPress={handleItem} />
+          <CatalogItem item={item} onLeftPress={onLeftPress} />
         )}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />

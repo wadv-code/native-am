@@ -1,77 +1,87 @@
-import React from "react";
+import React, { memo } from "react";
 import type { GetItemsResItem } from "@/api";
 import { getIconSymbol } from "@/utils/lib";
 import { IconSymbol } from "../ui";
-import { Text, useTheme } from "@rneui/themed";
+import { makeStyles, Text, useTheme } from "@rneui/themed";
 import { useSelector } from "react-redux";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import type { RootState } from "@/store";
 
 type ItemProps = {
   item: GetItemsResItem;
+  refresh?: boolean;
+  height?: number;
   showParent?: boolean;
-  onPress: (option: GetItemsResItem) => void;
+  onIconPress?: (option: GetItemsResItem) => void;
+  onLeftPress?: (option: GetItemsResItem) => void;
+  onRightPress?: (option: GetItemsResItem) => void;
 };
 
 export type CatalogItemProps = ItemProps;
 
-const CatalogItem = React.memo(
-  (option: CatalogItemProps) => {
-    const { item, showParent, onPress } = option;
-    const { id, name, is_dir, sizeFormat, modifiedFormat } = item;
+const CatalogItem = memo(
+  (props: CatalogItemProps) => {
+    const styles = useStyles(props);
+    const { item, showParent } = props;
+    const { is_collect } = item;
+    const { onIconPress, onLeftPress, onRightPress } = props;
     const { theme } = useTheme();
     const { audioInfo } = useSelector((state: RootState) => state.audio);
 
     return (
-      <View key={id} style={styles.itemContainer}>
+      <View key={item.id} style={styles.itemContainer}>
         <View
-          style={[
-            styles.line,
-            {
-              backgroundColor: theme.colors.primary,
-              opacity: audioInfo.id === item.id ? 1 : 0,
-            },
-          ]}
+          style={[styles.line, { opacity: audioInfo.id === item.id ? 1 : 0 }]}
         />
         <TouchableOpacity
           style={styles.leftContainer}
-          onPress={() => onPress && onPress(item)}
+          onPress={() => onLeftPress && onLeftPress(item)}
         >
           <IconSymbol
-            size={26}
-            name={getIconSymbol(item.name, is_dir)}
+            size={24}
+            name={getIconSymbol(item.name, item.is_dir)}
             color={theme.colors.primary}
             style={styles.leftSymbol}
           />
           <View>
             <Text numberOfLines={2} ellipsizeMode="tail" style={styles.title}>
-              {name}
+              {item.name}
             </Text>
-            <Text style={styles.size}>
-              {showParent ? item.parent : sizeFormat}
+            <Text style={styles.timeStyle}>
+              {showParent ? item.parent : item.modifiedFormat}
             </Text>
           </View>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.rightContainer}>
-          <Text style={styles.timeStyle}>{modifiedFormat}</Text>
-          <IconSymbol
-            size={24}
-            name={is_dir ? "keyboard-arrow-right" : "more-vert"}
-          />
-        </TouchableOpacity>
+        <View style={styles.rightContainer}>
+          <Text style={styles.size}>{item.sizeFormat}</Text>
+          <TouchableOpacity onPress={() => onIconPress && onIconPress(item)}>
+            <IconSymbol
+              size={24}
+              name={is_collect ? "star" : "star-border"}
+              color={is_collect ? theme.colors.primary : theme.colors.grey0}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => onRightPress && onRightPress(item)}>
+            <IconSymbol
+              size={24}
+              name={item.is_dir ? "keyboard-arrow-right" : "more-vert"}
+            />
+          </TouchableOpacity>
+        </View>
       </View>
     );
   },
   (prevProps, nextProps) => {
-    // 如果item的id没有改变，则不需要重新渲染
+    if (prevProps.refresh || nextProps.refresh) {
+      return false;
+    }
     return prevProps.item.id === nextProps.item.id;
   }
 );
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((theme, props: CatalogItemProps) => ({
   itemContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 7,
     position: "relative",
@@ -80,26 +90,28 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
+    height: props.height ?? 50,
     paddingRight: 40,
-    paddingVertical: 7,
   },
   title: {
     fontSize: 14,
-    fontWeight: "bold",
+    lineHeight: 16,
   },
   size: {
     fontSize: 12,
-    marginTop: 5,
+    marginRight: 5,
+    color: theme.colors.primary,
+  },
+  timeStyle: {
+    fontSize: 12,
+    marginTop: 3,
   },
   rightContainer: {
     flexDirection: "row",
     alignItems: "center",
   },
-  timeStyle: {
-    fontSize: 12,
-  },
   leftSymbol: {
-    marginRight: 5,
+    marginRight: 7,
   },
   line: {
     position: "absolute",
@@ -109,8 +121,9 @@ const styles = StyleSheet.create({
     height: "100%",
     width: 4,
     borderRadius: 2,
+    backgroundColor: theme.colors.primary,
   },
-});
+}));
 
 CatalogItem.displayName = "CatalogItem";
 

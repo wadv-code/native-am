@@ -1,6 +1,7 @@
 import request from "@/utils/request";
 import { IMAGE_DEFAULT_URL } from "@/utils";
-import { findAllUrls, formatContent } from "@/utils/lib";
+import { findAllUrls } from "@/utils/lib";
+import { formatContent } from "@/utils/common";
 import {
   getImageServerDefaultItem,
   type ServerItem,
@@ -25,8 +26,8 @@ export async function GetItems(params: GetItemsParams, refresh?: boolean) {
     data: params,
     cache: true,
     refresh: refresh,
-  }).then((res) => {
-    formatContent(res.data.content, params.path);
+  }).then(async (res) => {
+    await formatContent(res.data.content, params.path);
     return res;
   });
 }
@@ -54,8 +55,8 @@ export async function GetSearch(data: GetSearchParams) {
     url: "/api/fs/search",
     method: "post",
     data,
-  }).then((res) => {
-    formatContent(res.data.content);
+  }).then(async (res) => {
+    await formatContent(res.data.content);
     return res;
   });
 }

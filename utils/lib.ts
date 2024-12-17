@@ -1,7 +1,6 @@
 import type { MaterialIconsName } from "@/types";
 import dayjs, { type ConfigType } from "dayjs";
 import { isString } from "./helper";
-import type { GetItemsResItem } from "@/api";
 
 // token
 export const TokenKey = "Authorization";
@@ -165,22 +164,6 @@ export function formatPath(...segments: string[]): string {
     .replace(/\/+$/, ""); // 去掉路径结尾的斜杠
 
   return path;
-}
-
-/**
- * 格式化数据
- * @param items
- * @returns
- */
-export function formatContent(items: GetItemsResItem[], parent?: string) {
-  items.forEach((item) => {
-    item.parent = item.parent || parent || "/";
-    const path = formatPath(item.parent, item.name);
-    item.id = encodeURIComponent(path.replace(/\//g, ""));
-    item.modifiedFormat = formatTimeAgo(item.modified);
-    item.sizeFormat = formatFileSize(item.size);
-  });
-  return items;
 }
 
 /**

@@ -6,13 +6,12 @@ import Animated from "react-native-reanimated";
 import { storageManager } from "@/storage";
 import { useRouter } from "expo-router";
 import { ThemedNavigation } from "@/components/theme/ThemedNavigation";
-import { Button, Text, useTheme } from "@rneui/themed";
+import { Button, Switch, Text, useTheme } from "@rneui/themed";
 import { Colors } from "@/constants/Colors";
 import {
   Alert,
   Appearance,
   StyleSheet,
-  Switch,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -123,12 +122,7 @@ const SettingsScreen = () => {
             {theme.mode === "dark" ? "深色模式" : "浅色模式"}
           </Text>
         </View>
-        <Switch
-          thumbColor={theme.colors.grey0}
-          ios_backgroundColor={theme.colors.primary}
-          onValueChange={setMode}
-          value={theme.mode === "dark"}
-        />
+        <Switch onValueChange={setMode} value={theme.mode === "dark"} />
       </View>
       <View style={styles.cellStyle}>
         <View style={[globalStyles.row, { gap: 10 }]}>

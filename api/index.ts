@@ -26,6 +26,7 @@ export type GetItemsResItem = {
   hash_info?: object | null;
   hashinfo?: string;
   is_dir?: boolean;
+  is_collect?: boolean;
   modified?: string;
   modifiedFormat?: string;
   sign?: string;
