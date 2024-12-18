@@ -82,6 +82,7 @@ const CatalogList = ({ path }: CatalogListProps) => {
     try {
       setRefreshing(true);
       const { data } = await GetItems(params, refresh);
+      console.log(data.total);
       const list = await getSortOrderItems(data.content);
       setTotal(data.total);
       setItems(list);
@@ -123,7 +124,10 @@ const CatalogList = ({ path }: CatalogListProps) => {
         onScrollToIndexFailed={onScrollToIndexFailed}
         scrollEventThrottle={16}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onFetch} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => onFetch(true)}
+          />
         }
         getItemLayout={(data, index) => ({
           length: height,

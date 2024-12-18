@@ -1,35 +1,37 @@
 import { StyleSheet } from "react-native";
-import { useState } from "react";
-import { Button, TabView, Text, useTheme } from "@rneui/themed";
+import { useEffect, useState } from "react";
+import { TabView } from "@rneui/themed";
 import { ThemedView } from "@/components/theme/ThemedView";
-import { View } from "react-native";
 import { HeaderBar } from "@/components/sys";
-import { CatalogToolbar } from "@/components/catalog/CatalogToolbar";
 import { CatalogList } from "@/components/catalog-test/CatalogList";
+import type { CatalogCrumbItem } from "@/components/catalog-test/CatalogCrumbs";
+import { CatalogToolbar } from "@/components/catalog-test/CatalogToolbar";
 
 const HomeScreen = () => {
-  const { theme } = useTheme();
-  const [items, setItems] = useState<string[]>(["/", "/asmr"]);
+  const [items, setItems] = useState<CatalogCrumbItem[]>([
+    { name: "", path: "/" },
+    { name: "asmr", path: "/asmr" },
+    { name: "中文音声", path: "/asmr/中文音声" },
+  ]);
   const [value, setValue] = useState<number>(0);
 
   const onChange = (index: number) => {
     console.log(index);
   };
 
-  const add = () => {
-    setItems([...items, `我是${items.length}`]);
+  const insertItem = () => {
+    setItems([...items, { name: "中文音声", path: "/asmr/中文音声" }]);
     setValue(items.length);
   };
+
+  useEffect(() => {
+    console.log(items.length);
+  }, [items]);
 
   return (
     <ThemedView style={styles.container}>
       <HeaderBar />
-      <CatalogToolbar
-        showOpenSearch={true}
-        enableTouchBack={true}
-        rightText="我知道了"
-      />
-      {/* <Button onPress={add}>添加TabView</Button> */}
+      <CatalogToolbar items={items} rightText="我知道了" />
       <TabView
         value={value}
         onChange={onChange}
@@ -38,7 +40,7 @@ const HomeScreen = () => {
         {items.map((v, index) => {
           return (
             <TabView.Item key={index} style={styles.tabViewItem}>
-              <CatalogList path={v} />
+              <CatalogList path={v.path} />
             </TabView.Item>
           );
         })}
