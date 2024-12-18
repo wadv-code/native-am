@@ -1,6 +1,7 @@
 import type { GetItemsResItem } from "@/api";
 import { FAB, useTheme } from "@rneui/themed";
 import { useEffect, useRef, useState } from "react";
+import { CatalogItem } from "./CatalogItem";
 import {
   ActivityIndicator,
   Platform,
@@ -9,60 +10,53 @@ import {
   View,
   ViewProps,
   VirtualizedList,
-  type ListRenderItem,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from "react-native";
-import { CatalogItem } from "./CatalogItem";
-import { useSelector } from "react-redux";
-import type { RootState } from "@/store";
 
 type CatalogListProps = ViewProps & {
   total: number;
   height?: number;
-  path?: string;
   loading?: boolean;
   showParent?: boolean;
+  scrollIndex?: number;
   items: GetItemsResItem[];
   onRefresh?: () => void;
   onIconPress?: (item: GetItemsResItem) => void;
   onLeftPress?: (item: GetItemsResItem) => void;
   onRightPress?: (item: GetItemsResItem) => void;
+  onScrollIndex?: (index: number) => void;
 };
-
-const state: Recordable<number> = {};
 
 const CatalogList = (props: CatalogListProps) => {
   const {
-    path = "/",
     total,
     loading = false,
     height = 50,
     showParent,
+    scrollIndex,
     items,
   } = props;
-  const { onRefresh, onIconPress, onLeftPress, onRightPress } = props;
+  const { onRefresh, onIconPress, onLeftPress, onRightPress, onScrollIndex } =
+    props;
   const ref = useRef<VirtualizedList<GetItemsResItem>>(null);
   const [visible, setVisible] = useState(false);
   const [refreshId, setRefreshId] = useState<string>("");
   const [refreshing, setRefreshing] = useState<boolean>(loading);
-  const [scrollIndex, setScrollIndex] = useState<number>(0);
-  // const scrollYRef = useRef(0);
   const scrollIndexRef = useRef(0);
   const { theme } = useTheme();
-  const { audioInfo } = useSelector((state: RootState) => state.audio);
 
   const onIcon = (item: GetItemsResItem) => {
     setRefreshId(item.id);
     onIconPress && onIconPress(item);
+    setTimeout(() => {
+      setRefreshId("");
+    }, 300);
   };
 
-  const click = (item: GetItemsResItem) => {
-    if (audioInfo.id !== item.id) {
-      // state[path] = scrollYRef.current || 0;
-      state[path] = scrollIndexRef.current || 0;
-      onLeftPress && onLeftPress(item);
-    }
+  const onClick = (item: GetItemsResItem) => {
+    onScrollIndex && onScrollIndex(scrollIndexRef.current || 0);
+    onLeftPress && onLeftPress(item);
   };
 
   const onScrollToIndexFailed = () => {
@@ -77,26 +71,13 @@ const CatalogList = (props: CatalogListProps) => {
     );
     if (y >= 200 && !visible) {
       setVisible(true);
+    } else if (y <= 200 && visible) {
+      setVisible(false);
     }
   };
 
   const handleRefresh = () => {
-    delete state[path];
     onRefresh && onRefresh();
-  };
-
-  const renderItem: ListRenderItem<GetItemsResItem> = ({ item }) => {
-    return (
-      <CatalogItem
-        item={item}
-        height={height}
-        showParent={showParent}
-        refresh={item.id === refreshId}
-        onLeftPress={click}
-        onIconPress={onIcon}
-        onRightPress={onRightPress}
-      />
-    );
   };
 
   const getItem = (_data: GetItemsResItem, index: number) => {
@@ -118,23 +99,15 @@ const CatalogList = (props: CatalogListProps) => {
       index: 0,
       animated: true,
     });
-    setTimeout(() => {
-      setVisible(false);
-    }, 300);
   };
 
   useEffect(() => {
-    if (loading) {
-      // 加载前使用保存的索引开始渲染，达到每一次下钻和返回滚动保持原位的效果。
-      const index = state[path] ?? 0;
-      setScrollIndex(index);
-      setVisible(false);
-    }
+    if (!loading) scrollIndexRef.current = 0;
     setRefreshing(loading);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading]);
 
-  if (loading) {
+  if (refreshing) {
     return (
       <ActivityIndicator
         size={50}
@@ -150,7 +123,17 @@ const CatalogList = (props: CatalogListProps) => {
         ref={ref}
         data={items}
         initialScrollIndex={scrollIndex}
-        renderItem={renderItem}
+        renderItem={({ item }) => (
+          <CatalogItem
+            item={item}
+            height={height}
+            showParent={showParent}
+            refreshId={refreshId}
+            onLeftPress={onClick}
+            onIconPress={onIcon}
+            onRightPress={onRightPress}
+          />
+        )}
         keyExtractor={(item) => item.id}
         getItemCount={() => total}
         initialNumToRender={16}

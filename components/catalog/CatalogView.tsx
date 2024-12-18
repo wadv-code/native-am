@@ -19,11 +19,14 @@ type CatalogViewProps = {
   path?: string;
 };
 
+const state: Recordable<number> = {};
+
 const CatalogView = ({ path = "/" }: CatalogViewProps) => {
   const [total, setTotal] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const [items, setItems] = useState<GetItemsResItem[]>([]);
+  const [scrollIndex, setScrollIndex] = useState<number>(0);
   const [params, setParams] = useState<GetItemsParams>({
     page: 1,
     password: "",
@@ -36,13 +39,17 @@ const CatalogView = ({ path = "/" }: CatalogViewProps) => {
     try {
       setLoading(true);
       setItems([]);
+      // 请求
       // 由于目录是特殊的树结构，传统的memo下钻太快可能更新负荷过大，所以每次都重新渲染当前屏幕已显示的数据。
       // 接口有缓存机制，太快，这里延迟一会儿，等待清理列表。
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      // 请求
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      const index = state[params.path] ?? 0;
+      setScrollIndex(index);
+      await new Promise((resolve) => setTimeout(resolve, 150));
       const { data } = await GetItems(params, refresh);
+      const list = await getSortOrderItems(data.content);
       setTotal(data.total);
-      setItems(await getSortOrderItems(data.content));
+      setItems(list);
       storageManager.set("catalog_view_path", params.path);
     } catch {
       return Promise.reject("onFetch Request Error");
@@ -63,6 +70,10 @@ const CatalogView = ({ path = "/" }: CatalogViewProps) => {
         return item;
       });
     });
+  };
+
+  const onScrollIndex = (index: number) => {
+    state[params.path] = index;
   };
 
   const onLeftPress = (item: GetItemsResItem) => {
@@ -120,6 +131,7 @@ const CatalogView = ({ path = "/" }: CatalogViewProps) => {
       <CatalogToolbar
         path={params.path}
         toPath={toPath}
+        loading={loading}
         rightText={`${items.length}/${total}`}
         onSortOrder={onSortOrder}
         enableTouchBack={true}
@@ -129,10 +141,11 @@ const CatalogView = ({ path = "/" }: CatalogViewProps) => {
         items={items}
         total={total}
         loading={loading}
-        path={params.path}
+        scrollIndex={scrollIndex}
         onIconPress={onIconPress}
         onLeftPress={onLeftPress}
         onRightPress={onRightPress}
+        onScrollIndex={onScrollIndex}
         onRefresh={onRefresh}
       />
       <CatalogOverlay

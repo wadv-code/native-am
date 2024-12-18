@@ -17,6 +17,7 @@ import type { ActionSortOrder } from "@/types";
 
 type ToolbarProps = {
   rightText: string;
+  loading?: boolean;
   path?: string;
   toPath?: (path: string) => void;
   onSortOrder?: (order: ActionSortOrder) => void;
@@ -32,6 +33,7 @@ type HistoryItem = {
 const CatalogToolbar = (props: ToolbarProps) => {
   const {
     rightText,
+    loading,
     path = "/",
     enableTouchBack = false,
     showOpenSearch = false,
@@ -39,6 +41,7 @@ const CatalogToolbar = (props: ToolbarProps) => {
   const { toPath, onSortOrder } = props;
   const isFocused = useIsFocused();
   const isFocusedRef = useRef<boolean>(false);
+  const isLoadingRef = useRef<boolean>(false);
   const [items, setItems] = useState<HistoryItem[]>([]);
   const itemsRef = useRef<HistoryItem[]>(items);
   const router = useRouter();
@@ -85,6 +88,7 @@ const CatalogToolbar = (props: ToolbarProps) => {
   };
 
   const toCurrentPath = () => {
+    if (isLoadingRef.current) return true;
     if (isFocusedRef.current) {
       const list = itemsRef.current || [];
       const backItem = list[list.length - 2];
@@ -111,6 +115,10 @@ const CatalogToolbar = (props: ToolbarProps) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isFocused]);
+
+  useEffect(() => {
+    isLoadingRef.current = !!loading;
+  }, [loading]);
 
   useEffect(() => {
     if (!enableTouchBack) return;

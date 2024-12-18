@@ -172,7 +172,7 @@ const MusicPlayer = (props: MusicPlayerProps) => {
 
   useEffect(() => {
     storageManager.get("audio_info").then((audio) => {
-      if (audio && audio.id) onAudioChange(audio);
+      if (audio && audio.id && audio.id !== audioInfo.id) onAudioChange(audio);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

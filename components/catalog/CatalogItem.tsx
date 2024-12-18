@@ -9,7 +9,7 @@ import type { RootState } from "@/store";
 
 type ItemProps = {
   item: GetItemsResItem;
-  refresh?: boolean;
+  refreshId?: string;
   height?: number;
   showParent?: boolean;
   onIconPress?: (option: GetItemsResItem) => void;
@@ -72,7 +72,7 @@ const CatalogItem = memo(
     );
   },
   (prevProps, nextProps) => {
-    if (prevProps.refresh || nextProps.refresh) {
+    if (nextProps.refreshId === nextProps.item.id) {
       return false;
     }
     return prevProps.item.id === nextProps.item.id;
