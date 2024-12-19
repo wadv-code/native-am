@@ -14,17 +14,20 @@ import {
 } from "@/components/catalog/CatalogList";
 import { getStorage, removeStorage } from "@/storage/long";
 
+const defaultPaths = () => [
+  { name: "", path: "/" },
+  { name: "asmr", path: "/asmr" },
+  { name: "中文音声", path: "/asmr/中文音声" },
+  { name: "圈圈", path: "/asmr/中文音声/圈圈" },
+];
+
 const CatalogScreen = () => {
   const isFocused = useIsFocused();
   const catalogListRef = useRef<CatalogListHandle | null>(null);
   const isFocusedRef = useRef<boolean>(false);
   // const [rightText, setRightText] = useState("");
-  const itemsRef = useRef<CatalogCrumbItem[]>([{ name: "", path: "/" }]);
-  const [items, setItems] = useState<CatalogCrumbItem[]>([
-    { name: "", path: "/" },
-    { name: "asmr", path: "/asmr" },
-    { name: "中文音声", path: "/asmr/中文音声" },
-  ]);
+  const itemsRef = useRef<CatalogCrumbItem[]>(defaultPaths());
+  const [items, setItems] = useState<CatalogCrumbItem[]>(defaultPaths());
   const [value, setValue] = useState<number>(items.length - 1);
 
   const onChange = (index: number) => {

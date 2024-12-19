@@ -6,7 +6,8 @@ import { makeStyles, Text, useTheme } from "@rneui/themed";
 import { useSelector } from "react-redux";
 import { Alert, TouchableOpacity, View } from "react-native";
 import type { RootState } from "@/store";
-import { emitter } from "@/utils/mitt";
+import { useAppDispatch } from "@/hooks/useStore";
+import { setAudioInfoAsync } from "@/store/slices/audioSlice";
 
 type ItemProps = {
   item: GetItem;
@@ -22,6 +23,7 @@ export type CatalogItemProps = ItemProps;
 
 const CatalogItem = memo(
   (props: CatalogItemProps) => {
+    const dispatch = useAppDispatch();
     const styles = useStyles(props);
     const { item, showParent } = props;
     const { is_collect } = item;
@@ -31,7 +33,7 @@ const CatalogItem = memo(
 
     const onPress = () => {
       if (isAudioFile(item.name)) {
-        emitter.emit("onAudioChange", item);
+        dispatch(setAudioInfoAsync(item));
       } else if (item.is_dir) {
         onLeftPress && onLeftPress(item);
       } else {

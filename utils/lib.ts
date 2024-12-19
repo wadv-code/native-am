@@ -32,6 +32,23 @@ export function formatMilliseconds(ms?: number): string {
 }
 
 /**
+ * 计算音乐时长和进度
+ * @param position
+ * @param duration
+ * @returns
+ */
+export function formatAudioPosition(position: number, duration: number) {
+  const progress = parseFloat(((position / duration) * 100).toFixed(2));
+  const currentFormat = formatMilliseconds(position);
+  const durationFormat = formatMilliseconds(duration);
+  return {
+    progress,
+    currentFormat,
+    durationFormat,
+  };
+}
+
+/**
  * 判断一个字符串是否是通过JSON.stringify转换而来
  * @param str
  * @returns
@@ -212,4 +229,56 @@ export function isValidUrl(str: string): boolean {
   const urlPattern =
     /^([hH][tT]{2}[pP]:\/\/|[hH][tT]{2}[pP][sS]:\/\/)(([A-Za-z0-9-~]+).)+([A-Za-z0-9-~\/])+$/;
   return urlPattern.test(str);
+}
+
+/**
+ * 防抖
+ * @param func
+ * @param wait
+ * @returns
+ */
+export function debounce<T extends (...args: any[]) => void>(
+  func: T,
+  wait: number
+): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout | null = null;
+  return function (...args: Parameters<T>) {
+    if (timeout !== null) {
+      clearTimeout(timeout);
+    }
+    timeout = setTimeout(() => {
+      func(...args);
+    }, wait);
+  };
+}
+
+/**
+ * 节流
+ * @param func
+ * @param limit
+ * @returns
+ */
+export function throttle<T extends (...args: any[]) => void>(
+  func: T,
+  limit: number
+): (...args: Parameters<T>) => void {
+  let lastFunc: NodeJS.Timeout | null = null;
+  let lastRan: number = 0;
+  return function (...args: Parameters<T>) {
+    const context = this;
+    if (!lastRan) {
+      func.apply(context, args);
+      lastRan = Date.now();
+    } else {
+      if (lastFunc) {
+        clearTimeout(lastFunc);
+      }
+      lastFunc = setTimeout(function () {
+        if (Date.now() - lastRan >= limit) {
+          func.apply(context, args);
+          lastRan = Date.now();
+        }
+      }, limit - (Date.now() - lastRan));
+    }
+  };
 }

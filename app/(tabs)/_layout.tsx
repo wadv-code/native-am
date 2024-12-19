@@ -1,16 +1,17 @@
-import React, { useState } from "react";
 import { Tabs } from "expo-router";
 import { Platform } from "react-native";
 import { useTheme } from "@rneui/themed";
 import { HapticTab } from "@/components/HapticTab";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import TabBarBackground from "@/components/ui/TabBarBackground";
-import { MusicPlayer } from "@/components/audio/MusicPlayer";
 import { AudioBar } from "@/components/audio";
 import {
   ModalPlayer,
   type ModalPlayerType,
 } from "@/components/audio/ModalPlayer";
+// import { MusicPlayer } from "@/components/audio/MusicPlayer";
+import { useState } from "react";
+import { Music } from "@/components/audio/Music";
 
 export default function TabLayout() {
   const { theme } = useTheme();
@@ -93,7 +94,8 @@ export default function TabLayout() {
         modalVisible={visible}
         closeModal={closeModal}
       />
-      <MusicPlayer />
+      {/* <MusicPlayer /> */}
+      <Music />
     </>
   );
 }

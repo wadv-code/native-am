@@ -2,7 +2,7 @@ import type { GetDetailParams, GetItem } from "@/api";
 import { GetCover, GetDetail } from "@/api/api";
 import { getStorage, setStorage } from "@/storage/long";
 import { IMAGE_DEFAULT_URL } from "@/utils";
-import { formatMilliseconds, formatPath } from "@/utils/lib";
+import { formatAudioPosition, formatPath } from "@/utils/lib";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { Alert } from "react-native";
 
@@ -10,7 +10,8 @@ export type AudioSlice = {
   loading: boolean;
   playing: boolean;
   duration: number;
-  current: number;
+  seek: number;
+  progress: number;
   currentFormat: string;
   durationFormat: string;
   audioInfo: GetItem;
@@ -72,6 +73,7 @@ export const handleCoverItems = async ({
 export const setAudioInfoAsync = createAsyncThunk<GetItem, GetItem>(
   "audio/setAudioInfoAsync",
   async (audio, thunkAPI) => {
+    thunkAPI.dispatch(setLoading(true));
     const { coverItems, rawUrlItems } = await getStorageAsync();
     const params: GetDetailParams = {
       password: "",
@@ -111,8 +113,9 @@ export const setAudioInfoAsync = createAsyncThunk<GetItem, GetItem>(
 const initialState: AudioSlice = {
   loading: false,
   playing: false,
+  seek: 0,
+  progress: 0,
   duration: 0,
-  current: 0,
   currentFormat: "00:00",
   durationFormat: "00:00",
   audioInfo: {
@@ -134,13 +137,21 @@ const audioSlice = createSlice({
     setLoading: (state, action) => {
       state.loading = action.payload;
     },
-    setDuration: (state, action) => {
-      state.duration = action.payload;
-      state.durationFormat = formatMilliseconds(action.payload);
+    setSeek: (state, action) => {
+      state.seek = action.payload;
+      const { progress, durationFormat, currentFormat } = formatAudioPosition(
+        state.seek,
+        state.duration
+      );
+      state.progress = progress;
+      state.durationFormat = durationFormat;
+      state.currentFormat = currentFormat;
     },
-    setCurrent: (state, action) => {
-      state.current = action.payload;
-      state.currentFormat = formatMilliseconds(action.payload);
+    setPosition: (state, action) => {
+      state.progress = action.payload.progress;
+      state.duration = action.payload.duration;
+      state.durationFormat = action.payload.durationFormat;
+      state.currentFormat = action.payload.currentFormat;
     },
     setAudioInfo: (state, action) => {
       state.audioInfo = action.payload;
@@ -165,7 +176,7 @@ const audioSlice = createSlice({
   },
 });
 
-export const { setPlaying, setLoading, setDuration, setCurrent, setAudioInfo } =
+export const { setPlaying, setLoading, setSeek, setPosition, setAudioInfo } =
   audioSlice.actions;
 
 export default audioSlice.reducer;

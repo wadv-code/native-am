@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { IconSymbol } from "@/components/ui";
 import { emitter } from "@/utils/mitt";
 import Slider from "@react-native-community/slider";
@@ -22,6 +22,7 @@ import {
   handleCoverItems,
   setAudioInfo,
   setPlaying,
+  setSeek,
 } from "@/store/slices/audioSlice";
 
 const { width } = Dimensions.get("window");
@@ -34,6 +35,7 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
   const { theme } = useTheme();
   const [refreshing, setRefreshing] = useState(false);
   const [value, setValue] = useState(0);
+  const startRef = useRef(false);
   const [dragCurrent, setDragCurrent] = useState<string | undefined>();
   const dispatch = useAppDispatch();
   const audio = useSelector((state: RootState) => state.audio);
@@ -42,7 +44,7 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
     playing,
     currentFormat,
     durationFormat,
-    current,
+    progress,
     duration,
     loading,
   } = audio;
@@ -50,18 +52,21 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
   const styles = useStyles();
 
   const onSlidingComplete = (value: number) => {
+    startRef.current = false;
     setDragCurrent(undefined);
-    dispatch(setPlaying(true));
-    const diff = Math.floor(value * duration);
-    emitter.emit("setAudioSeek", diff);
+    const seek = Math.floor((value / 100) * duration);
+    dispatch(setSeek(seek));
   };
 
   const onValueChange = (value: number) => {
-    const diff = Math.floor(value * duration);
-    setDragCurrent(formatMilliseconds(diff));
+    if (startRef.current) {
+      const diff = Math.floor((value / 100) * duration);
+      setDragCurrent(formatMilliseconds(diff));
+    }
   };
 
   const onSlidingStart = () => {
+    startRef.current = true;
     dispatch(setPlaying(false));
   };
 
@@ -112,10 +117,10 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
   };
 
   useEffect(() => {
-    setValue(parseFloat((current / duration).toFixed(2)));
+    setValue(progress);
     if (dragCurrent) setDragCurrent(undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [current]);
+  }, [progress]);
 
   return (
     <ThemedNavigation
@@ -152,10 +157,10 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
           onSlidingComplete={onSlidingComplete}
           onValueChange={onValueChange}
           minimumValue={0}
-          maximumValue={1}
+          maximumValue={100}
           minimumTrackTintColor={theme.colors.primary}
           thumbTintColor={theme.colors.primary}
-          step={0.01}
+          step={0.5}
           style={{ width: "90%" }}
         />
         <View style={styles.time}>

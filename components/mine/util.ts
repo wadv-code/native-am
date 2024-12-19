@@ -49,6 +49,37 @@ export const getServerItems = (): ServerItem[] => {
       ],
       isDefault: true,
     },
+    {
+      id: "2",
+      url: "https://t.alcy.cc/ycy?json",
+      title: "alcy",
+      params: [],
+      isDefault: false,
+    },
+    {
+      id: "3",
+      url: "https://moe.jitsu.top/img",
+      title: "alcy",
+      params: [
+        { key: "sort", value: "r18" },
+        { key: "type", value: "json" },
+      ],
+      isDefault: false,
+    },
+    {
+      id: "4",
+      url: "https://api.vvhan.com/api/wallpaper/pcGirl",
+      title: "vvhan电脑",
+      params: [{ key: "type", value: "json" }],
+      isDefault: false,
+    },
+    {
+      id: "5",
+      url: "https://api.vvhan.com/api/wallpaper/mobileGirl",
+      title: "vvhan手机",
+      params: [{ key: "type", value: "json" }],
+      isDefault: false,
+    },
   ];
 };
 
