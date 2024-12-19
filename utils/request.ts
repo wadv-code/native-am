@@ -1,5 +1,5 @@
-import { storageManager } from "@/storage";
 import axios from "axios";
+import { getStorage, setStorage } from "@/storage/long";
 import type { AxiosInstance, AxiosRequestConfig } from "axios";
 
 /**
@@ -52,16 +52,17 @@ const cacheAdapter = async (config: AxiosRequestConfig) => {
   const cacheAge = config.cache;
   if (cacheAge) {
     const cacheKey = generateCacheKey(config);
-
-    const cacheRes = await storageManager.get(cacheKey);
+    const cache = await getStorage<Recordable<any>>("catalogRes", {});
+    const cacheRes = cache[cacheKey];
     if (cacheRes && !config.refresh) {
       return Promise.resolve(cacheRes);
     } else {
       delete config.adapter;
       const res = await axios(config);
       if (res.data && res.data.data) {
+        cache[cacheKey] = res;
         // 保存数据
-        await storageManager.set(cacheKey, res);
+        await setStorage("catalogRes", cache);
       }
       return res;
     }

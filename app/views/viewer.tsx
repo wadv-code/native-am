@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { getStorageAsync } from "@/store/slices/audioSlice";
-import { storageManager } from "@/storage";
 import { ReactNativeZoomableView } from "@openspacelabs/react-native-zoomable-view";
 import { IconSymbol } from "@/components/ui";
 import Constants from "expo-constants";
@@ -21,6 +20,7 @@ import {
   View,
 } from "react-native";
 import { isNumber } from "@/utils/helper";
+import { setStorage } from "@/storage/long";
 
 const ImageScreen = () => {
   const mode = useColorScheme();
@@ -35,7 +35,7 @@ const ImageScreen = () => {
 
   const setImagesAsync = async (list: OptionType[]) => {
     setImages(list);
-    await storageManager.set("cover_items", list);
+    await setStorage("coverItems", list);
   };
 
   const onCoverRefresh = async (order: 1 | -1) => {
@@ -109,13 +109,14 @@ const ImageScreen = () => {
     }
     const cover = images[index];
     if (cover) setImageUrl(cover.value);
-    storageManager.set("viewer_index", index);
+    setStorage("viewerIndex", index);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
 
   useEffect(() => {
     (async () => {
       const { coverItems, viewerIndex } = await getStorageAsync();
+      console.log(coverItems.length);
       setIndex(isNumber(viewerIndex) ? viewerIndex : 0);
       if (coverItems.length) {
         setImages([...coverItems]);

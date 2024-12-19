@@ -2,15 +2,17 @@ import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { IconSymbol } from "../ui";
 import { useEffect, useRef, useState } from "react";
 import { HeaderBar } from "./HeaderBar";
-import { Text, useTheme } from "@rneui/themed";
-import { storageManager } from "@/storage";
+import { Button, useTheme } from "@rneui/themed";
+import { getStorage, setStorage } from "@/storage/long";
 
 type HeaderSearchBarProps = {
   keywords?: string;
+  loading?: boolean;
   onSearch?: (keyword?: string) => void;
 };
 
-const HeaderSearchBar = ({ keywords, onSearch }: HeaderSearchBarProps) => {
+const HeaderSearchBar = (props: HeaderSearchBarProps) => {
+  const { keywords, loading, onSearch } = props;
   const { theme } = useTheme();
   const inputRef = useRef<TextInput>(null);
   const [search, setSearch] = useState("");
@@ -19,7 +21,7 @@ const HeaderSearchBar = ({ keywords, onSearch }: HeaderSearchBarProps) => {
     const isFocused = inputRef.current?.isFocused();
     if (isFocused) return inputRef.current?.blur();
     onSearch && onSearch(query);
-    storageManager.set("keywords", query);
+    setStorage("keywords", query);
   };
 
   const handleClear = () => {
@@ -28,7 +30,7 @@ const HeaderSearchBar = ({ keywords, onSearch }: HeaderSearchBarProps) => {
 
   useEffect(() => {
     (async () => {
-      const value = keywords || (await storageManager.get("keywords")) || "";
+      const value = keywords || (await getStorage<string>("keywords", ""));
       setSearch(value);
     })();
   }, [keywords]);
@@ -62,12 +64,15 @@ const HeaderSearchBar = ({ keywords, onSearch }: HeaderSearchBarProps) => {
             <IconSymbol size={22} name="close" />
           </TouchableOpacity>
         ) : null}
-        <TouchableOpacity
-          style={[styles.search, { backgroundColor: theme.colors.primary }]}
+        <Button
+          loading={loading}
+          loadingStyle={styles.loadingStyle}
+          containerStyle={styles.searchBtn}
+          titleStyle={styles.searchBtnTitle}
           onPress={() => handleSearch(search)}
         >
-          <Text style={styles.searchText}>搜索</Text>
-        </TouchableOpacity>
+          搜索
+        </Button>
       </View>
     </View>
   );
@@ -77,19 +82,21 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 10,
   },
-  search: {
+  searchBtn: {
     width: 70,
     height: "85%",
     marginRight: 2,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 5,
-    overflow: "hidden",
+    borderRadius: 4,
   },
-  searchText: {
+  searchBtnTitle: {
+    fontSize: 14,
+    lineHeight: 14,
     fontWeight: "bold",
-    color: "#ffffff",
+    letterSpacing: 2,
+  },
+  loadingStyle: {
+    width: 10,
+    height: 10,
   },
   viewContainer: {
     width: "100%",

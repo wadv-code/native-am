@@ -17,7 +17,7 @@ export type GetSearchParams = {
   refresh?: boolean;
 };
 
-export type GetItemsResItem = {
+export type GetItem = {
   id: string;
   name: string;
   raw_url?: string;
@@ -40,7 +40,7 @@ export type GetItemsResItem = {
 
 // 请求参数
 export type GetItemsRes = {
-  content: GetItemsResItem[];
+  content: GetItem[];
   page: number;
   header: string;
   provider: string;

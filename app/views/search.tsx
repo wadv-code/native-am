@@ -1,28 +1,28 @@
-import type { GetItemsResItem, GetSearchParams } from "@/api";
+import type { GetItem, GetSearchParams } from "@/api";
 import { GetSearch } from "@/api/api";
+import { CatalogAction } from "@/components/catalog/CatalogAction";
 import { CatalogList } from "@/components/catalog/CatalogList";
-import { CatalogToolbar } from "@/components/catalog/CatalogToolbar";
 import { HeaderSearchBar } from "@/components/sys/HeaderSearchBar";
 import { ThemedView } from "@/components/theme/ThemedView";
-import { storageManager } from "@/storage";
-import type { ActionSortOrder, RootStackParamList } from "@/types";
-import { getSortOrderItems, toggleCollect } from "@/utils/common";
-import { formatPath, isAudioFile } from "@/utils/lib";
-import { emitter } from "@/utils/mitt";
+import { setStorage } from "@/storage/long";
+import type { RootStackParamList } from "@/types";
+import { formatPath } from "@/utils/lib";
 import { useRoute, type RouteProp } from "@react-navigation/native";
+import { Text, useTheme } from "@rneui/themed";
 import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { Alert, StyleSheet } from "react-native";
+import { ActivityIndicator, StyleSheet } from "react-native";
 
 const default_per_page = 100;
 type SearchScreenRouteProp = RouteProp<RootStackParamList, "search">;
 
 const SearchScreen = () => {
+  const { theme } = useTheme();
   const route = useRoute<SearchScreenRouteProp>();
   const isInitialRender = useRef<boolean>(false);
   const [total, setTotal] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
-  const [items, setItems] = useState<GetItemsResItem[]>([]);
+  const [items, setItems] = useState<GetItem[]>([]);
   const [params, setParams] = useState<GetSearchParams>({
     keywords: "",
     page: 1,
@@ -42,39 +42,6 @@ const SearchScreen = () => {
     }
   };
 
-  const onSortOrder = async (option: ActionSortOrder) => {
-    const list = await getSortOrderItems(items, option);
-    setItems(list);
-  };
-
-  const onIconPress = async (item: GetItemsResItem) => {
-    const is_collect = await toggleCollect(item);
-    if (!is_collect) onFetch();
-  };
-
-  const onCanBack = () => {
-    const isBack = router.canGoBack();
-    if (isBack) {
-      router.back();
-    } else {
-      router.replace("/catalog");
-    }
-  };
-
-  const onLeftPress = async (item: GetItemsResItem) => {
-    if (item.is_dir) {
-      await storageManager.set(
-        "parent_search_path",
-        formatPath(item.parent || "/", item.name)
-      );
-      onCanBack();
-    } else if (isAudioFile(item.name)) {
-      emitter.emit("onAudioChange", item);
-    } else {
-      Alert.prompt("还未处理的文件格式。");
-    }
-  };
-
   // 刷新
   const onRefresh = async (keywords?: string) => {
     if (loading) return;
@@ -88,8 +55,20 @@ const SearchScreen = () => {
     });
   };
 
-  const toPath = (target: string) => {
-    setParams({ ...params, parent: target || "/" });
+  const onCanBack = () => {
+    const isBack = router.canGoBack();
+    if (isBack) {
+      router.back();
+    } else {
+      router.replace("/catalog");
+    }
+  };
+
+  const onLeftPress = async (item: GetItem) => {
+    if (item.is_dir) {
+      setStorage("parentSearchPath", formatPath(item.parent || "/", item.name));
+      onCanBack();
+    }
   };
 
   useEffect(() => {
@@ -107,24 +86,33 @@ const SearchScreen = () => {
   }, [params]);
   return (
     <ThemedView style={styles.container}>
-      <HeaderSearchBar keywords={params.keywords} onSearch={onRefresh} />
-      <CatalogToolbar
-        path={params.parent}
-        toPath={toPath}
-        rightText={`${items.length}/${total}`}
-        onSortOrder={onSortOrder}
-        showOpenSearch={false}
-      />
-      <CatalogList
-        items={items}
+      <HeaderSearchBar
+        keywords={params.keywords}
         loading={loading}
-        path={params.parent}
-        total={total}
-        showParent={true}
-        onRefresh={onFetch}
-        onIconPress={onIconPress}
-        onLeftPress={onLeftPress}
+        onSearch={onRefresh}
       />
+      <Text style={styles.parent}>{params.parent}</Text>
+      <CatalogAction
+        title="搜索结果"
+        rightText={`${items.length}/${total}`}
+        style={styles.action}
+        onSortOrder={() => onRefresh()}
+      />
+      {loading ? (
+        <ActivityIndicator
+          size={50}
+          color={theme.colors.primary}
+          style={styles.loading}
+        />
+      ) : (
+        <CatalogList
+          data={items}
+          height={60}
+          showParent={true}
+          onRefresh={onFetch}
+          onLeftPress={onLeftPress}
+        />
+      )}
     </ThemedView>
   );
 };
@@ -133,8 +121,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  parent: {
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    fontFamily: "SpaceMono",
+  },
   action: {
     paddingHorizontal: 10,
+  },
+  loading: {
+    flex: 1,
   },
 });
 

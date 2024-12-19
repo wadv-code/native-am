@@ -4,7 +4,6 @@ import { StyleSheet } from "react-native";
 import { View } from "react-native";
 import { IconSymbol } from "../ui";
 import { useEffect, useState } from "react";
-import { storageManager } from "@/storage";
 import type {
   ActionOrder,
   ActionSort,
@@ -14,6 +13,7 @@ import type {
 import { Text } from "@rneui/themed";
 import { orders, sorts } from "@/utils";
 import { getSortOrder } from "@/utils/common";
+import { setStorage } from "@/storage/long";
 
 type CatalogActionProps = ViewProps & {
   title?: string;
@@ -35,7 +35,7 @@ const CatalogAction = ({
     const orderString = orders[index + 1];
     const value = orderString ?? orders[0];
     setOrder(value);
-    storageManager.set("order_string", value);
+    setStorage("orderString", value);
     onSortOrder && onSortOrder({ sort, order: value });
   };
 
@@ -44,7 +44,7 @@ const CatalogAction = ({
     const sortString = sorts[index + 1];
     const value = sortString ?? sorts[0];
     setSort(value);
-    storageManager.set("sort_string", value);
+    setStorage("sortString", value);
     onSortOrder && onSortOrder({ sort: value, order });
   };
 
@@ -98,12 +98,10 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     alignItems: "center",
   },
-  text: {
-    fontSize: 16,
-  },
   smallText: {
     fontSize: 14,
     textTransform: "capitalize",
+    fontFamily: "SpaceMono",
   },
 });
 

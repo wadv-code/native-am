@@ -4,7 +4,6 @@ import { GetCover } from "@/api/api";
 import { ThemedNavigation } from "@/components/theme/ThemedNavigation";
 import { IconSymbol } from "@/components/ui";
 import { useBottomTabOverflow } from "@/components/ui/TabBarBackground";
-import { storageManager } from "@/storage";
 import { globalStyles } from "@/styles";
 import { IMAGE_DEFAULT_URL } from "@/utils";
 import { isString } from "@/utils/helper";
@@ -23,6 +22,7 @@ import {
   type ServerItem,
   type ServerItemParam,
 } from "@/components/mine/util";
+import { setStorage } from "@/storage/long";
 
 const ImageServerEdit = () => {
   const info = useRouteInfo();
@@ -55,7 +55,7 @@ const ImageServerEdit = () => {
       if (!item.id) item.id = Date.now().toString();
       list.push({ ...item });
     }
-    await storageManager.set("server_items", list);
+    await setStorage("serverItems", list);
     handleBack();
   };
 

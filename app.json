@@ -45,10 +45,13 @@
         {
           "icon": "./assets/images/favicon.png",
           "color": "#000000",
-          "sounds": ["./assets/audio/dx.mp3"],
+          "sounds": [
+            "./assets/audio/dx.mp3"
+          ],
           "mode": "production"
         }
-      ]
+      ],
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true

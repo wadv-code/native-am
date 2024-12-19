@@ -1,10 +1,9 @@
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
 import { useEffect, useRef, useState } from "react";
-import type { GetItemsParams, GetItemsResItem } from "@/api";
+import type { GetItemsParams, GetItem } from "@/api";
 import { GetItems } from "@/api/api";
 import { emitter } from "@/utils/mitt";
-import { storageManager } from "@/storage";
 import { useRouter } from "expo-router";
 import { ThemedNavigation } from "../theme/ThemedNavigation";
 import { formatPath, isAudioFile } from "@/utils/lib";
@@ -18,6 +17,7 @@ import {
   StyleSheet,
   type TextProps,
 } from "react-native";
+import { setStorage } from "@/storage/long";
 
 type ListPlayerProps = TextProps & {
   closeModal: () => void;
@@ -31,7 +31,7 @@ const ListPlayer = ({ closeModal }: ListPlayerProps) => {
   const { audioInfo } = audio;
   const isInitialRender = useRef<boolean>(false);
   const [total, setTotal] = useState<number>(0);
-  const [items, setItems] = useState<GetItemsResItem[]>([]);
+  const [items, setItems] = useState<GetItem[]>([]);
   const [params, setParams] = useState<GetItemsParams>({
     page: 1,
     password: "",
@@ -62,11 +62,11 @@ const ListPlayer = ({ closeModal }: ListPlayerProps) => {
     setParams({ ...params, page: 1 });
   };
 
-  const onLeftPress = async (item: GetItemsResItem) => {
+  const onLeftPress = async (item: GetItem) => {
     if (refreshing) return;
     if (item.is_dir) {
-      await storageManager.set(
-        "parent_search_path",
+      await setStorage(
+        "parentSearchPath",
         formatPath(item.parent || "/", item.name)
       );
       closeModal();

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { IconSymbol } from "@/components/ui";
 import { emitter } from "@/utils/mitt";
 import Slider from "@react-native-community/slider";
@@ -8,13 +8,13 @@ import { useAppDispatch } from "@/hooks/useStore";
 import { formatMilliseconds, formatPath } from "@/utils/lib";
 import { GetCover, GetMusic } from "@/api/api";
 import { ThemedNavigation } from "../theme/ThemedNavigation";
-import { Text, useTheme } from "@rneui/themed";
+import { Text, makeStyles, useTheme } from "@rneui/themed";
+import { globalStyles } from "@/styles";
 import {
   ActivityIndicator,
   Animated,
-  Easing,
+  Dimensions,
   Platform,
-  StyleSheet,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -23,7 +23,8 @@ import {
   setAudioInfo,
   setPlaying,
 } from "@/store/slices/audioSlice";
-import { globalStyles } from "@/styles";
+
+const { width } = Dimensions.get("window");
 
 type ViewPlayerProps = {
   closeModal: () => void;
@@ -34,7 +35,6 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
   const [refreshing, setRefreshing] = useState(false);
   const [value, setValue] = useState(0);
   const [dragCurrent, setDragCurrent] = useState<string | undefined>();
-  const rotateAnimation = useRef(new Animated.Value(0)).current;
   const dispatch = useAppDispatch();
   const audio = useSelector((state: RootState) => state.audio);
   const {
@@ -46,18 +46,8 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
     duration,
     loading,
   } = audio;
-  const [isMusic, setIsMusic] = useState(!audioInfo.parent);
 
-  const spin = rotateAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["0deg", "360deg"],
-  });
-
-  const rotateStyle = { transform: [{ rotate: spin }] };
-
-  // const handleBack = () => {
-  //   navigation.goBack();
-  // };
+  const styles = useStyles();
 
   const onSlidingComplete = (value: number) => {
     setDragCurrent(undefined);
@@ -77,26 +67,10 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
 
   const playSound = async () => {
     dispatch(setPlaying(true));
-    startAnimation();
   };
 
   const pauseSound = async () => {
     dispatch(setPlaying(false));
-    stopAnimation();
-  };
-
-  const startAnimation = () => {
-    rotateAnimation.setValue(0);
-    Animated.timing(rotateAnimation, {
-      toValue: 1,
-      duration: 30000,
-      useNativeDriver: true,
-      easing: Easing.linear,
-    }).start(startAnimation);
-  };
-
-  const stopAnimation = () => {
-    rotateAnimation.stopAnimation();
   };
 
   const onCoverRefresh = async () => {
@@ -138,14 +112,6 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
   };
 
   useEffect(() => {
-    if (playing) setTimeout(startAnimation, 300);
-    return () => {
-      stopAnimation();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rotateAnimation]);
-
-  useEffect(() => {
     setValue(parseFloat((current / duration).toFixed(2)));
     if (dragCurrent) setDragCurrent(undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -158,22 +124,10 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
       style={styles.viewContainer}
       onLeft={closeModal}
       leftIcon="keyboard-arrow-down"
-      rightText={
-        <TouchableOpacity
-          onPress={() => setIsMusic(!isMusic)}
-          style={styles.rightText}
-        >
-          <Text style={{ fontWeight: "bold" }}>
-            {isMusic ? "退出音乐模式" : "进入音乐模式"}
-          </Text>
-        </TouchableOpacity>
-      }
+      title={audioInfo.name + audioInfo.name + audioInfo.name + audioInfo.name}
     >
       <View style={styles.animatedImage}>
-        <TouchableOpacity
-          onPress={onCoverRefresh}
-          style={[styles.cover, rotateStyle]}
-        >
+        <TouchableOpacity onPress={onCoverRefresh} style={styles.cover}>
           {(refreshing || loading) && (
             <ActivityIndicator
               size={100}
@@ -185,7 +139,6 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
         </TouchableOpacity>
       </View>
       <Animated.View style={styles.infoContainer}>
-        <Text style={styles.infoTitle}>{audioInfo.name}</Text>
         <Text style={styles.parent}>{audioInfo.auther}</Text>
         <Text style={[styles.parent, { color: theme.colors.grey0 }]}>
           {audioInfo.parent}
@@ -206,27 +159,29 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
           style={{ width: "90%" }}
         />
         <View style={styles.time}>
-          <Text>{dragCurrent || currentFormat}</Text>
-          <Text>{durationFormat}</Text>
+          <Text style={styles.timeText}>{dragCurrent || currentFormat}</Text>
+          <Text style={styles.timeText}>{durationFormat}</Text>
         </View>
-        <View style={styles.toolbar}>
+        <View style={[globalStyles.rowAround, styles.toolbar]}>
           <TouchableOpacity onPress={nextPress}>
             <IconSymbol
-              name="arrow-left"
-              size={Platform.OS === "android" ? 50 : 30}
+              name="skip-previous"
+              size={Platform.OS === "android" ? 40 : 30}
+              style={styles.toolbarIcon}
             />
           </TouchableOpacity>
           <TouchableOpacity onPress={playing ? pauseSound : playSound}>
             <IconSymbol
-              name={playing ? "pause-circle-outline" : "play-circle-outline"}
-              size={60}
-              style={{ marginHorizontal: 30 }}
+              name={playing ? "pause-circle" : "play-circle"}
+              size={70}
+              style={styles.toolbarIcon}
             />
           </TouchableOpacity>
           <TouchableOpacity onPress={nextPress}>
             <IconSymbol
-              name="arrow-right"
-              size={Platform.OS === "android" ? 50 : 30}
+              name="skip-next"
+              size={Platform.OS === "android" ? 40 : 30}
+              style={styles.toolbarIcon}
             />
           </TouchableOpacity>
         </View>
@@ -235,7 +190,7 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
   );
 };
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((theme) => ({
   indicator: {
     width: "100%",
     height: "100%",
@@ -261,9 +216,9 @@ const styles = StyleSheet.create({
   animatedImage: {
     flexGrow: 1,
     flexDirection: "row",
-    alignItems: "center",
     justifyContent: "center",
     position: "relative",
+    paddingTop: width * 0.05,
   },
   infoContainer: {
     width: "100%",
@@ -280,24 +235,33 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 40,
+    paddingHorizontal: 30,
+  },
+  timeText: {
+    fontSize: 18,
+    color: theme.colors.grey2,
+    fontFamily: "FontNumber",
   },
   cover: {
-    width: 300,
-    height: 300,
-    borderRadius: 150,
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.5,
+    width: width - 40,
+    height: width - 40,
+    borderRadius: 8,
+    shadowOffset: { width: 10, height: 10 },
+    shadowOpacity: 1,
     shadowRadius: 10,
-    elevation: 2, // Android上的阴影效果
+    elevation: 10, // Android上的阴影效果
     overflow: "hidden",
-    borderWidth: 35,
   },
   toolbar: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingBottom: 20,
+    width: "90%",
+    paddingVertical: 30,
   },
-});
+  toolbarIcon: {
+    shadowOffset: { width: 10, height: 10 },
+    shadowOpacity: 1,
+    shadowRadius: 10,
+    elevation: 10, // Android上的阴影效果
+  },
+}));
 
 export { ViewPlayer, ViewPlayerProps };

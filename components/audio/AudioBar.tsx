@@ -69,14 +69,12 @@ const AudioBar = ({ onPress }: AudioBarProps) => {
           <Image src={audioInfo?.cover} containerStyle={styles.imageStyle} />
         )}
         <View style={{ flex: 1 }}>
-          <Text style={{ fontSize: 16 }} numberOfLines={1}>
+          <Text style={styles.name} numberOfLines={1}>
             {audioInfo?.name ?? "没有音乐可播放"}
           </Text>
-          <View>
-            <Text style={styles.timeStyle}>
-              {currentFormat}/{durationFormat}
-            </Text>
-          </View>
+          <Text style={styles.timeStyle}>
+            {currentFormat}/{durationFormat}
+          </Text>
         </View>
       </TouchableOpacity>
       <View style={styles.barRightContainer}>
@@ -155,10 +153,16 @@ const styles = StyleSheet.create({
     flexShrink: 0,
     transform: [{ scale: 1.2 }],
   },
+  name: {
+    fontSize: 16,
+    fontFamily: "SpaceMono",
+  },
   timeStyle: {
     margin: 0,
     padding: 0,
-    fontSize: 14,
+    fontSize: 16,
+    fontFamily: "FontNumber",
+    marginTop: 1,
   },
   button: {
     alignItems: "center",

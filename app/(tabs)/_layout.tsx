@@ -59,20 +59,20 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="collect"
-          options={{
-            title: "Collect",
-            tabBarIcon: ({ color }) => (
-              <IconSymbol size={28} name="star" color={color} />
-            ),
-          }}
-        />
-        <Tabs.Screen
           name="catalog"
           options={{
             title: "Catalog",
             tabBarIcon: ({ color }) => (
               <IconSymbol size={28} name="snippet-folder" color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="collect"
+          options={{
+            title: "Collect",
+            tabBarIcon: ({ color }) => (
+              <IconSymbol size={28} name="star" color={color} />
             ),
           }}
         />

@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { IconSymbol } from "../ui";
 import { ThemedView, type ThemedViewProps } from "../theme/ThemedView";
 import { useRouter, type Href } from "expo-router";
-import { storageManager } from "@/storage";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Text, useTheme } from "@rneui/themed";
 import ThemedModal from "../theme/ThemedModal";
@@ -14,6 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { clearStorage, removeStorage, setStorage } from "@/storage/long";
 
 export type MineGridProps = ThemedViewProps & {
   items: GridItem[];
@@ -33,7 +33,7 @@ const MineGrid = ({ style, items, title }: MineGridProps) => {
     router.navigate(href);
   };
 
-  const clearStorage = () => {
+  const clearStorageAll = (key: "all" | "catalogRes") => {
     Alert.alert(
       "提示",
       "确认要清除缓存吗？",
@@ -43,7 +43,16 @@ const MineGrid = ({ style, items, title }: MineGridProps) => {
           onPress: () => console.log("取消"),
           style: "cancel",
         },
-        { text: "确认清除", onPress: () => storageManager.clear() },
+        {
+          text: "确认清除",
+          onPress: () => {
+            if (key === "catalogRes") {
+              removeStorage(key);
+            } else {
+              clearStorage();
+            }
+          },
+        },
       ],
       { cancelable: false }
     );
@@ -61,7 +70,9 @@ const MineGrid = ({ style, items, title }: MineGridProps) => {
     if (item.href) {
       openPage(item.href);
     } else if (item.type === "clear") {
-      clearStorage();
+      clearStorageAll("all");
+    } else if (item.type === "catalogRes") {
+      clearStorageAll("catalogRes");
     } else if (item.type === "modal") {
       openModal();
     } else if (item.type === "theme") {
@@ -78,7 +89,7 @@ const MineGrid = ({ style, items, title }: MineGridProps) => {
     updateTheme({
       mode: colorScheme,
     });
-    storageManager.set("color_scheme", colorScheme);
+    setStorage("colorScheme", colorScheme);
   };
 
   return (

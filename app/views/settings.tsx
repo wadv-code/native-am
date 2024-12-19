@@ -3,7 +3,6 @@ import { useColorScheme } from "@/hooks/useColorScheme";
 import { globalStyles } from "@/styles";
 import { useEffect, useState } from "react";
 import Animated from "react-native-reanimated";
-import { storageManager } from "@/storage";
 import { useRouter } from "expo-router";
 import { ThemedNavigation } from "@/components/theme/ThemedNavigation";
 import { Button, Switch, Text, useTheme } from "@rneui/themed";
@@ -15,6 +14,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { removeStorage, setStorage } from "@/storage/long";
 
 const SettingsScreen = () => {
   const router = useRouter();
@@ -29,7 +29,7 @@ const SettingsScreen = () => {
     updateTheme({
       mode: colorScheme,
     });
-    storageManager.set("color_scheme", colorScheme);
+    setStorage("colorScheme", colorScheme);
   };
 
   const openAbout = () => {
@@ -46,7 +46,7 @@ const SettingsScreen = () => {
           onPress: () => console.log("取消"),
           style: "cancel",
         },
-        { text: "确认清除", onPress: () => storageManager.clear() },
+        { text: "确认清除", onPress: () => clearStorage() },
       ],
       { cancelable: false }
     );
@@ -96,7 +96,7 @@ const SettingsScreen = () => {
           primary: color,
         },
       });
-      storageManager.set("theme_primary", color);
+      setStorage("themePrimary", color);
     } else {
       updateTheme({
         darkColors: {
@@ -106,7 +106,7 @@ const SettingsScreen = () => {
           primary: Colors.light.primary,
         },
       });
-      storageManager.remove("theme_primary");
+      removeStorage("themePrimary");
     }
   };
 

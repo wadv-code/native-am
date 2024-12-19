@@ -3,10 +3,9 @@ import { Audio, type AVPlaybackStatus } from "expo-av";
 import { useSelector } from "react-redux";
 import { emitter } from "@/utils/mitt";
 import { useAppDispatch } from "@/hooks/useStore";
-import { storageManager } from "@/storage";
 import { formatPath } from "@/utils/lib";
 import type { RootState } from "@/store";
-import type { GetItemsResItem } from "@/api";
+import type { GetItem } from "@/api";
 import {
   setAudioInfoAsync,
   setCurrent,
@@ -15,6 +14,7 @@ import {
   setLoading,
   setAudioInfo,
 } from "@/store/slices/audioSlice";
+import { getStorage, setStorage } from "@/storage/long";
 
 Audio.setAudioModeAsync({
   allowsRecordingIOS: false,
@@ -65,11 +65,11 @@ const MusicPlayer = (props: MusicPlayerProps) => {
     } catch {
       // 错误就移除url
       delete audioInfo.raw_url;
-      storageManager.get("raw_url_items").then((list: OptionType[] | null) => {
+      getStorage<OptionType[]>("rawUrlItems", []).then((list) => {
         if (list) {
           const path = formatPath(audioInfo.parent || "/", audioInfo.name);
-          storageManager.set(
-            "raw_url_items",
+          setStorage(
+            "rawUrlItems",
             list.filter((s) => path !== s.key)
           );
         }
@@ -140,7 +140,7 @@ const MusicPlayer = (props: MusicPlayerProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [audioInfo.raw_url]);
 
-  const onAudioChange = (audio: GetItemsResItem) => {
+  const onAudioChange = (audio: GetItem) => {
     dispatch(setLoading(true));
     if (audio.parent) {
       dispatch(setAudioInfoAsync(audio));
@@ -171,8 +171,8 @@ const MusicPlayer = (props: MusicPlayerProps) => {
   // };
 
   useEffect(() => {
-    storageManager.get("audio_info").then((audio) => {
-      if (audio && audio.id && audio.id !== audioInfo.id) onAudioChange(audio);
+    getStorage<GetItem>("audioInfo", { name: "", id: "" }).then((audio) => {
+      if (audio.id && audio.id !== audioInfo.id) onAudioChange(audio);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

@@ -2,45 +2,52 @@ import { globalStyles } from "@/styles";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { IconSymbol } from "../ui";
 import Animated from "react-native-reanimated";
-import { useEffect } from "react";
-import { Text } from "@rneui/themed";
+import { Text, useTheme } from "@rneui/themed";
 import { router } from "expo-router";
-import { formatPath } from "@/utils/lib";
 
 type CatalogCrumbItem = {
   name: string;
   path: string;
+  text?: string;
 };
 
 type CatalogCrumbsProps = {
+  item?: CatalogCrumbItem;
   items: CatalogCrumbItem[];
   search?: boolean;
-  onPress?: (item: CatalogCrumbItem, index: number) => void;
+  onPress?: (index: number) => void;
 };
 
 const CatalogCrumbs = (props: CatalogCrumbsProps) => {
-  const { items, search, onPress } = props;
-  const onRoot = () => {};
+  const { item, items, search, onPress } = props;
+
+  const { theme } = useTheme();
 
   const openSearch = () => {
-    const path = formatPath(items.map((v) => v.name).join("/"));
-    console.log(path);
     router.navigate({
       pathname: "/views/search",
       params: {
-        path: path ?? "/",
+        path: item?.path || "/",
       },
     });
   };
 
-  useEffect(() => {
-    // splitToItems(path);
-  }, [items]);
+  const onChange = (index: number) => {
+    onPress && onPress(index);
+  };
+
+  const getColor = (v: CatalogCrumbItem) => {
+    return item?.path === v.path ? theme.colors.primary : theme.colors.grey0;
+  };
 
   return (
     <View style={globalStyles.row}>
-      <TouchableOpacity onPress={onRoot}>
-        <IconSymbol size={24} name="snippet-folder" />
+      <TouchableOpacity onPress={() => onChange(0)}>
+        <IconSymbol
+          size={24}
+          color={getColor({ name: "", path: "/" })}
+          name="snippet-folder"
+        />
       </TouchableOpacity>
       <Animated.ScrollView
         scrollEventThrottle={16}
@@ -50,19 +57,22 @@ const CatalogCrumbs = (props: CatalogCrumbsProps) => {
       >
         {items
           .filter((f) => f.name)
-          .map((item, index) => {
+          .map((v, index) => {
             return (
               <TouchableOpacity
                 key={index}
                 style={styles.breadcrumb}
-                onPress={() => onPress && onPress(item, index)}
+                onPress={() => onChange(index + 1)}
               >
                 <IconSymbol
                   size={16}
                   style={{ marginHorizontal: 3 }}
+                  color={getColor(v)}
                   name="arrow-right"
                 />
-                <Text style={styles.text}>{item.name}</Text>
+                <Text style={[styles.text, { color: getColor(v) }]}>
+                  {v.name}
+                </Text>
               </TouchableOpacity>
             );
           })}
@@ -97,6 +107,7 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 16,
+    fontFamily: "SpaceMono",
   },
   smallText: {
     fontSize: 14,

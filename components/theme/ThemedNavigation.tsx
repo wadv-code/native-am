@@ -16,11 +16,14 @@ import {
   StyleSheet,
   ImageBackground,
   TouchableOpacity,
+  Dimensions,
 } from "react-native";
 import type { MaterialIconsName } from "@/types";
 import { getStorageAsync } from "@/store/slices/audioSlice";
 import { randomNum } from "@/utils/lib";
 import { Text, useTheme } from "@rneui/themed";
+
+const { width } = Dimensions.get("window");
 
 type ThemedNavigationProps = PropsWithChildren<
   ThemedViewProps & {
@@ -103,9 +106,11 @@ const ThemedNavigation = (props: ThemedNavigationProps) => {
           src={currentSrc || audioInfo.cover}
         />
       )}
-      <View style={styles.header}>
+      <View style={{ width: "100%" }}>
         {statusBar && <HeaderBar />}
-        <View style={[globalStyles.row, globalStyles.justifyBetween]}>
+        <View
+          style={[styles.header, globalStyles.row, globalStyles.justifyBetween]}
+        >
           <TouchableOpacity
             style={[
               globalStyles.row,
@@ -120,7 +125,9 @@ const ThemedNavigation = (props: ThemedNavigationProps) => {
               name={leftIcon}
             />
           </TouchableOpacity>
-          <Text>{title}</Text>
+          <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
+            {title}
+          </Text>
           {rightText || (
             <TouchableOpacity
               style={[
@@ -160,11 +167,18 @@ const styles = StyleSheet.create({
     height: "100%",
     opacity: 0.2,
   },
+  title: {
+    width: width * 0.5,
+    fontSize: 16,
+    fontWeight: "bold",
+    flexGrow: 1,
+  },
   content: {
     flexGrow: 1,
   },
   header: {
     width: "100%",
+    overflow: "hidden",
   },
   action: {
     width: 50,

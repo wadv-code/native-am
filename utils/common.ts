@@ -1,15 +1,15 @@
-import type { GetItemsResItem } from "@/api";
+import type { GetItem } from "@/api";
 import { formatFileSize, formatPath, formatTimeAgo } from "./lib";
-import { storageManager } from "@/storage";
-import type { ActionSortOrder } from "@/types";
+import type { ActionOrder, ActionSort, ActionSortOrder } from "@/types";
 import dayjs from "dayjs";
+import { getStorage, setStorage } from "@/storage/long";
 
 /**
  * 格式化数据
  * @param items
  * @returns
  */
-export async function formatContent(items: GetItemsResItem[], parent?: string) {
+export async function formatContent(items: GetItem[], parent?: string) {
   const collectItems = await getCollectItems();
   items.forEach((item) => {
     item.parent = item.parent || parent || "/";
@@ -28,7 +28,7 @@ export async function formatContent(items: GetItemsResItem[], parent?: string) {
  * 切换收藏
  * @param item
  */
-export const toggleCollect = async (item: GetItemsResItem) => {
+export const toggleCollect = async (item: GetItem) => {
   const collectItems = await getCollectItems();
   if (!collectItems.some((s) => s.id === item.id)) {
     item.is_collect = true;
@@ -45,21 +45,21 @@ export const toggleCollect = async (item: GetItemsResItem) => {
 };
 
 export const getCollectItems = async () => {
-  return (await storageManager.get<GetItemsResItem[]>("collect_items")) || [];
+  return await getStorage<GetItem[]>("collectItems", []);
 };
 
-export const saveCollectItems = async (list: GetItemsResItem[]) => {
-  return storageManager.set("collect_items", list);
+export const saveCollectItems = async (list: GetItem[]) => {
+  return setStorage("collectItems", list);
 };
 
 export const getSortOrder = async (): Promise<ActionSortOrder> => {
-  const sort = (await storageManager.get("sort_string")) ?? "descending";
-  const order = (await storageManager.get("order_string")) ?? "time";
+  const sort = await getStorage<ActionSort>("sortString", "descending");
+  const order = await getStorage<ActionOrder>("orderString", "time");
   return { sort, order };
 };
 
 export const getSortOrderItems = async (
-  list: GetItemsResItem[],
+  list: GetItem[],
   option?: ActionSortOrder
 ) => {
   const sortOrder = option ?? (await getSortOrder());

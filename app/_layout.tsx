@@ -1,20 +1,19 @@
 // import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
-import * as SplashScreen from "expo-splash-screen";
+import { SplashScreen, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import "react-native-reanimated";
 import { Provider } from "react-redux";
 import { store } from "@/store";
-import { Appearance, SafeAreaView } from "react-native";
-import { storageManager } from "@/storage";
+import { Appearance, SafeAreaView, type ColorSchemeName } from "react-native";
 import { Colors } from "@/constants/Colors";
 import {
   createTheme,
   ThemeProvider,
   type CreateThemeOptions,
 } from "@rneui/themed";
+import { getStorage } from "@/storage/long";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -23,12 +22,13 @@ export default function RootLayout() {
   const { setColorScheme } = Appearance;
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+    FontNumber: require("../assets/fonts/FontNumber.ttf"),
   });
   const [theme, setTheme] = useState<CreateThemeOptions | undefined>();
 
   const getCreateThemeOptions = async () => {
-    const mode = await storageManager.get("color_scheme");
-    const primary = await storageManager.get("theme_primary");
+    const mode = await getStorage<ColorSchemeName>("colorScheme", "light");
+    const primary = await getStorage<string>("themePrimary", "");
     setColorScheme(mode);
     const themeProps = createTheme({
       lightColors: {

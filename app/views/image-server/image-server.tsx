@@ -2,7 +2,7 @@ import { getImageServerItems, type ServerItem } from "@/components/mine/util";
 import { ThemedNavigation } from "@/components/theme/ThemedNavigation";
 import { IconSymbol } from "@/components/ui";
 import { useBottomTabOverflow } from "@/components/ui/TabBarBackground";
-import { storageManager } from "@/storage";
+import { removeStorage, setStorage } from "@/storage/long";
 import { globalStyles } from "@/styles";
 import { useIsFocused } from "@react-navigation/native";
 import { Button, Text, useTheme } from "@rneui/themed";
@@ -37,8 +37,8 @@ const ImageServer = () => {
     items.splice(index, 1);
     const list = [...items];
     setItems(list);
-    if (list.length) storageManager.set("server_items", list);
-    else storageManager.remove("server_items");
+    if (list.length) setStorage("serverItems", list);
+    else removeStorage("serverItems");
   };
 
   const handleEdit = (item: ServerItem) => {
@@ -55,7 +55,7 @@ const ImageServer = () => {
     item.isDefault = true;
     const list = [...items];
     setItems(list);
-    storageManager.set("server_items", list);
+    setStorage("serverItems", list);
   };
 
   const handleAdd = () => {

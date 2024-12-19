@@ -1,4 +1,4 @@
-import { storageManager } from "@/storage";
+import { getStorage } from "@/storage/long";
 import type { MaterialIconsName } from "@/types";
 import { IMAGE_DEFAULT_URL } from "@/utils";
 import type { Href } from "expo-router";
@@ -12,7 +12,8 @@ export type GridItem = {
 
 export const gridItems: GridItem[] = [
   { title: "浅色模式", icon: "light-mode", type: "theme" },
-  { title: "清除缓存", icon: "delete-sweep", type: "clear" },
+  { title: "清除全部缓存", icon: "delete-sweep", type: "clear" },
+  { title: "清除请求缓存", icon: "delete-sweep", type: "catalogRes" },
   { title: "愉悦心情", icon: "photo-library", href: "/views/viewer" },
   { title: "应用设置", icon: "settings", href: "/views/settings" },
   {
@@ -57,7 +58,7 @@ export type getImageServerDefaultItemFn = (
 ) => Promise<ServerItem | undefined>;
 
 export const getImageServerItems: GetImageServerItemsFn = async () => {
-  return (await storageManager.get("server_items")) || getServerItems();
+  return await getStorage<ServerItem[]>("serverItems", getServerItems());
 };
 
 export const getImageServerDefaultItem: getImageServerDefaultItemFn = async (

@@ -1,20 +1,21 @@
 import React, { memo } from "react";
-import type { GetItemsResItem } from "@/api";
-import { getIconSymbol } from "@/utils/lib";
+import type { GetItem } from "@/api";
+import { getIconSymbol, isAudioFile } from "@/utils/lib";
 import { IconSymbol } from "../ui";
 import { makeStyles, Text, useTheme } from "@rneui/themed";
 import { useSelector } from "react-redux";
-import { TouchableOpacity, View } from "react-native";
+import { Alert, TouchableOpacity, View } from "react-native";
 import type { RootState } from "@/store";
+import { emitter } from "@/utils/mitt";
 
 type ItemProps = {
-  item: GetItemsResItem;
+  item: GetItem;
   refreshId?: string;
   height?: number;
   showParent?: boolean;
-  onIconPress?: (option: GetItemsResItem) => void;
-  onLeftPress?: (option: GetItemsResItem) => void;
-  onRightPress?: (option: GetItemsResItem) => void;
+  onIconPress?: (option: GetItem) => void;
+  onLeftPress?: (option: GetItem) => void;
+  onRightPress?: (option: GetItem) => void;
 };
 
 export type CatalogItemProps = ItemProps;
@@ -28,15 +29,22 @@ const CatalogItem = memo(
     const { theme } = useTheme();
     const { audioInfo } = useSelector((state: RootState) => state.audio);
 
+    const onPress = () => {
+      if (isAudioFile(item.name)) {
+        emitter.emit("onAudioChange", item);
+      } else if (item.is_dir) {
+        onLeftPress && onLeftPress(item);
+      } else {
+        Alert.prompt("还未处理的文件格式。");
+      }
+    };
+
     return (
       <View key={item.id} style={styles.itemContainer}>
         <View
           style={[styles.line, { opacity: audioInfo.id === item.id ? 1 : 0 }]}
         />
-        <TouchableOpacity
-          style={styles.leftContainer}
-          onPress={() => onLeftPress && onLeftPress(item)}
-        >
+        <TouchableOpacity style={styles.leftContainer} onPress={onPress}>
           <IconSymbol
             size={24}
             name={getIconSymbol(item.name, item.is_dir)}
@@ -83,14 +91,14 @@ const useStyles = makeStyles((theme, props: CatalogItemProps) => ({
   itemContainer: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 7,
+    paddingHorizontal: 10,
     position: "relative",
+    height: props.height ?? 50,
   },
   leftContainer: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    height: props.height ?? 50,
     paddingRight: 40,
   },
   title: {
@@ -98,13 +106,16 @@ const useStyles = makeStyles((theme, props: CatalogItemProps) => ({
     lineHeight: 16,
   },
   size: {
-    fontSize: 12,
+    fontSize: 13,
     marginRight: 5,
-    color: theme.colors.primary,
+    fontFamily: "SpaceMono",
+    letterSpacing: -1,
   },
   timeStyle: {
     fontSize: 12,
     marginTop: 3,
+    color: theme.colors.primary,
+    fontFamily: "SpaceMono",
   },
   rightContainer: {
     flexDirection: "row",
