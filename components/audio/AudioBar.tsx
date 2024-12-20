@@ -13,6 +13,8 @@ import {
   ImageBackground,
   TouchableOpacity,
 } from "react-native";
+import { globalStyles } from "@/styles";
+import { Circle } from "react-native-progress";
 
 // const sound =
 //   "http://nm.hzwima.com:8000/%E5%91%A8%E6%9D%B0%E4%BC%A6-%E7%A8%BB%E9%A6%99.mp3";
@@ -25,8 +27,14 @@ const AudioBar = ({ onPress }: AudioBarProps) => {
   const { theme } = useTheme();
   const dispatch = useDispatch();
   const audioState = useSelector((state: RootState) => state.audio);
-  const { audioInfo, loading, playing, durationFormat, currentFormat } =
-    audioState;
+  const {
+    audioInfo,
+    progress,
+    loading,
+    playing,
+    durationFormat,
+    currentFormat,
+  } = audioState;
 
   const togglePlaying = () => {
     if (loading) return;
@@ -73,22 +81,37 @@ const AudioBar = ({ onPress }: AudioBarProps) => {
             {audioInfo?.name ?? "没有音乐可播放"}
           </Text>
           <Text style={styles.timeStyle}>
-            {currentFormat}/{durationFormat}
+            {currentFormat} / {durationFormat}
           </Text>
         </View>
       </TouchableOpacity>
       <View style={styles.barRightContainer}>
-        <TouchableOpacity style={styles.button} onPress={togglePlaying}>
-          <IconSymbol
-            size={28}
-            name={playing ? "pause-circle-outline" : "play-circle-outline"}
-          />
-        </TouchableOpacity>
+        {audioInfo.parent && (
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => onPress && onPress("list")}
+          >
+            <IconSymbol size={28} name="queue-music" />
+          </TouchableOpacity>
+        )}
         <TouchableOpacity
-          style={styles.button}
-          onPress={() => onPress && onPress("list")}
+          style={[globalStyles.rowCenter, { position: "relative" }]}
+          onPress={togglePlaying}
         >
-          <IconSymbol size={28} name="queue-music" />
+          <Circle
+            size={25}
+            progress={progress}
+            color={theme.colors.grey0}
+            unfilledColor={theme.colors.grey4}
+            borderWidth={0}
+            thickness={2}
+            style={{ position: "absolute" }}
+          />
+          <IconSymbol
+            name={playing ? "pause-circle" : "play-circle"}
+            color={theme.colors.grey0}
+            size={22}
+          />
         </TouchableOpacity>
       </View>
     </View>
@@ -107,6 +130,7 @@ const styles = StyleSheet.create({
     // padding: 5, // 可选：内边距
     // borderWidth: 0.5,
     // overflow: "hidden",
+    height: 38,
   },
   imageContainer: {
     position: "absolute",
@@ -121,8 +145,8 @@ const styles = StyleSheet.create({
     elevation: 2, // Android上的阴影效果
     borderTopLeftRadius: 5,
     borderBottomLeftRadius: 5,
-    borderBottomRightRadius: 25,
-    borderTopRightRadius: 25,
+    borderBottomRightRadius: 19,
+    borderTopRightRadius: 19,
   },
   backgroundImage: {
     position: "absolute",
@@ -149,20 +173,19 @@ const styles = StyleSheet.create({
     width: 45,
     height: 45,
     borderRadius: 3,
-    marginRight: 10,
+    marginRight: 15,
     flexShrink: 0,
-    transform: [{ scale: 1.2 }],
+    transform: [{ scale: 1.15 }],
   },
   name: {
     fontSize: 16,
-    fontFamily: "SpaceMono",
   },
   timeStyle: {
     margin: 0,
     padding: 0,
     fontSize: 16,
     fontFamily: "FontNumber",
-    marginTop: 1,
+    marginTop: 2,
   },
   button: {
     alignItems: "center",

@@ -9,7 +9,6 @@ import {
   ModalPlayer,
   type ModalPlayerType,
 } from "@/components/audio/ModalPlayer";
-// import { MusicPlayer } from "@/components/audio/MusicPlayer";
 import { useState } from "react";
 import { Music } from "@/components/audio/Music";
 
@@ -94,7 +93,6 @@ export default function TabLayout() {
         modalVisible={visible}
         closeModal={closeModal}
       />
-      {/* <MusicPlayer /> */}
       <Music />
     </>
   );

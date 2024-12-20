@@ -112,3 +112,32 @@ export async function GetMusic(bill: string = "热歌榜") {
     },
   });
 }
+
+export type GetHotListItem = {
+  hot: string;
+  index: number;
+  mobil_url: string;
+  title: string;
+  type: string;
+  url: string;
+};
+
+export type GetHotListRes = {
+  data: GetHotListItem[];
+  name: string;
+  subtitle: string;
+  update_time: string;
+}[];
+
+/**
+ * 获取热搜榜单聚合
+ * @constructor
+ */
+export async function GetHotList(refresh?: boolean) {
+  return request<GetHotListRes>({
+    url: "https://api.vvhan.com/api/hotlist/all",
+    method: "get",
+    cache: true,
+    refresh,
+  });
+}

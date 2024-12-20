@@ -155,9 +155,9 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   headerMenuCount: {
-    fontWeight: "bold",
     textAlign: "center",
-    fontSize: 20,
+    fontSize: 26,
+    fontFamily: "FontNumber",
   },
   backgroundImage: {
     position: "absolute",

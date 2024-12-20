@@ -47,6 +47,7 @@ const CatalogList = forwardRef<CatalogListHandle, CatalogListProps>(
     const { onLeftPress, onRightPress, onChangeText, onRefresh } = props;
     const { theme } = useTheme();
     const virtualizedRef = useRef<VirtualizedList<GetItem>>(null);
+    const currentPath = useRef<string>("");
     const [visible, setVisible] = useState(false);
     const [refreshing, setRefreshing] = useState<boolean>(false);
     const [items, setItems] = useState<GetItem[]>([]);
@@ -76,13 +77,10 @@ const CatalogList = forwardRef<CatalogListHandle, CatalogListProps>(
 
     const updateItem = (id: string, key: keyof GetItem, value: any) => {
       setItems((prevItems) => {
-        // 创建一个新数组来避免直接修改状态
         return prevItems.map((item) => {
-          // 如果找到匹配的id，则返回一个新的对象来更新它
           if (item.id === id) {
             return { ...item, [key]: value };
           }
-          // 否则返回原始对象
           return item;
         });
       });
@@ -133,6 +131,7 @@ const CatalogList = forwardRef<CatalogListHandle, CatalogListProps>(
           setItems(list);
           setTotal(data.total);
           onChangeText && onChangeText(`${list.length}/${data.total}`);
+          currentPath.current = params.path;
         } catch {
           return Promise.reject("onFetch Request Error");
         } finally {
@@ -146,15 +145,16 @@ const CatalogList = forwardRef<CatalogListHandle, CatalogListProps>(
       onRefresh && onRefresh();
     };
 
-    // useEffect(() => {
-    //   onFetch();
-    //   // eslint-disable-next-line react-hooks/exhaustive-deps
-    // }, [path]);
-
+    // 只刷新当前视图，其他视图进入不加载数据，优化性能
     useEffect(() => {
-      if (index !== undefined && value === index && !items.length) onFetch();
+      if (
+        (index !== undefined && value === index && !currentPath.current) ||
+        (currentPath.current && currentPath.current !== path)
+      ) {
+        onFetch();
+      }
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [value, index]);
+    }, [path, value, index]);
 
     useEffect(() => {
       if (data) onFetch();

@@ -14,6 +14,7 @@ export type HistoryItem = HistoryItemType;
 
 export type RootStackParamList = {
   search: { path: string };
+  "web-view": { url: string; title: string };
 };
 
 export type ActionOrder = (typeof orders)[number];

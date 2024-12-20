@@ -5,6 +5,9 @@ export const globalStyles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
+  flex: {
+    flex: 1,
+  },
   row: {
     flexDirection: "row",
     alignItems: "center",

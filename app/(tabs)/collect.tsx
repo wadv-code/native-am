@@ -8,6 +8,9 @@ import { StyleSheet } from "react-native";
 import { CatalogAction } from "@/components/catalog/CatalogAction";
 import type { ActionSortOrder } from "@/types";
 import { useIsFocused } from "@react-navigation/native";
+import { setStorage } from "@/storage/long";
+import { formatPath } from "@/utils/lib";
+import { router } from "expo-router";
 
 const CollectScreen = () => {
   const [items, setItems] = useState<GetItem[]>([]);
@@ -24,6 +27,14 @@ const CollectScreen = () => {
     setItems(list);
   };
 
+  const onLeftPress = async (item: GetItem) => {
+    await setStorage(
+      "onCatalogChangePath",
+      formatPath(item.parent || "/", item.name)
+    );
+    router.replace("/catalog");
+  };
+
   useEffect(() => {
     if (isFocused) onFetch();
   }, [isFocused]);
@@ -36,7 +47,7 @@ const CollectScreen = () => {
         style={styles.action}
         onSortOrder={onSortOrder}
       />
-      <CatalogList data={items} onRefresh={onFetch} />
+      <CatalogList data={items} onRefresh={onFetch} onLeftPress={onLeftPress} />
     </ThemedView>
   );
 };

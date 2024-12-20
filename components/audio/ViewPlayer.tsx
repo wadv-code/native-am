@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { IconSymbol } from "@/components/ui";
-import { emitter } from "@/utils/mitt";
 import Slider from "@react-native-community/slider";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
@@ -8,11 +7,10 @@ import { useAppDispatch } from "@/hooks/useStore";
 import { formatMilliseconds, formatPath } from "@/utils/lib";
 import { GetCover, GetMusic } from "@/api/api";
 import { ThemedNavigation } from "../theme/ThemedNavigation";
-import { Text, makeStyles, useTheme } from "@rneui/themed";
+import { Image, Text, makeStyles, useTheme } from "@rneui/themed";
 import { globalStyles } from "@/styles";
 import {
   ActivityIndicator,
-  Animated,
   Dimensions,
   Platform,
   TouchableOpacity,
@@ -33,11 +31,11 @@ type ViewPlayerProps = {
 
 const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
   const { theme } = useTheme();
+  const dispatch = useAppDispatch();
   const [refreshing, setRefreshing] = useState(false);
   const [value, setValue] = useState(0);
   const startRef = useRef(false);
   const [dragCurrent, setDragCurrent] = useState<string | undefined>();
-  const dispatch = useAppDispatch();
   const audio = useSelector((state: RootState) => state.audio);
   const {
     audioInfo,
@@ -54,13 +52,13 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
   const onSlidingComplete = (value: number) => {
     startRef.current = false;
     setDragCurrent(undefined);
-    const seek = Math.floor((value / 100) * duration);
+    const seek = Math.round(value * duration);
     dispatch(setSeek(seek));
   };
 
   const onValueChange = (value: number) => {
     if (startRef.current) {
-      const diff = Math.floor((value / 100) * duration);
+      const diff = Math.round(value * duration);
       setDragCurrent(formatMilliseconds(diff));
     }
   };
@@ -102,13 +100,15 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
       const { info } = await GetMusic();
       if (info) {
         const id = info.id.toString();
-        emitter.emit("onAudioChange", {
-          id,
-          name: info.name,
-          auther: info.auther,
-          raw_url: info.url,
-          cover: info.pic_url,
-        });
+        dispatch(
+          setAudioInfo({
+            id,
+            name: info.name,
+            auther: info.auther,
+            raw_url: info.url,
+            cover: info.pic_url,
+          })
+        );
       }
     } finally {
       setRefreshing(false);
@@ -129,7 +129,6 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
       style={styles.viewContainer}
       onLeft={closeModal}
       leftIcon="keyboard-arrow-down"
-      title={audioInfo.name + audioInfo.name + audioInfo.name + audioInfo.name}
     >
       <View style={styles.animatedImage}>
         <TouchableOpacity onPress={onCoverRefresh} style={styles.cover}>
@@ -140,13 +139,21 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
               style={styles.indicator}
             />
           )}
-          <Animated.Image src={audioInfo.cover} style={globalStyles.screen} />
+          <Image
+            src={audioInfo.cover}
+            resizeMode="cover"
+            containerStyle={globalStyles.screen}
+          />
         </TouchableOpacity>
       </View>
-      <Animated.View style={styles.infoContainer}>
+      <View style={styles.infoContainer}>
+        <Text style={styles.infoTitle}>{audioInfo.name}</Text>
         <Text style={styles.parent}>{audioInfo.auther}</Text>
         <Text style={[styles.parent, { color: theme.colors.grey0 }]}>
           {audioInfo.parent}
+        </Text>
+        <Text style={[styles.parent, { color: theme.colors.grey0 }]}>
+          {audioInfo.sizeFormat}
         </Text>
         <Text style={{ color: theme.colors.grey0 }}>
           {audioInfo.modifiedFormat}
@@ -157,10 +164,10 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
           onSlidingComplete={onSlidingComplete}
           onValueChange={onValueChange}
           minimumValue={0}
-          maximumValue={100}
+          maximumValue={1}
           minimumTrackTintColor={theme.colors.primary}
           thumbTintColor={theme.colors.primary}
-          step={0.5}
+          step={0.01}
           style={{ width: "90%" }}
         />
         <View style={styles.time}>
@@ -190,7 +197,7 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
             />
           </TouchableOpacity>
         </View>
-      </Animated.View>
+      </View>
     </ThemedNavigation>
   );
 };
@@ -248,13 +255,13 @@ const useStyles = makeStyles((theme) => ({
     fontFamily: "FontNumber",
   },
   cover: {
-    width: width - 40,
-    height: width - 40,
+    width: width - 60,
+    height: width - 60,
     borderRadius: 8,
-    shadowOffset: { width: 10, height: 10 },
+    shadowOffset: { width: 6, height: 6 },
     shadowOpacity: 1,
     shadowRadius: 10,
-    elevation: 10, // Android上的阴影效果
+    elevation: 6, // Android上的阴影效果
     overflow: "hidden",
   },
   toolbar: {

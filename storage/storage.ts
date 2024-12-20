@@ -7,9 +7,9 @@ const storage = new Storage({
   // 使用 AsyncStorage 或 window.localStorage
   storageBackend: AsyncStorage,
   // 数据过期时间, 默认 1 天(86400 秒)
-  defaultExpires: 1000 * 3600 * 24,
+  defaultExpires: 1000 * 3600 * 24 * 7,
   // 启用后台同步
-  enableCache: true,
+  // enableCache: true,
   // 你可以在构造函数这里就写好sync的方法
   // sync: {
   //   // ...

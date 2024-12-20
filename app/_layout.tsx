@@ -1,5 +1,6 @@
 import { useFonts } from "expo-font";
-import { SplashScreen, Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import "react-native-reanimated";
@@ -7,12 +8,13 @@ import { Provider } from "react-redux";
 import { store } from "@/store";
 import { Appearance, SafeAreaView, type ColorSchemeName } from "react-native";
 import { Colors } from "@/constants/Colors";
+import { getStorage } from "@/storage/long";
+// import { AudioLoading } from "@/components/audio/AudioLoading";
 import {
   createTheme,
   ThemeProvider,
   type CreateThemeOptions,
 } from "@rneui/themed";
-import { getStorage } from "@/storage/long";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -78,6 +80,7 @@ export default function RootLayout() {
             <Stack.Screen name="+not-found" />
           </Stack>
           <StatusBar style="auto" />
+          {/* <AudioLoading /> */}
         </ThemeProvider>
       </Provider>
     </SafeAreaView>

@@ -1,11 +1,11 @@
 import { useAppDispatch } from "@/hooks/useStore";
 import type { RootState } from "@/store";
-import { Audio, type AVPlaybackStatus } from "expo-av";
+import { Audio, InterruptionModeAndroid, type AVPlaybackStatus } from "expo-av";
 import { useEffect, useState } from "react";
 import { AppState } from "react-native";
 import { useSelector } from "react-redux";
 import { formatAudioPosition, throttle } from "@/utils/lib";
-import { getStorage } from "@/storage/long";
+import { getStorage, setStorage } from "@/storage/long";
 import type { GetItem } from "@/api";
 import {
   setAudioInfo,
@@ -15,11 +15,12 @@ import {
 } from "@/store/slices/audioSlice";
 
 Audio.setAudioModeAsync({
-  allowsRecordingIOS: false,
   interruptionModeIOS: 0,
   playsInSilentModeIOS: true,
   shouldDuckAndroid: true,
   staysActiveInBackground: true,
+  playThroughEarpieceAndroid: true,
+  interruptionModeAndroid: InterruptionModeAndroid.DuckOthers,
 });
 
 const Music = () => {
@@ -29,30 +30,55 @@ const Music = () => {
   const { audioInfo, playing, loading, seek } = audioState;
 
   const playAsync = async () => {
-    if (sound && !loading) {
-      dispatch(setLoading(true));
+    if (sound) {
       await sound.playAsync();
       dispatch(setPlaying(true));
     }
   };
 
   const pauseAsync = async () => {
-    if (sound && !loading) {
+    if (sound) {
+      await sound.pauseAsync();
+      dispatch(setPlaying(false));
+    }
+  };
+
+  const stopAsync = async () => {
+    if (sound) {
       await sound.stopAsync();
       dispatch(setPlaying(false));
     }
   };
 
+  const getStoragePosition = async () => {
+    const option = await getStorage<{ position: number; id: string }>(
+      "audioPosition",
+      { position: 0, id: audioInfo.id }
+    );
+    return option;
+  };
+
+  const setStoragePosition = throttle((position) => {
+    if (position) {
+      setStorage("audioPosition", {
+        id: audioInfo.id,
+        position,
+      });
+    }
+  }, 5000);
+
   const setAudioCurrent = (playbackStatus: AVPlaybackStatus) => {
     if (playbackStatus.isLoaded) {
       const position = playbackStatus.positionMillis;
       const duration = playbackStatus.durationMillis ?? 0;
+      const option = formatAudioPosition(position, duration);
       dispatch(
         setPosition({
           duration,
-          ...formatAudioPosition(position, duration),
+          ...option,
         })
       );
+      setStoragePosition(position);
     }
   };
 
@@ -73,10 +99,10 @@ const Music = () => {
           // Update your UI for the paused state
         }
 
-        if (playbackStatus.isBuffering) {
-          console.log("isBuffering");
-          // onBuffering && onBuffering();
-        }
+        // if (playbackStatus.isBuffering) {
+        //   console.log("isBuffering");
+        //   // onBuffering && onBuffering();
+        // }
 
         if (playbackStatus.didJustFinish && !playbackStatus.isLooping) {
           console.log("isFinish");
@@ -116,12 +142,18 @@ const Music = () => {
       const soundObject = new Audio.Sound();
       try {
         dispatch(setLoading(true));
+        await stopAsync();
         // 注销旧的
         await sound?.unloadAsync();
+        // 获取进度
+        const option = await getStoragePosition();
         // 新的
         const playbackStatus = await soundObject.loadAsync(
           { uri },
-          { shouldPlay: playing }
+          {
+            shouldPlay: playing,
+            positionMillis: audioInfo.id === option.id ? option.position : 0,
+          }
         );
         setAudioCurrent(playbackStatus);
         soundObject?.setOnPlaybackStatusUpdate(handlePlaybackStatusUpdate);

@@ -8,26 +8,26 @@ import { CatalogToolbar } from "@/components/catalog/CatalogToolbar";
 import { useIsFocused } from "@react-navigation/native";
 import type { GetItem } from "@/api";
 import { formatPath } from "@/utils/lib";
+import { getStorage, removeStorage, setStorage } from "@/storage/long";
 import {
   CatalogList,
   type CatalogListHandle,
 } from "@/components/catalog/CatalogList";
-import { getStorage, removeStorage } from "@/storage/long";
 
-const defaultPaths = () => [
-  { name: "", path: "/" },
-  { name: "asmr", path: "/asmr" },
-  { name: "中文音声", path: "/asmr/中文音声" },
-  { name: "圈圈", path: "/asmr/中文音声/圈圈" },
-];
+// const defaultPaths = () => [
+//   { name: "", path: "/" },
+//   // { name: "asmr", path: "/asmr" },
+//   // { name: "中文音声", path: "/asmr/中文音声" },
+//   // { name: "圈圈", path: "/asmr/中文音声/圈圈" },
+// ];
 
 const CatalogScreen = () => {
   const isFocused = useIsFocused();
   const catalogListRef = useRef<CatalogListHandle | null>(null);
   const isFocusedRef = useRef<boolean>(false);
   // const [rightText, setRightText] = useState("");
-  const itemsRef = useRef<CatalogCrumbItem[]>(defaultPaths());
-  const [items, setItems] = useState<CatalogCrumbItem[]>(defaultPaths());
+  const itemsRef = useRef<CatalogCrumbItem[]>([]);
+  const [items, setItems] = useState<CatalogCrumbItem[]>([]);
   const [value, setValue] = useState<number>(items.length - 1);
 
   const onChange = (index: number) => {
@@ -53,37 +53,61 @@ const CatalogScreen = () => {
     catalogListRef.current?.onFetch();
   };
 
+  const updateItem = (
+    path: string,
+    key: keyof CatalogCrumbItem,
+    value: any
+  ) => {
+    setItems((prevItems) => {
+      return prevItems.map((item) => {
+        if (item.path === path) {
+          return { ...item, [key]: value };
+        }
+        return item;
+      });
+    });
+  };
+
   const setRightText = (text: string) => {
     const item = items[value];
-    item.text = text;
-    setItems([...items]);
+    updateItem(item.path, "text", text);
+  };
+
+  const formatPathToItems = (path: string) => {
+    const spPaths = path.split("/").filter((f: string) => f);
+    const list: CatalogCrumbItem[] = spPaths.map((v, index) => {
+      return {
+        name: v,
+        path: "/" + spPaths.slice(0, index + 1).join("/"),
+      };
+    });
+    list.unshift({ name: "", path: "/" });
+    return list;
   };
 
   useEffect(() => {
     itemsRef.current = [...items];
     setValue(items.length - 1);
+    if (items.length) {
+      const item = items[items.length - 1];
+      setStorage("catalogPath", item ? item.path : "/");
+    }
   }, [items]);
 
   useEffect(() => {
     isFocusedRef.current = isFocused;
     if (isFocused) {
       (async () => {
-        const path = await getStorage<string>("parentSearchPath", "");
+        const path = await getStorage<string>("onCatalogChangePath", "");
         if (path) {
-          const spPaths = path.split("/").filter((f: string) => f);
-          const list: CatalogCrumbItem[] = spPaths.map((v, index) => {
-            return {
-              name: v,
-              path: "/" + spPaths.slice(0, index + 1).join("/"),
-            };
-          });
-          list.unshift({ name: "", path: "/" });
-          setItems(list);
-          await removeStorage("parentSearchPath");
+          setItems(formatPathToItems(path));
+          await removeStorage("onCatalogChangePath");
+        } else if (!itemsRef.current.length) {
+          const path = await getStorage("catalogPath", "/");
+          setItems(formatPathToItems(path));
         }
       })();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isFocused]);
 
   useEffect(() => {

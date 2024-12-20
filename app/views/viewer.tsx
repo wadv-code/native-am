@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { getStorageAsync } from "@/store/slices/audioSlice";
+import { getStorageAsync, type OptionType } from "@/store/slices/audioSlice";
 import { ReactNativeZoomableView } from "@openspacelabs/react-native-zoomable-view";
 import { IconSymbol } from "@/components/ui";
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
-import type { OptionType } from "@/components/audio/MusicPlayer";
 import { GetCover } from "@/api/api";
 import { ThemedView } from "@/components/theme/ThemedView";
 import { globalStyles } from "@/styles";
@@ -116,7 +115,6 @@ const ImageScreen = () => {
   useEffect(() => {
     (async () => {
       const { coverItems, viewerIndex } = await getStorageAsync();
-      console.log(coverItems.length);
       setIndex(isNumber(viewerIndex) ? viewerIndex : 0);
       if (coverItems.length) {
         setImages([...coverItems]);
@@ -142,7 +140,12 @@ const ImageScreen = () => {
         </TouchableOpacity>
       </View>
       <ReactNativeZoomableView maxZoom={30}>
-        <Image src={imageUrl} style={styles.imageViewer}></Image>
+        <Image
+          src={imageUrl}
+          style={styles.imageViewer}
+          onLoadEnd={() => setLoading(false)}
+          onLoadStart={() => setLoading(true)}
+        ></Image>
       </ReactNativeZoomableView>
       <View
         style={[

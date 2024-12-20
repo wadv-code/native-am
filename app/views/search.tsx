@@ -66,7 +66,7 @@ const SearchScreen = () => {
 
   const onLeftPress = async (item: GetItem) => {
     if (item.is_dir) {
-      setStorage("parentSearchPath", formatPath(item.parent || "/", item.name));
+      setStorage("onCatalogChangePath", formatPath(item.parent || "/", item.name));
       onCanBack();
     }
   };

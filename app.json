@@ -14,7 +14,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/logo.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#000000"
       },
       "package": "com.qaz853925809.nativeam"
     },
@@ -28,7 +28,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/logo.png",
+          "image": "./assets/images/splash-icon.png",
           "imageWidth": 100,
           "resizeMode": "contain",
           "backgroundColor": "#000000"
@@ -45,9 +45,7 @@
         {
           "icon": "./assets/images/favicon.png",
           "color": "#000000",
-          "sounds": [
-            "./assets/audio/dx.mp3"
-          ],
+          "sounds": ["./assets/audio/dx.mp3"],
           "mode": "production"
         }
       ],

@@ -1,5 +1,6 @@
 import { isArray } from "@/utils/helper";
 import { storage } from "./storage";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const storageVersion = "1.1.2";
 
@@ -22,7 +23,8 @@ export async function getStorage<T = unknown>(
       .load<T>({ key: getStorageKey(key) })
       .then((ret) => {
         if (isArray(defaultValue)) {
-          resolve(JSON.parse(ret as string));
+          const arr = JSON.parse(ret as string);
+          resolve(arr.length ? arr : defaultValue);
         } else {
           resolve(ret);
         }
@@ -82,6 +84,7 @@ export async function removeStorage(key: string): Promise<boolean> {
  */
 export async function clearStorage(): Promise<boolean> {
   return await new Promise((resolve) => {
+    AsyncStorage.clear();
     storage
       .clearMap()
       .then(() => {

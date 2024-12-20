@@ -45,7 +45,7 @@ export const getServerItems = (): ServerItem[] => {
       title: "3650000",
       params: [
         { key: "type", value: "json" },
-        { key: "mode", value: "8" },
+        { key: "mode", value: "2,8" },
       ],
       isDefault: true,
     },

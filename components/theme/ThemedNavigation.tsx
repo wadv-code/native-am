@@ -165,13 +165,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     width: "100%",
     height: "100%",
-    opacity: 0.2,
   },
   title: {
     width: width * 0.5,
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "bold",
     flexGrow: 1,
+    textAlign: "center",
   },
   content: {
     flexGrow: 1,

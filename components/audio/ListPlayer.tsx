@@ -3,7 +3,6 @@ import type { RootState } from "@/store";
 import { useEffect, useRef, useState } from "react";
 import type { GetItemsParams, GetItem } from "@/api";
 import { GetItems } from "@/api/api";
-import { emitter } from "@/utils/mitt";
 import { useRouter } from "expo-router";
 import { ThemedNavigation } from "../theme/ThemedNavigation";
 import { formatPath, isAudioFile } from "@/utils/lib";
@@ -18,6 +17,8 @@ import {
   type TextProps,
 } from "react-native";
 import { setStorage } from "@/storage/long";
+import { useAppDispatch } from "@/hooks/useStore";
+import { setAudioInfoAsync } from "@/store/slices/audioSlice";
 
 type ListPlayerProps = TextProps & {
   closeModal: () => void;
@@ -25,6 +26,7 @@ type ListPlayerProps = TextProps & {
 
 const ListPlayer = ({ closeModal }: ListPlayerProps) => {
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const [isHappy, setIsHappy] = useState(false);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const audio = useSelector((state: RootState) => state.audio);
@@ -66,13 +68,13 @@ const ListPlayer = ({ closeModal }: ListPlayerProps) => {
     if (refreshing) return;
     if (item.is_dir) {
       await setStorage(
-        "parentSearchPath",
+        "onCatalogChangePath",
         formatPath(item.parent || "/", item.name)
       );
       closeModal();
       router.replace("/catalog");
     } else if (isAudioFile(item.name)) {
-      emitter.emit("onAudioChange", item);
+      dispatch(setAudioInfoAsync(item));
       closeModal();
     } else {
       Alert.prompt("还未处理的文件格式。");
