@@ -15,12 +15,18 @@ import {
   View,
 } from "react-native";
 import { removeStorage, setStorage } from "@/storage/long";
+import { setIsImageBackground } from "@/store/slices/appSlice";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store";
+import { useAppDispatch } from "@/hooks/useStore";
 
 const SettingsScreen = () => {
   const router = useRouter();
   const mode = useColorScheme();
+  const dispatch = useAppDispatch();
   const { theme, updateTheme } = useTheme();
   const [colors, setColors] = useState<string[]>([]);
+  const { isImageBackground } = useSelector((state: RootState) => state.app);
   const { setColorScheme } = Appearance;
 
   const setMode = () => {
@@ -30,6 +36,10 @@ const SettingsScreen = () => {
       mode: colorScheme,
     });
     setStorage("colorScheme", colorScheme);
+  };
+
+  const onIsImage = () => {
+    dispatch(setIsImageBackground(!isImageBackground));
   };
 
   const openAbout = () => {
@@ -112,7 +122,7 @@ const SettingsScreen = () => {
 
   useEffect(takeColors, [theme]);
   return (
-    <ThemedNavigation style={styles.container} isImage={true} statusBar={true}>
+    <ThemedNavigation style={styles.container} statusBar={true}>
       <View style={styles.cellStyle}>
         <View style={[globalStyles.row, { gap: 10 }]}>
           <IconSymbol
@@ -126,13 +136,19 @@ const SettingsScreen = () => {
       </View>
       <View style={styles.cellStyle}>
         <View style={[globalStyles.row, { gap: 10 }]}>
+          <IconSymbol name="image" />
+          <Text style={styles.cellTitle}>启用背景图</Text>
+        </View>
+        <Switch onValueChange={onIsImage} value={isImageBackground} />
+      </View>
+      <View style={styles.cellStyle}>
+        <View style={[globalStyles.row, { gap: 10 }]}>
           <IconSymbol name="palette" />
           <Text style={styles.cellTitle}>主题设置</Text>
         </View>
         <View style={{ width: "60%" }}>
           <Animated.ScrollView
             scrollEventThrottle={16}
-            style={{ height: 40 }}
             horizontal={true}
             contentContainerStyle={[globalStyles.row, { gap: 5 }]}
           >
@@ -187,7 +203,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    height: 50,
+    height: 40,
   },
   cellStyleColumn: {
     marginTop: 5,

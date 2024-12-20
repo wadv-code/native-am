@@ -1,8 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit";
 import audioSlice from "./slices/audioSlice";
+import appSlice from "./slices/appSlice";
 
 export const store = configureStore({
   reducer: {
+    app: appSlice,
     audio: audioSlice,
   },
 });

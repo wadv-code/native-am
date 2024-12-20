@@ -72,7 +72,7 @@ const ImageServer = () => {
   }, [isFocused]);
 
   return (
-    <ThemedNavigation statusBar={true} isImage={true} title="图片服务器维护">
+    <ThemedNavigation statusBar={true} title="图片服务器维护">
       <Animated.ScrollView
         scrollEventThrottle={16}
         scrollIndicatorInsets={{ bottom }}

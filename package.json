@@ -15,8 +15,8 @@
     "clean": "npm run clean-only --del-lock",
     "clean-only": "node ./scripts/clean.mjs",
     "doctor": "npx expo-doctor@latest",
-    "build:android": "eas build -p android --profile preview",
-    "build:ios": "eas build -p ios --profile preview",
+    "build:android": "npx eas build -p android --profile preview",
+    "build:ios": "npx eas build -p ios --profile preview",
     "check": "npx expo install --check"
   },
   "jest": {

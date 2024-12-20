@@ -148,7 +148,6 @@ const ImageServerEdit = () => {
   return (
     <ThemedNavigation
       statusBar={true}
-      isImage={true}
       title="图片服务器编辑"
       style={styles.container}
     >

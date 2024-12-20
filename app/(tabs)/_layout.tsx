@@ -1,3 +1,4 @@
+import React from "react";
 import { Tabs } from "expo-router";
 import { Platform } from "react-native";
 import { useTheme } from "@rneui/themed";
@@ -44,7 +45,7 @@ export default function TabLayout() {
               position: "absolute",
             },
             default: {
-              borderColor: theme.colors.primary,
+              borderColor: theme.colors.background,
             },
           }),
         }}

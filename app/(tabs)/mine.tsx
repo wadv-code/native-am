@@ -60,7 +60,6 @@ export default function MineScreen() {
   return (
     <ThemedNavigation
       leftIcon="qr-code-scanner"
-      isImage={true}
       statusBar={true}
       style={styles.container}
       rightText={

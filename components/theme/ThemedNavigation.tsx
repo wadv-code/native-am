@@ -61,6 +61,7 @@ const ThemedNavigation = (props: ThemedNavigationProps) => {
   const { theme } = useTheme();
   const router = useRouter();
   const audio = useSelector((state: RootState) => state.audio);
+  const { isImageBackground } = useSelector((state: RootState) => state.app);
   const { audioInfo } = audio;
   const [currentSrc, setCurrentSrc] = useState<string | undefined>(src);
 
@@ -100,7 +101,7 @@ const ThemedNavigation = (props: ThemedNavigationProps) => {
 
   return (
     <ThemedView style={styles.container}>
-      {isImage && (
+      {(isImage === undefined ? isImageBackground : isImage) && (
         <ImageBackground
           style={[styles.backgroundImage, { opacity: isHappy ? 1 : opacity }]}
           src={currentSrc || audioInfo.cover}

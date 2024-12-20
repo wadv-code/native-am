@@ -5,7 +5,7 @@ import { StyleSheet } from "react-native";
 
 const AboutScreen = () => {
   return (
-    <ThemedNavigation style={styles.container} isImage={true} statusBar={true}>
+    <ThemedNavigation style={styles.container} statusBar={true}>
       <HeaderBar />
       <Text h1={true}>AboutScreen</Text>
     </ThemedNavigation>

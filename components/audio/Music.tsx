@@ -32,7 +32,6 @@ const Music = () => {
   const playAsync = async () => {
     if (sound) {
       await sound.playAsync();
-      dispatch(setPlaying(true));
     }
   };
 
@@ -155,11 +154,13 @@ const Music = () => {
             positionMillis: audioInfo.id === option.id ? option.position : 0,
           }
         );
+        if (playing) dispatch(setPlaying(true));
         setAudioCurrent(playbackStatus);
         soundObject?.setOnPlaybackStatusUpdate(handlePlaybackStatusUpdate);
         setSound(soundObject);
       } catch (error) {
         console.error("音频加载失败:", error);
+        dispatch(setLoading(false));
         setSound(null);
       } finally {
         dispatch(setLoading(false));

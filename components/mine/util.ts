@@ -21,6 +21,7 @@ export const gridItems: GridItem[] = [
     icon: "developer-board",
     href: "/views/image-server/image-server",
   },
+  { title: "热搜聚合", icon: "whatshot", href: "/views/hot" },
   { title: "测试弹窗", icon: "table-view", type: "modal" },
 ];
 
