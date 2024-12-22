@@ -2,7 +2,7 @@ import { ThemedView } from "../theme/ThemedView";
 import { IconSymbol } from "../ui";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "@/store";
-import { setPlaying } from "@/store/slices/audioSlice";
+import { setLoading } from "@/store/slices/audioSlice";
 import type { ModalPlayerType } from "./ModalPlayer";
 import { Image, Text, useTheme } from "@rneui/themed";
 import {
@@ -15,6 +15,8 @@ import {
 } from "react-native";
 import { globalStyles } from "@/styles";
 import { Circle } from "react-native-progress";
+import { player } from "@/utils/audio";
+import { useCallback } from "react";
 
 // const sound =
 //   "http://nm.hzwima.com:8000/%E5%91%A8%E6%9D%B0%E4%BC%A6-%E7%A8%BB%E9%A6%99.mp3";
@@ -27,19 +29,18 @@ const AudioBar = ({ onPress }: AudioBarProps) => {
   const { theme } = useTheme();
   const dispatch = useDispatch();
   const audioState = useSelector((state: RootState) => state.audio);
-  const {
-    audioInfo,
-    progress,
-    loading,
-    playing,
-    durationFormat,
-    currentFormat,
-  } = audioState;
+  const { audioInfo, loading, playing, covering } = audioState;
 
-  const togglePlaying = () => {
+  const togglePlaying = useCallback(() => {
     if (loading) return;
-    dispatch(setPlaying(!playing));
-  };
+    if (playing) {
+      dispatch(setLoading(true));
+      player.pause().finally(() => dispatch(setLoading(false)));
+    } else {
+      dispatch(setLoading(true));
+      player.play(true).finally(() => dispatch(setLoading(false)));
+    }
+  }, [loading, playing, dispatch]);
 
   return (
     <View
@@ -58,8 +59,7 @@ const AudioBar = ({ onPress }: AudioBarProps) => {
       <ThemedView style={styles.imageContainer}>
         <ImageBackground
           style={styles.backgroundImage}
-          src={audioInfo?.cover}
-          source={audioInfo?.cover ? require("@/assets/images/logo.png") : null}
+          src={audioInfo.cover}
           resizeMode="cover"
         />
       </ThemedView>
@@ -67,11 +67,11 @@ const AudioBar = ({ onPress }: AudioBarProps) => {
         style={styles.barLeftContainer}
         onPress={() => onPress && onPress("view")}
       >
-        {loading ? (
+        {covering ? (
           <ActivityIndicator
             size={30}
             color={theme.colors.primary}
-            style={[styles.imageStyle]}
+            style={styles.imageStyle}
           />
         ) : (
           <Image src={audioInfo?.cover} containerStyle={styles.imageStyle} />
@@ -81,7 +81,7 @@ const AudioBar = ({ onPress }: AudioBarProps) => {
             {audioInfo?.name ?? "没有音乐可播放"}
           </Text>
           <Text style={styles.timeStyle}>
-            {currentFormat} / {durationFormat}
+            {audioInfo.currentFormat} / {audioInfo.durationFormat}
           </Text>
         </View>
       </TouchableOpacity>
@@ -91,16 +91,23 @@ const AudioBar = ({ onPress }: AudioBarProps) => {
             style={styles.button}
             onPress={() => onPress && onPress("list")}
           >
-            <IconSymbol size={28} name="queue-music" />
+            <IconSymbol size={30} name="queue-music" />
           </TouchableOpacity>
         )}
         <TouchableOpacity
           style={[globalStyles.rowCenter, { position: "relative" }]}
           onPress={togglePlaying}
         >
+          {loading && (
+            <ActivityIndicator
+              size={20}
+              color={theme.colors.grey4}
+              style={{ position: "absolute", zIndex: 1 }}
+            />
+          )}
           <Circle
-            size={25}
-            progress={progress}
+            size={30}
+            progress={audioInfo.progress}
             color={theme.colors.grey0}
             unfilledColor={theme.colors.grey4}
             borderWidth={0}
@@ -110,7 +117,7 @@ const AudioBar = ({ onPress }: AudioBarProps) => {
           <IconSymbol
             name={playing ? "pause-circle" : "play-circle"}
             color={theme.colors.grey0}
-            size={22}
+            size={29}
           />
         </TouchableOpacity>
       </View>
@@ -130,7 +137,7 @@ const styles = StyleSheet.create({
     // padding: 5, // 可选：内边距
     // borderWidth: 0.5,
     // overflow: "hidden",
-    height: 38,
+    height: 40,
   },
   imageContainer: {
     position: "absolute",
@@ -145,8 +152,8 @@ const styles = StyleSheet.create({
     elevation: 2, // Android上的阴影效果
     borderTopLeftRadius: 5,
     borderBottomLeftRadius: 5,
-    borderBottomRightRadius: 19,
-    borderTopRightRadius: 19,
+    borderBottomRightRadius: 20,
+    borderTopRightRadius: 20,
   },
   backgroundImage: {
     position: "absolute",
@@ -166,7 +173,7 @@ const styles = StyleSheet.create({
   barRightContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginRight: 10,
+    marginRight: 7,
     gap: 10,
   },
   imageStyle: {

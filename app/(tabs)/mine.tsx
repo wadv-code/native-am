@@ -4,17 +4,12 @@ import { IconSymbol } from "@/components/ui";
 import type { RootState } from "@/store";
 import { useSelector } from "react-redux";
 import { useRouter } from "expo-router";
-import { formatPath } from "@/utils/lib";
 import { useAppDispatch } from "@/hooks/useStore";
 import { GetCover } from "@/api/api";
 import { globalStyles } from "@/styles";
 import { ThemedNavigation } from "@/components/theme/ThemedNavigation";
 import MineGrid from "@/components/mine/MineGrid";
-import {
-  handleCoverItems,
-  setAudioInfo,
-  setLoading,
-} from "@/store/slices/audioSlice";
+import { setAudioCover, setLoading } from "@/store/slices/audioSlice";
 import {
   ActivityIndicator,
   StyleSheet,
@@ -23,6 +18,7 @@ import {
 } from "react-native";
 import { gridItems } from "@/components/mine/util";
 import { Image, Text, useTheme } from "@rneui/themed";
+import { handleCoverItems } from "@/utils/store";
 
 export default function MineScreen() {
   const { theme } = useTheme();
@@ -34,15 +30,12 @@ export default function MineScreen() {
 
   const onCoverRefresh = async () => {
     try {
-      const path = formatPath(audioInfo.parent || "/", audioInfo.name);
       dispatch(setLoading(true));
       const url = await GetCover();
       if (url) {
-        handleCoverItems({ key: path, value: url });
-        dispatch(setAudioInfo({ ...audioInfo, cover: url }));
+        handleCoverItems({ key: audioInfo.id, value: url });
+        dispatch(setAudioCover(url));
       }
-    } catch {
-      console.log("图片加载失败");
     } finally {
       dispatch(setLoading(false));
     }

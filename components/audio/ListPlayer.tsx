@@ -5,11 +5,10 @@ import type { GetItemsParams, GetItem } from "@/api";
 import { GetItems } from "@/api/api";
 import { useRouter } from "expo-router";
 import { ThemedNavigation } from "../theme/ThemedNavigation";
-import { formatPath, isAudioFile } from "@/utils/lib";
+import { formatPath } from "@/utils/lib";
 import { CatalogItem } from "../catalog/CatalogItem";
 import { Text } from "@rneui/themed";
 import {
-  Alert,
   FlatList,
   Platform,
   RefreshControl,
@@ -17,8 +16,6 @@ import {
   type TextProps,
 } from "react-native";
 import { setStorage } from "@/storage/long";
-import { useAppDispatch } from "@/hooks/useStore";
-import { setAudioInfoAsync } from "@/store/slices/audioSlice";
 
 type ListPlayerProps = TextProps & {
   closeModal: () => void;
@@ -26,7 +23,6 @@ type ListPlayerProps = TextProps & {
 
 const ListPlayer = ({ closeModal }: ListPlayerProps) => {
   const router = useRouter();
-  const dispatch = useAppDispatch();
   const [isHappy, setIsHappy] = useState(false);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const audio = useSelector((state: RootState) => state.audio);
@@ -66,19 +62,12 @@ const ListPlayer = ({ closeModal }: ListPlayerProps) => {
 
   const onLeftPress = async (item: GetItem) => {
     if (refreshing) return;
-    if (item.is_dir) {
-      await setStorage(
-        "onCatalogChangePath",
-        formatPath(item.parent || "/", item.name)
-      );
-      closeModal();
-      router.replace("/catalog");
-    } else if (isAudioFile(item.name)) {
-      dispatch(setAudioInfoAsync(item));
-      closeModal();
-    } else {
-      Alert.prompt("还未处理的文件格式。");
-    }
+    await setStorage(
+      "onCatalogChangePath",
+      formatPath(item.parent || "/", item.name)
+    );
+    closeModal();
+    router.replace("/catalog");
   };
 
   useEffect(() => {
@@ -95,7 +84,7 @@ const ListPlayer = ({ closeModal }: ListPlayerProps) => {
       setParams({ ...params, path: audioInfo.parent });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [audioInfo]);
+  }, [audioInfo.parent]);
 
   return (
     <ThemedNavigation

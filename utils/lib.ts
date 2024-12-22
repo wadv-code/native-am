@@ -37,7 +37,10 @@ export function formatMilliseconds(ms?: number): string {
  * @param duration
  * @returns
  */
-export function formatAudioPosition(position: number, duration: number) {
+export function formatAudioPosition(
+  position: number = 0,
+  duration: number = 0
+) {
   const progress = parseFloat((position / duration).toFixed(2));
   const currentFormat = formatMilliseconds(position);
   const durationFormat = formatMilliseconds(duration);

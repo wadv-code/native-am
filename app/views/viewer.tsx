@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { getStorageAsync, type OptionType } from "@/store/slices/audioSlice";
 import { ReactNativeZoomableView } from "@openspacelabs/react-native-zoomable-view";
 import { IconSymbol } from "@/components/ui";
 import Constants from "expo-constants";
@@ -20,6 +19,7 @@ import {
 } from "react-native";
 import { isNumber } from "@/utils/helper";
 import { setStorage } from "@/storage/long";
+import { getStorageAsync, type OptionType } from "@/utils/store";
 
 const ImageScreen = () => {
   const mode = useColorScheme();

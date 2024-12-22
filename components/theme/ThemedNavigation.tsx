@@ -19,9 +19,9 @@ import {
   Dimensions,
 } from "react-native";
 import type { MaterialIconsName } from "@/types";
-import { getStorageAsync } from "@/store/slices/audioSlice";
 import { randomNum } from "@/utils/lib";
 import { Text, useTheme } from "@rneui/themed";
+import { getStorageAsync } from "@/utils/store";
 
 const { width } = Dimensions.get("window");
 

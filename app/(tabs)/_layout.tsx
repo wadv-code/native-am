@@ -6,12 +6,12 @@ import { HapticTab } from "@/components/HapticTab";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import TabBarBackground from "@/components/ui/TabBarBackground";
 import { AudioBar } from "@/components/audio";
+import { useState } from "react";
+import { MusicPlayer } from "@/components/audio/MusicPlayer";
 import {
   ModalPlayer,
   type ModalPlayerType,
 } from "@/components/audio/ModalPlayer";
-import { useState } from "react";
-import { Music } from "@/components/audio/Music";
 
 export default function TabLayout() {
   const { theme } = useTheme();
@@ -94,7 +94,7 @@ export default function TabLayout() {
         modalVisible={visible}
         closeModal={closeModal}
       />
-      <Music />
+      <MusicPlayer />
     </>
   );
 }

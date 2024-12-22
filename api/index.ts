@@ -36,6 +36,12 @@ export type GetItem = {
   type?: number;
   cover?: string;
   auther?: string;
+  // 播放相关
+  position?: number;
+  progress?: number;
+  duration?: number;
+  currentFormat?: string;
+  durationFormat?: string;
 };
 
 // 请求参数

@@ -1,131 +1,59 @@
-import type { GetDetailParams, GetItem } from "@/api";
-import { GetCover, GetDetail } from "@/api/api";
+import type { GetItem } from "@/api";
 import { getStorage, setStorage } from "@/storage/long";
 import { IMAGE_DEFAULT_URL } from "@/utils";
-import { formatAudioPosition, formatPath } from "@/utils/lib";
+import { formatAudioPosition } from "@/utils/lib";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { Alert } from "react-native";
 
 export type AudioSlice = {
+  covering: boolean;
   loading: boolean;
   playing: boolean;
-  duration: number;
-  seek: number;
-  progress: number;
-  currentFormat: string;
-  durationFormat: string;
   audioInfo: GetItem;
 };
 
-export type OptionType = {
-  key: string;
-  value: string;
-};
-export type GetStorageAsync = {
-  rawUrlItems: OptionType[];
-  coverItems: OptionType[];
-  viewerIndex: number;
-};
-
-export const getStorageAsync = async (): Promise<GetStorageAsync> => {
-  const viewerIndex = await getStorage<number>("viewerIndex", 0);
-  // 源集
-  const rawUrlItems = await getStorage<OptionType[]>("rawUrlItems", []);
-  // 封面集
-  const coverItems = await getStorage<OptionType[]>("coverItems", []);
-
-  return {
-    coverItems,
-    rawUrlItems,
-    viewerIndex: Number(viewerIndex) || 0,
-  };
-};
-
-export const handleRawUrlItems = async ({ value, key }: OptionType) => {
-  const { rawUrlItems } = await getStorageAsync();
-  const rawUrl = rawUrlItems.find((f) => f.key === key);
-  if (rawUrl) {
-    rawUrl.value = value;
-    await setStorage("rawUrlItems", [...rawUrlItems]);
-  } else {
-    const list = [...rawUrlItems, { value, key }];
-    await setStorage("rawUrlItems", list);
-  }
-};
-export const handleCoverItems = async ({
-  value,
-  key,
-}: OptionType): Promise<OptionType[]> => {
-  const { coverItems } = await getStorageAsync();
-  const cover = coverItems.find((f) => f.key === key);
-  if (cover) {
-    cover.value = value;
-    const list = [...coverItems];
-    setStorage("coverItems", list);
-    return list;
-  } else {
-    const list = [...coverItems, { value, key }];
-    setStorage("coverItems", list);
-    return list;
-  }
-};
-
-export const setAudioInfoAsync = createAsyncThunk<GetItem, GetItem>(
-  "audio/setAudioInfoAsync",
-  async (audio, thunkAPI) => {
-    thunkAPI.dispatch(setLoading(true));
-    const { coverItems, rawUrlItems } = await getStorageAsync();
-    const params: GetDetailParams = {
-      password: "",
-      path: "",
-    };
-    params.path = formatPath(audio.parent || "/", audio.name);
-    const coverItem = coverItems.find((f) => f.key === params.path);
-    const rawUrlItem = rawUrlItems.find((f) => f.key === params.path);
-    audio.raw_url = rawUrlItem ? rawUrlItem.value : "";
-    if (!audio.raw_url) {
-      try {
-        const { data } = await GetDetail(params);
-        audio.raw_url = data.raw_url;
-        handleRawUrlItems({ key: params.path, value: data.raw_url });
-      } catch (error) {
-        // Alert.alert("请求音频错误", JSON.stringify(error));
-        thunkAPI.rejectWithValue(JSON.stringify(error));
-      }
-    }
-    audio.cover = coverItem ? coverItem.value : "";
-    if (!audio.cover) {
-      try {
-        const url = await GetCover();
-        if (url) {
-          audio.cover = url;
-          handleCoverItems({ key: params.path, value: url });
-        }
-      } catch (error) {
-        thunkAPI.rejectWithValue(JSON.stringify(error));
-      }
-    }
-    return audio;
-  }
-);
-
-// 定义slice的初始状态
-const initialState: AudioSlice = {
+export const initialState: AudioSlice = {
+  covering: false,
   loading: false,
   playing: false,
-  seek: 0,
-  progress: 0,
-  duration: 0,
-  currentFormat: "00:00",
-  durationFormat: "00:00",
   audioInfo: {
     id: "",
     name: "暂时没用可播放的音乐",
     auther: "",
     raw_url: "",
     cover: IMAGE_DEFAULT_URL,
+    progress: 0,
+    duration: 0,
+    position: 0,
+    currentFormat: "00:00",
+    durationFormat: "00:00",
   },
 };
+
+export const loadInitialAudio = createAsyncThunk(
+  "app/loadInitialAudio",
+  async () => {
+    const info = JSON.parse(JSON.stringify(initialState.audioInfo));
+    try {
+      return await getStorage("initialAudioData", info);
+    } catch (error) {
+      console.error("Failed to load initial data:", error);
+      return info;
+    }
+  }
+);
+
+export const fetchAudioCover = createAsyncThunk(
+  "app/fetchAudioCover",
+  async () => {
+    const info = JSON.parse(JSON.stringify(initialState.audioInfo));
+    try {
+      return await getStorage("initialAudioData", info);
+    } catch (error) {
+      console.error("Failed to load initial data:", error);
+      return info;
+    }
+  }
+);
 
 const audioSlice = createSlice({
   name: "audio",
@@ -137,46 +65,61 @@ const audioSlice = createSlice({
     setLoading: (state, action) => {
       state.loading = action.payload;
     },
-    setSeek: (state, action) => {
-      state.seek = action.payload;
-      const { progress, durationFormat, currentFormat } = formatAudioPosition(
-        state.seek,
-        state.duration
-      );
-      state.progress = progress;
-      state.durationFormat = durationFormat;
-      state.currentFormat = currentFormat;
+    setCovering: (state, action) => {
+      state.covering = action.payload;
+    },
+    setAudioCover: (state, action) => {
+      state.audioInfo.cover = action.payload;
+      setStorage("initialAudioData", state.audioInfo);
     },
     setPosition: (state, action) => {
-      state.progress = action.payload.progress;
-      state.duration = action.payload.duration;
-      state.durationFormat = action.payload.durationFormat;
-      state.currentFormat = action.payload.currentFormat;
+      const position = action.payload.position;
+      const duration = action.payload.duration;
+      const option = formatAudioPosition(position, duration);
+      const { progress, durationFormat, currentFormat } = option;
+      state.audioInfo.progress = progress;
+      state.audioInfo.position = position;
+      state.audioInfo.duration = duration;
+      state.audioInfo.durationFormat = durationFormat;
+      state.audioInfo.currentFormat = currentFormat;
+      setStorage("initialAudioData", state.audioInfo);
     },
     setAudioInfo: (state, action) => {
+      if (state.loading) return;
+      if (!action.payload.duration) {
+        action.payload.duration = 0;
+        action.payload.position = 0;
+        action.payload.durationFormat = "00:00";
+        action.payload.currentFormat = "00:00";
+        action.payload.cover = action.payload.cover || IMAGE_DEFAULT_URL;
+      }
       state.audioInfo = action.payload;
-      setStorage("audioInfo", action.payload);
+      setStorage("initialAudioData", state.audioInfo);
     },
   },
   extraReducers: (builder) => {
+    // 获取缓存音乐数据
     builder
-      .addCase(setAudioInfoAsync.pending, (state) => {
+      .addCase(loadInitialAudio.pending, (state) => {
         state.loading = true;
       })
-      .addCase(setAudioInfoAsync.fulfilled, (state, action) => {
-        // state.loading = false;
-        state.audioInfo = action.payload;
-        setStorage("audioInfo", action.payload);
-      })
-      .addCase(setAudioInfoAsync.rejected, (state, action) => {
+      .addCase(loadInitialAudio.fulfilled, (state, action) => {
+        if (action.payload) state.audioInfo = action.payload;
         state.loading = false;
-        console.log("rejected", action.error);
-        Alert.alert("设置音频错误", JSON.stringify(action.error));
+      })
+      .addCase(loadInitialAudio.rejected, (state) => {
+        state.loading = false;
       });
   },
 });
 
-export const { setPlaying, setLoading, setSeek, setPosition, setAudioInfo } =
-  audioSlice.actions;
+export const {
+  setPlaying,
+  setCovering,
+  setLoading,
+  setPosition,
+  setAudioInfo,
+  setAudioCover,
+} = audioSlice.actions;
 
 export default audioSlice.reducer;

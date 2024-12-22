@@ -7,7 +7,7 @@ import { useSelector } from "react-redux";
 import { Alert, TouchableOpacity, View } from "react-native";
 import type { RootState } from "@/store";
 import { useAppDispatch } from "@/hooks/useStore";
-import { setAudioInfoAsync } from "@/store/slices/audioSlice";
+import { setAudioInfo } from "@/store/slices/audioSlice";
 
 type ItemProps = {
   item: GetItem;
@@ -29,11 +29,13 @@ const CatalogItem = memo(
     const { is_collect } = item;
     const { onIconPress, onLeftPress, onRightPress } = props;
     const { theme } = useTheme();
-    const { audioInfo } = useSelector((state: RootState) => state.audio);
+    const audioInfoId = useSelector(
+      (state: RootState) => state.audio.audioInfo.id
+    );
 
     const onPress = () => {
       if (isAudioFile(item.name)) {
-        dispatch(setAudioInfoAsync(item));
+        dispatch(setAudioInfo(item));
       } else if (item.is_dir) {
         onLeftPress && onLeftPress(item);
       } else {
@@ -44,7 +46,7 @@ const CatalogItem = memo(
     return (
       <View key={item.id} style={styles.itemContainer}>
         <View
-          style={[styles.line, { opacity: audioInfo.id === item.id ? 1 : 0 }]}
+          style={[styles.line, { opacity: audioInfoId === item.id ? 1 : 0 }]}
         />
         <TouchableOpacity style={styles.leftContainer} onPress={onPress}>
           <IconSymbol

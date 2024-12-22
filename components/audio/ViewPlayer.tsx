@@ -1,14 +1,22 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { IconSymbol } from "@/components/ui";
 import Slider from "@react-native-community/slider";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
 import { useAppDispatch } from "@/hooks/useStore";
-import { formatMilliseconds, formatPath } from "@/utils/lib";
+import { formatMilliseconds } from "@/utils/lib";
 import { GetCover, GetMusic } from "@/api/api";
 import { ThemedNavigation } from "../theme/ThemedNavigation";
 import { Image, Text, makeStyles, useTheme } from "@rneui/themed";
 import { globalStyles } from "@/styles";
+import { player } from "@/utils/audio";
+import {
+  setAudioCover,
+  setAudioInfo,
+  setLoading,
+  setPlaying,
+} from "@/store/slices/audioSlice";
+import { handleCoverItems } from "@/utils/store";
 import {
   ActivityIndicator,
   Dimensions,
@@ -16,12 +24,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import {
-  handleCoverItems,
-  setAudioInfo,
-  setPlaying,
-  setSeek,
-} from "@/store/slices/audioSlice";
 
 const { width } = Dimensions.get("window");
 
@@ -37,15 +39,13 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
   const startRef = useRef(false);
   const [dragCurrent, setDragCurrent] = useState<string | undefined>();
   const audio = useSelector((state: RootState) => state.audio);
+  const { audioInfo, playing, loading } = audio;
   const {
-    audioInfo,
-    playing,
+    duration = 0,
+    progress = 0,
     currentFormat,
     durationFormat,
-    progress,
-    duration,
-    loading,
-  } = audio;
+  } = audioInfo;
 
   const styles = useStyles();
 
@@ -53,7 +53,10 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
     startRef.current = false;
     setDragCurrent(undefined);
     const seek = Math.round(value * duration);
-    dispatch(setSeek(seek));
+    dispatch(setLoading(true));
+    player.seek(seek).finally(() => {
+      dispatch(setLoading(false));
+    });
   };
 
   const onValueChange = (value: number) => {
@@ -68,23 +71,14 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
     dispatch(setPlaying(false));
   };
 
-  const playSound = async () => {
-    dispatch(setPlaying(true));
-  };
-
-  const pauseSound = async () => {
-    dispatch(setPlaying(false));
-  };
-
   const onCoverRefresh = async () => {
     if (refreshing) return;
     try {
-      const path = formatPath(audioInfo.parent || "/", audioInfo.name);
       setRefreshing(true);
       const url = await GetCover();
       if (url) {
-        handleCoverItems({ key: path, value: url });
-        dispatch(setAudioInfo({ ...audioInfo, cover: url }));
+        handleCoverItems({ key: audioInfo.id, value: url });
+        dispatch(setAudioCover(url));
       }
     } catch {
       console.log("图片加载失败");
@@ -116,6 +110,17 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
     }
   };
 
+  const togglePlaying = useCallback(() => {
+    if (loading) return;
+    if (playing) {
+      dispatch(setLoading(true));
+      player.pause().finally(() => dispatch(setLoading(false)));
+    } else {
+      dispatch(setLoading(true));
+      player.play(true).finally(() => dispatch(setLoading(false)));
+    }
+  }, [loading, playing, dispatch]);
+
   useEffect(() => {
     setValue(progress);
     if (dragCurrent) setDragCurrent(undefined);
@@ -132,7 +137,7 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
     >
       <View style={styles.animatedImage}>
         <TouchableOpacity onPress={onCoverRefresh} style={styles.cover}>
-          {(refreshing || loading) && (
+          {refreshing && (
             <ActivityIndicator
               size={100}
               color={theme.colors.primary}
@@ -182,13 +187,17 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
               style={styles.toolbarIcon}
             />
           </TouchableOpacity>
-          <TouchableOpacity onPress={playing ? pauseSound : playSound}>
-            <IconSymbol
-              name={playing ? "pause-circle" : "play-circle"}
-              size={70}
-              style={styles.toolbarIcon}
-            />
-          </TouchableOpacity>
+          {loading ? (
+            <ActivityIndicator size={71.2} color={theme.colors.grey3} />
+          ) : (
+            <TouchableOpacity onPress={togglePlaying}>
+              <IconSymbol
+                name={playing ? "pause-circle" : "play-circle"}
+                size={70}
+                style={styles.toolbarIcon}
+              />
+            </TouchableOpacity>
+          )}
           <TouchableOpacity onPress={nextPress}>
             <IconSymbol
               name="skip-next"
