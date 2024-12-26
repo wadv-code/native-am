@@ -13,7 +13,7 @@ import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, StyleSheet } from "react-native";
 
-const default_per_page = 100;
+const default_per_page = 1000;
 type SearchScreenRouteProp = RouteProp<RootStackParamList, "search">;
 
 const SearchScreen = () => {
@@ -32,6 +32,7 @@ const SearchScreen = () => {
   });
 
   const onFetch = async () => {
+    if (!params.keywords) return Promise.resolve(true);
     try {
       setLoading(true);
       const { data } = await GetSearch(params);
@@ -66,7 +67,10 @@ const SearchScreen = () => {
 
   const onLeftPress = async (item: GetItem) => {
     if (item.is_dir) {
-      setStorage("onCatalogChangePath", formatPath(item.parent || "/", item.name));
+      setStorage(
+        "onCatalogChangePath",
+        formatPath(item.parent || "/", item.name)
+      );
       onCanBack();
     }
   };

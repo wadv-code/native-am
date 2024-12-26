@@ -1,6 +1,12 @@
 import React, { memo } from "react";
 import type { GetItem } from "@/api";
-import { getIconSymbol, isAudioFile } from "@/utils/lib";
+import {
+  formatPath,
+  getIconSymbol,
+  isAudioFile,
+  isImageFile,
+  isVideoFile,
+} from "@/utils/lib";
 import { IconSymbol } from "../ui";
 import { makeStyles, Text, useTheme } from "@rneui/themed";
 import { useSelector } from "react-redux";
@@ -8,6 +14,7 @@ import { Alert, TouchableOpacity, View } from "react-native";
 import type { RootState } from "@/store";
 import { useAppDispatch } from "@/hooks/useStore";
 import { setAudioInfo } from "@/store/slices/audioSlice";
+import { router } from "expo-router";
 
 type ItemProps = {
   item: GetItem;
@@ -36,6 +43,20 @@ const CatalogItem = memo(
     const onPress = () => {
       if (isAudioFile(item.name)) {
         dispatch(setAudioInfo(item));
+      } else if (isImageFile(item.name)) {
+        router.push({
+          pathname: "/views/viewer",
+          params: {
+            path: formatPath(item.parent ?? "/", item.name),
+          },
+        });
+      } else if (isVideoFile(item.name)) {
+        router.push({
+          pathname: "/views/video",
+          params: {
+            path: formatPath(item.parent ?? "/", item.name),
+          },
+        });
       } else if (item.is_dir) {
         onLeftPress && onLeftPress(item);
       } else {
@@ -59,7 +80,11 @@ const CatalogItem = memo(
             <Text numberOfLines={2} ellipsizeMode="tail" style={styles.title}>
               {item.name}
             </Text>
-            <Text style={styles.timeStyle}>
+            <Text
+              style={styles.timeStyle}
+              ellipsizeMode="tail"
+              numberOfLines={2}
+            >
               {showParent ? item.parent : item.modifiedFormat}
             </Text>
           </View>
@@ -112,14 +137,13 @@ const useStyles = makeStyles((theme, props: CatalogItemProps) => ({
   size: {
     fontSize: 13,
     marginRight: 5,
-    fontFamily: "SpaceMono",
     letterSpacing: -1,
   },
   timeStyle: {
     fontSize: 12,
     marginTop: 3,
     color: theme.colors.primary,
-    fontFamily: "SpaceMono",
+    lineHeight: 14,
   },
   rightContainer: {
     flexDirection: "row",

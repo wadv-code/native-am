@@ -60,10 +60,6 @@ export type GetDetailParams = {
   path: string;
 };
 
-export type GetDetailRes = {
-  raw_url: string;
-};
-
 export type GetCoverRes = {
   code: number;
   url: string;

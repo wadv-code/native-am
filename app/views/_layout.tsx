@@ -10,6 +10,7 @@ export default function ViewsLayout() {
       <Stack.Screen name="about" options={{ headerShown: false }} />
       <Stack.Screen name="web" options={{ headerShown: false }} />
       <Stack.Screen name="hot" options={{ headerShown: false }} />
+      <Stack.Screen name="video" options={{ headerShown: false }} />
       <Stack.Screen
         name="image-server/image-server"
         options={{ headerShown: false }}

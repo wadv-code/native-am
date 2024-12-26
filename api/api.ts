@@ -8,10 +8,10 @@ import {
 } from "@/components/mine/util";
 import type {
   GetItemsRes,
-  GetDetailRes,
   GetItemsParams,
   GetDetailParams,
   GetSearchParams,
+  GetItem,
 } from ".";
 
 /**
@@ -38,7 +38,7 @@ export async function GetItems(params: GetItemsParams, refresh?: boolean) {
  * @param data
  */
 export async function GetDetail(data: GetDetailParams) {
-  return request<GetDetailRes>({
+  return request<GetItem>({
     url: "/api/fs/get",
     method: "post",
     data,

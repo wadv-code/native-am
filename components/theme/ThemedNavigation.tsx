@@ -105,6 +105,7 @@ const ThemedNavigation = (props: ThemedNavigationProps) => {
         <ImageBackground
           style={[styles.backgroundImage, { opacity: isHappy ? 1 : opacity }]}
           src={currentSrc || audioInfo.cover}
+          resizeMode="cover"
         />
       )}
       <View style={{ width: "100%" }}>

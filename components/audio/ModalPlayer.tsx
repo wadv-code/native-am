@@ -2,7 +2,7 @@ import { Modal, type TextProps } from "react-native";
 import { ViewPlayer } from "./ViewPlayer";
 import { ListPlayer } from "./ListPlayer";
 
-type ModalPlayerType = "view" | "list";
+type ModalPlayerType = "view" | "list" | "image";
 
 type ModalPlayerProps = TextProps & {
   modalType: ModalPlayerType;

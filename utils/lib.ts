@@ -103,10 +103,10 @@ export function formatTimeAgo(date: ConfigType) {
  */
 export function isImageFile(fileName: string): boolean {
   // 定义一个正则表达式，匹配常见的图片文件扩展名（不区分大小写）
-  const imageExtensionRegex = /\.(jpeg|jpg|png|gif|bmp|svg|tiff|webp)$/i;
+  const imageRegex = /\.(jpeg|jpg|png|gif|bmp|svg|tiff|webp)$/i;
 
   // 使用正则表达式的 test 方法来检查文件名
-  return imageExtensionRegex.test(fileName);
+  return imageRegex.test(fileName);
 }
 
 /**
@@ -116,10 +116,24 @@ export function isImageFile(fileName: string): boolean {
  */
 export function isAudioFile(fileName: string): boolean {
   // 定义一个正则表达式，匹配常见的音频文件扩展名（不区分大小写）
-  const audioExtensionRegex = /\.(mp3|wav|ogg|flac|aac|m4a|wma|aiff|au)$/i;
+  const audioRegex = /\.(mp3|wav|ogg|flac|aac|m4a|wma|aiff|au)$/i;
 
   // 使用正则表达式的 test 方法来检查文件名
-  return audioExtensionRegex.test(fileName);
+  return audioRegex.test(fileName);
+}
+
+/**
+ * 是否是音频格式
+ * @param fileName
+ * @returns
+ */
+export function isVideoFile(fileName: string): boolean {
+  // 定义一个正则表达式，匹配常见的音频文件扩展名（不区分大小写）
+  const videoRegex =
+    /\.(mp4|avi|mov|wmv|flv|mkv|webm|m4v|mpg|mpeg|ts|m2ts|vob|divx|xvid)$/i;
+
+  // 使用正则表达式的 test 方法来检查文件名
+  return videoRegex.test(fileName);
 }
 
 export type FnIconSymbol = (
@@ -138,6 +152,8 @@ export const getIconSymbol: FnIconSymbol = (name: string, is_dir?: boolean) => {
     return "photo";
   } else if (isAudioFile(name)) {
     return "music-note";
+  } else if (isVideoFile(name)) {
+    return "ondemand-video";
   } else {
     return "file-present";
   }
@@ -184,6 +200,16 @@ export function formatPath(...segments: string[]): string {
     .replace(/\/+$/, ""); // 去掉路径结尾的斜杠
 
   return path;
+}
+
+/**
+ * 去掉路径最后一个斜杠的内容
+ * @param path
+ * @returns
+ */
+export function removeLastPath(path: string) {
+  const index = path.lastIndexOf("/");
+  return path.replace(path.substring(index, path.length), "");
 }
 
 /**

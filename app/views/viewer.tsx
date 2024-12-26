@@ -1,13 +1,13 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ReactNativeZoomableView } from "@openspacelabs/react-native-zoomable-view";
 import { IconSymbol } from "@/components/ui";
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
-import { GetCover } from "@/api/api";
+import { GetCover, GetItems } from "@/api/api";
 import { ThemedView } from "@/components/theme/ThemedView";
 import { globalStyles } from "@/styles";
 import { Text, useTheme } from "@rneui/themed";
-import { IMAGE_DEFAULT_URL } from "@/utils";
+import { IMAGE_BASE_URL, IMAGE_DEFAULT_URL } from "@/utils";
 import {
   ActivityIndicator,
   Image,
@@ -20,15 +20,24 @@ import {
 import { isNumber } from "@/utils/helper";
 import { setStorage } from "@/storage/long";
 import { getStorageAsync, type OptionType } from "@/utils/store";
+import { useRoute, type RouteProp } from "@react-navigation/native";
+import type { RootStackParamList } from "@/types";
+import { formatPath, isImageFile, removeLastPath } from "@/utils/lib";
+
+type VideoScreenRouteProp = RouteProp<RootStackParamList, "video">;
+
+type ImageScreenType = "image" | "viewer";
 
 const ImageScreen = () => {
   const mode = useColorScheme();
   const { theme } = useTheme();
+  const route = useRoute<VideoScreenRouteProp>();
   const [index, setIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState<OptionType[]>([]);
   const [imageUrl, setImageUrl] = useState(IMAGE_DEFAULT_URL);
   const isInitialRender = useRef<boolean>(false);
+  const type = useRef<ImageScreenType>("image");
 
   const router = useRouter();
 
@@ -67,8 +76,12 @@ const ImageScreen = () => {
     if (cover) {
       setIndex(index - 1);
     } else {
-      const url = await onCoverRefresh(-1);
-      if (url) setImageUrl(url);
+      if (type.current === "image") {
+        setIndex(images.length - 1);
+      } else {
+        const url = await onCoverRefresh(-1);
+        if (url) setImageUrl(url);
+      }
     }
   };
   const nextPicture = async () => {
@@ -76,14 +89,17 @@ const ImageScreen = () => {
     if (cover) {
       setIndex(index + 1);
     } else {
-      const url = await onCoverRefresh(1);
-      if (url) {
-        setIndex(index + 1);
+      if (type.current === "image") {
+        setIndex(0);
+      } else {
+        const url = await onCoverRefresh(1);
+        if (url) setIndex(index + 1);
       }
     }
   };
 
   const handleDelete = async () => {
+    if (type.current === "image") return;
     const item = images[index];
     if (item) {
       images.splice(index, 1);
@@ -101,6 +117,35 @@ const ImageScreen = () => {
     }
   };
 
+  const onFetch = useCallback((path: string) => {
+    const catalogPath = removeLastPath(path);
+    setLoading(true);
+    GetItems({
+      page: 1,
+      password: "",
+      path: catalogPath,
+      per_page: 1000,
+      refresh: false,
+    })
+      .then(({ data }) => {
+        const imageItems = data.content.filter((f) => isImageFile(f.name));
+        const index = imageItems.findIndex(
+          (f) => formatPath(f.parent ?? "/", f.name) === path
+        );
+        const list = imageItems.map((v) => {
+          return {
+            value: `${IMAGE_BASE_URL}/${formatPath(v.parent ?? "/", v.name)}`,
+            key: v.id,
+          };
+        });
+        setIndex(index > -1 ? index : 0);
+        setImages([...list]);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
+
   useEffect(() => {
     if (!isInitialRender.current) {
       isInitialRender.current = true;
@@ -108,22 +153,30 @@ const ImageScreen = () => {
     }
     const cover = images[index];
     if (cover) setImageUrl(cover.value);
+    if (type.current === "image") return;
     setStorage("viewerIndex", index);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
 
   useEffect(() => {
     (async () => {
-      const { coverItems, viewerIndex } = await getStorageAsync();
-      setIndex(isNumber(viewerIndex) ? viewerIndex : 0);
-      if (coverItems.length) {
-        setImages([...coverItems]);
+      if (route.params.path) {
+        type.current = "image";
+        onFetch(route.params.path);
       } else {
-        setImages([{ key: Math.random().toString(), value: imageUrl }]);
+        type.current = "viewer";
+        const { coverItems, viewerIndex } = await getStorageAsync();
+        setIndex(isNumber(viewerIndex) ? viewerIndex : 0);
+        if (coverItems.length) {
+          setImages([...coverItems]);
+        } else {
+          setImages([
+            { key: Math.random().toString(), value: IMAGE_DEFAULT_URL },
+          ]);
+        }
       }
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [onFetch, route.params.path]);
 
   return (
     <ThemedView style={styles.viewContainer}>

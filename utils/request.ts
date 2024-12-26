@@ -1,6 +1,7 @@
 import axios from "axios";
 import { getStorage, setStorage } from "@/storage/long";
 import type { AxiosInstance, AxiosRequestConfig } from "axios";
+import { BASE_URL } from ".";
 
 /**
  * 生成key
@@ -76,7 +77,7 @@ const cacheAdapter = async (config: AxiosRequestConfig) => {
 const request: AxiosInstance = axios.create({
   adapter: cacheAdapter,
   // baseURL: import.meta.env.VITE_API_URL,
-  baseURL: "https://www.asmrgay.com",
+  baseURL: BASE_URL,
   timeout: 50000,
 });
 

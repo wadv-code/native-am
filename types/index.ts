@@ -14,6 +14,8 @@ export type HistoryItem = HistoryItemType;
 
 export type RootStackParamList = {
   search: { path: string };
+  video: { path: string };
+  viewer: { path: string };
   "web-view": { url: string; title: string };
 };
 
