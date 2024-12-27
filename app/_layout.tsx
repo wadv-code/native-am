@@ -9,12 +9,12 @@ import { store } from "@/store";
 import { Appearance, SafeAreaView, type ColorSchemeName } from "react-native";
 import { Colors } from "@/constants/Colors";
 import { getStorage } from "@/storage/long";
-// import { AudioLoading } from "@/components/audio/AudioLoading";
 import {
   createTheme,
   ThemeProvider,
   type CreateThemeOptions,
 } from "@rneui/themed";
+import ThemedToast from "@/components/theme/ThemedToast";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -74,13 +74,13 @@ export default function RootLayout() {
     >
       <Provider store={store}>
         <ThemeProvider theme={theme}>
+          <ThemedToast position="top" />
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="views" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" />
           </Stack>
           <StatusBar style="auto" />
-          {/* <AudioLoading /> */}
         </ThemeProvider>
       </Provider>
     </SafeAreaView>

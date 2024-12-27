@@ -36,6 +36,7 @@ export type GetItem = {
   type?: number;
   cover?: string;
   auther?: string;
+  readme?: string;
   // 播放相关
   position?: number;
   progress?: number;

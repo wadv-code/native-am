@@ -3,7 +3,7 @@ import { ReactNativeZoomableView } from "@openspacelabs/react-native-zoomable-vi
 import { IconSymbol } from "@/components/ui";
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
-import { GetCover, GetItems } from "@/api/api";
+import { GetCover, GetDetail, GetItems } from "@/api/api";
 import { ThemedView } from "@/components/theme/ThemedView";
 import { globalStyles } from "@/styles";
 import { Text, useTheme } from "@rneui/themed";
@@ -23,6 +23,7 @@ import { getStorageAsync, type OptionType } from "@/utils/store";
 import { useRoute, type RouteProp } from "@react-navigation/native";
 import type { RootStackParamList } from "@/types";
 import { formatPath, isImageFile, removeLastPath } from "@/utils/lib";
+import { Toast } from "@/components/theme";
 
 type VideoScreenRouteProp = RouteProp<RootStackParamList, "video">;
 
@@ -32,11 +33,10 @@ const ImageScreen = () => {
   const mode = useColorScheme();
   const { theme } = useTheme();
   const route = useRoute<VideoScreenRouteProp>();
-  const [index, setIndex] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [index, setIndex] = useState(-1);
+  const [loading, setLoading] = useState(true);
   const [images, setImages] = useState<OptionType[]>([]);
   const [imageUrl, setImageUrl] = useState(IMAGE_DEFAULT_URL);
-  const isInitialRender = useRef<boolean>(false);
   const type = useRef<ImageScreenType>("image");
 
   const router = useRouter();
@@ -46,57 +46,40 @@ const ImageScreen = () => {
     await setStorage("coverItems", list);
   };
 
-  const onCoverRefresh = async (order: 1 | -1) => {
-    if (loading) return;
-    try {
-      setLoading(true);
-      const url = await GetCover();
-      if (url) {
-        const option = { key: Date.now().toString(), value: url };
-        if (order >= 1) {
-          await setImagesAsync([...images, option]);
-        } else {
-          await setImagesAsync([option, ...images]);
+  const updateImage = (id: string, key: keyof OptionType, value: any) => {
+    setImages((prevItems) => {
+      return prevItems.map((item) => {
+        if (item.key === id) {
+          return { ...item, [key]: value };
         }
-        return url;
-      }
-    } catch {
-      console.log("图片加载失败");
-    } finally {
-      setLoading(false);
-    }
+        return item;
+      });
+    });
   };
 
   const onBack = () => {
     router.back();
   };
 
-  const prevPicture = async () => {
-    const cover = images[index - 1];
-    if (cover) {
+  const prevPicture = useCallback(() => {
+    if (index > 0) {
+      setLoading(true);
       setIndex(index - 1);
     } else {
-      if (type.current === "image") {
-        setIndex(images.length - 1);
-      } else {
-        const url = await onCoverRefresh(-1);
-        if (url) setImageUrl(url);
-      }
+      Toast.warn("到头了", "top");
     }
-  };
-  const nextPicture = async () => {
-    const cover = images[index + 1];
-    if (cover) {
-      setIndex(index + 1);
+  }, [index]);
+
+  const nextPicture = useCallback(() => {
+    setLoading(true);
+    if (type.current === "image") {
+      if (index < images.length - 1) {
+        setIndex(index + 1);
+      }
     } else {
-      if (type.current === "image") {
-        setIndex(0);
-      } else {
-        const url = await onCoverRefresh(1);
-        if (url) setIndex(index + 1);
-      }
+      setIndex(index + 1);
     }
-  };
+  }, [index, images]);
 
   const handleDelete = async () => {
     if (type.current === "image") return;
@@ -111,7 +94,7 @@ const ImageScreen = () => {
           setIndex(index - 1);
         }
       } else {
-        await nextPicture();
+        nextPicture();
       }
       setImagesAsync([...images]);
     }
@@ -133,9 +116,10 @@ const ImageScreen = () => {
           (f) => formatPath(f.parent ?? "/", f.name) === path
         );
         const list = imageItems.map((v) => {
+          const key = formatPath(v.parent ?? "/", v.name);
           return {
-            value: `${IMAGE_BASE_URL}/${formatPath(v.parent ?? "/", v.name)}`,
-            key: v.id,
+            value: "",
+            key: key,
           };
         });
         setIndex(index > -1 ? index : 0);
@@ -147,16 +131,47 @@ const ImageScreen = () => {
   }, []);
 
   useEffect(() => {
-    if (!isInitialRender.current) {
-      isInitialRender.current = true;
-      return;
+    if (index > -1) {
+      const cover = images[index];
+      if (type.current === "viewer") setStorage("viewerIndex", index);
+      if (cover && cover.value) {
+        setImageUrl(cover.value);
+      } else if (type.current === "viewer") {
+        setLoading(true);
+        GetCover()
+          .then((url) => {
+            const option = { key: Date.now().toString(), value: url };
+            setImagesAsync([...images, option]);
+          })
+          .catch(() => {
+            setLoading(false);
+          });
+      } else if (cover && type.current === "image") {
+        setLoading(true);
+        GetDetail({ path: cover.key, password: "" })
+          .then(({ data }) => {
+            if (!data) setLoading(false);
+            const raw_url = data.raw_url ?? "";
+            const sign = data.sign ?? "";
+            if (raw_url.indexOf(IMAGE_BASE_URL) !== -1) {
+              setImages([
+                ...images.map((v) => {
+                  return {
+                    ...v,
+                    value: `${IMAGE_BASE_URL}${v.key}?sign=${sign}`,
+                  };
+                }),
+              ]);
+            } else {
+              updateImage(cover.key, "value", raw_url);
+            }
+          })
+          .catch(() => {
+            setLoading(false);
+          });
+      }
     }
-    const cover = images[index];
-    if (cover) setImageUrl(cover.value);
-    if (type.current === "image") return;
-    setStorage("viewerIndex", index);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [index]);
+  }, [images, index]);
 
   useEffect(() => {
     (async () => {
@@ -196,9 +211,10 @@ const ImageScreen = () => {
         <Image
           src={imageUrl}
           style={styles.imageViewer}
+          onError={() => setLoading(false)}
           onLoadEnd={() => setLoading(false)}
           onLoadStart={() => setLoading(true)}
-        ></Image>
+        />
       </ReactNativeZoomableView>
       <View
         style={[
