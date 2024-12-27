@@ -71,12 +71,13 @@ const ImageScreen = () => {
   }, [index]);
 
   const nextPicture = useCallback(() => {
-    setLoading(true);
     if (type.current === "image") {
       if (index < images.length - 1) {
+        setLoading(true);
         setIndex(index + 1);
       }
     } else {
+      setLoading(true);
       setIndex(index + 1);
     }
   }, [index, images]);

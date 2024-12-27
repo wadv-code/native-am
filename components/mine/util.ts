@@ -52,14 +52,14 @@ export const getServerItems = (): ServerItem[] => {
     },
     {
       id: "2",
-      url: "https://t.alcy.cc/ycy?json",
+      url: "https://t.alcy.cc/ycy/",
       title: "alcy",
-      params: [],
+      params: [{ key: "json", value: "" }],
       isDefault: false,
     },
     {
       id: "3",
-      url: "https://moe.jitsu.top/img",
+      url: "https://moe.jitsu.top/img/",
       title: "alcy",
       params: [
         { key: "sort", value: "r18" },
@@ -69,14 +69,14 @@ export const getServerItems = (): ServerItem[] => {
     },
     {
       id: "4",
-      url: "https://api.vvhan.com/api/wallpaper/pcGirl",
+      url: "https://api.vvhan.com/api/wallpaper/pcGirl/",
       title: "vvhan电脑",
       params: [{ key: "type", value: "json" }],
       isDefault: false,
     },
     {
       id: "5",
-      url: "https://api.vvhan.com/api/wallpaper/mobileGirl",
+      url: "https://api.vvhan.com/api/wallpaper/mobileGirl/",
       title: "vvhan手机",
       params: [{ key: "type", value: "json" }],
       isDefault: false,
