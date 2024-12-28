@@ -22,7 +22,12 @@ import { setStorage } from "@/storage/long";
 import { getStorageAsync, type OptionType } from "@/utils/store";
 import { useRoute, type RouteProp } from "@react-navigation/native";
 import type { RootStackParamList } from "@/types";
-import { formatPath, isImageFile, removeLastPath } from "@/utils/lib";
+import {
+  formatPath,
+  isImageFile,
+  randomNum,
+  removeLastPath,
+} from "@/utils/lib";
 import { Toast } from "@/components/theme";
 
 type VideoScreenRouteProp = RouteProp<RootStackParamList, "video">;
@@ -82,6 +87,12 @@ const ImageScreen = () => {
     }
   }, [index, images]);
 
+  const handleRefresh = useCallback(() => {
+    const randomIndex = randomNum(images.length - 1);
+    const option = images[randomIndex];
+    if (option) setIndex(randomIndex);
+  }, [images]);
+
   const handleDelete = async () => {
     if (type.current === "image") return;
     const item = images[index];
@@ -106,7 +117,7 @@ const ImageScreen = () => {
     setLoading(true);
     GetItems({
       page: 1,
-      password: "",
+      password: "asmrgay",
       path: catalogPath,
       per_page: 1000,
       refresh: false,
@@ -200,13 +211,17 @@ const ImageScreen = () => {
         <TouchableOpacity onPress={onBack}>
           <IconSymbol
             name="chevron-left"
-            size={Platform.OS === "android" ? 35 : 25}
+            size={Platform.OS === "android" ? 30 : 22}
           />
         </TouchableOpacity>
-        <TouchableOpacity style={globalStyles.row} onPress={handleDelete}>
-          <IconSymbol name="delete-outline" />
-          {/* <Text style={{ fontWeight: "bold" }}>💗</Text> */}
-        </TouchableOpacity>
+        <View style={[globalStyles.row, { gap: 10 }]}>
+          <TouchableOpacity onPress={handleDelete}>
+            <IconSymbol name="delete-outline" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleRefresh}>
+            <IconSymbol name="refresh" />
+          </TouchableOpacity>
+        </View>
       </View>
       <ReactNativeZoomableView maxZoom={30}>
         <Image
@@ -301,7 +316,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 1,
-    paddingRight: 10,
+    paddingHorizontal: 10,
   },
   toolbar: {
     // opacity: 0.5,

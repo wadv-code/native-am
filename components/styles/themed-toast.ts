@@ -23,6 +23,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
     overflow: "hidden",
+    minHeight: 50,
   },
 
   hideButton: {

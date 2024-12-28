@@ -1,7 +1,7 @@
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
-import { useEffect, useRef, useState } from "react";
-import type { GetItemsParams, GetItem } from "@/api";
+import { useCallback, useEffect, useState } from "react";
+import type { GetItem } from "@/api";
 import { GetItems } from "@/api/api";
 import { useRouter } from "expo-router";
 import { ThemedNavigation } from "../theme/ThemedNavigation";
@@ -23,24 +23,23 @@ type ListPlayerProps = TextProps & {
 
 const ListPlayer = ({ closeModal }: ListPlayerProps) => {
   const router = useRouter();
-  const [isHappy, setIsHappy] = useState(false);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const audio = useSelector((state: RootState) => state.audio);
   const { audioInfo } = audio;
-  const isInitialRender = useRef<boolean>(false);
   const [total, setTotal] = useState<number>(0);
   const [items, setItems] = useState<GetItem[]>([]);
-  const [params, setParams] = useState<GetItemsParams>({
-    page: 1,
-    password: "",
-    path: "/",
-    per_page: 1000,
-    refresh: false,
-  });
+  const [path, setPath] = useState<string>("/");
 
-  const onFetch = async () => {
+  const onFetch = useCallback(async () => {
     try {
       setRefreshing(true);
+      const params = {
+        page: 1,
+        password: "asmrgay",
+        path,
+        per_page: 1000,
+        refresh: false,
+      };
       const { data } = await GetItems(params);
       setTotal(data.total);
       setItems([...data.content]);
@@ -49,15 +48,15 @@ const ListPlayer = ({ closeModal }: ListPlayerProps) => {
     } finally {
       setRefreshing(false);
     }
-  };
+  }, [path]);
 
   // 刷新
   const onRefresh = async () => {
     if (refreshing) return;
     setRefreshing(true);
     setItems([]);
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    setParams({ ...params, page: 1 });
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    onFetch();
   };
 
   const onLeftPress = async (item: GetItem) => {
@@ -71,41 +70,27 @@ const ListPlayer = ({ closeModal }: ListPlayerProps) => {
   };
 
   useEffect(() => {
-    if (!isInitialRender.current) {
-      isInitialRender.current = true;
-      return;
-    }
-    onFetch();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params]);
-
-  useEffect(() => {
     if (audioInfo.parent) {
-      setParams({ ...params, path: audioInfo.parent });
+      setPath(audioInfo.parent);
+      onFetch();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [audioInfo.parent]);
+  }, [audioInfo.parent, onFetch]);
 
   return (
     <ThemedNavigation
       statusBar={true}
       isImage={true}
-      style={styles.viewContainer}
+      isModal={true}
       onLeft={closeModal}
-      isHappy={isHappy}
       leftIcon="keyboard-arrow-down"
-      rightText={
+      rightText={() => (
         <Text
           style={styles.rightText}
         >{`${items.length}条 共${total}条记录`}</Text>
-      }
-      onRight={() => setIsHappy(!isHappy)}
+      )}
     >
       <FlatList
         data={items}
-        style={{
-          paddingHorizontal: 10,
-        }}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <CatalogItem item={item} onLeftPress={onLeftPress} />
@@ -127,9 +112,6 @@ const ListPlayer = ({ closeModal }: ListPlayerProps) => {
 };
 
 const styles = StyleSheet.create({
-  viewContainer: {
-    flex: 1,
-  },
   rightText: {
     marginRight: 10,
     fontSize: 16,

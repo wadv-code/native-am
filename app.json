@@ -9,7 +9,10 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "UIBackgroundModes": ["audio"]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -44,18 +47,13 @@
         }
       ],
       [
-        "expo-av",
-        {
-          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone."
-        }
-      ],
-      [
         "expo-video",
         {
           "supportsBackgroundPlayback": true,
           "supportsPictureInPicture": true
         }
       ],
+      "expo-av",
       "expo-font"
     ],
     "experiments": {

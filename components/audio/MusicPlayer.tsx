@@ -1,13 +1,6 @@
 import { GetCover } from "@/api/api";
 import { useAppDispatch } from "@/hooks/useStore";
 import type { RootState } from "@/store";
-import {
-  setAudioCover,
-  setCovering,
-  setLoading,
-  setPlaying,
-  setPosition,
-} from "@/store/slices/audioSlice";
 import { IMAGE_DEFAULT_URL } from "@/utils";
 import { player } from "@/utils/audio";
 import { throttle } from "@/utils/lib";
@@ -16,6 +9,15 @@ import type { AVPlaybackStatus } from "expo-av";
 import { useEffect } from "react";
 import { AppState } from "react-native";
 import { useSelector } from "react-redux";
+import {
+  setAudioCover,
+  setAudioInfo,
+  setCovering,
+  setLoading,
+  setPlaying,
+  setPosition,
+} from "@/store/slices/audioSlice";
+import { onSwitchAudio } from ".";
 
 const MusicPlayer = () => {
   const dispatch = useAppDispatch();
@@ -37,6 +39,12 @@ const MusicPlayer = () => {
 
       if (status.didJustFinish && !status.isLooping) {
         console.log("isFinish");
+        onSwitchAudio(audioInfo, 1, !audioInfo.parent).then((audio) => {
+          if (audio) {
+            dispatch(setPlaying(true));
+            dispatch(setAudioInfo(audio));
+          }
+        });
       }
       dispatch(
         setPosition({

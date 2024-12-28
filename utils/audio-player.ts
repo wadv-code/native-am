@@ -5,6 +5,7 @@ import { Audio, type AVPlaybackSource, type AVPlaybackStatus } from "expo-av";
 import { getStorage } from "@/storage/long";
 import { initialState } from "@/store/slices/audioSlice";
 import { getStorageAsync, handleRawUrlItems } from "./store";
+import { IMAGE_DEFAULT_URL } from ".";
 
 Audio.setAudioModeAsync({
   staysActiveInBackground: true,
@@ -20,7 +21,7 @@ type LoadSoundProps = {
 export async function fetchSource(audio: GetItem): Promise<AVPlaybackSource> {
   if (audio.raw_url) return { uri: audio.raw_url };
   const params = {
-    password: "",
+    password: "asmrgay",
     path: formatPath(audio.parent || "/", audio.name),
   };
   const { rawUrlItems } = await getStorageAsync();
@@ -29,8 +30,11 @@ export async function fetchSource(audio: GetItem): Promise<AVPlaybackSource> {
   if (audio.parent) {
     try {
       const { data } = await GetDetail(params);
-      handleRawUrlItems({ key: params.path, value: data.raw_url });
-      return { uri: data.raw_url };
+      const raw_url = data.raw_url ?? IMAGE_DEFAULT_URL;
+      if (data.raw_url) {
+        handleRawUrlItems({ key: params.path, value: data.raw_url });
+      }
+      return { uri: raw_url };
     } catch {
       return require("@/assets/audio/dx.mp3");
     }

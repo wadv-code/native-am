@@ -19,12 +19,12 @@ export default function TabLayout() {
   const [modalType, setModalType] = useState<ModalPlayerType>("view");
 
   const closeModal = () => {
+    console.log("closeModal");
     setVisible(false);
   };
 
   const openModal = async (type: ModalPlayerType) => {
     setModalType(type);
-    await new Promise((resolve) => setTimeout(resolve, 100));
     setVisible(true);
   };
   return (

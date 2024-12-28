@@ -1,10 +1,11 @@
-import type { GetItemsParams, GetItem } from "@/api";
+import type { GetItem } from "@/api";
 import { FAB, useTheme } from "@rneui/themed";
 import { GetItems } from "@/api/api";
 import { getSortOrderItems, toggleCollect } from "@/utils/common";
 import { CatalogItem } from "./CatalogItem";
 import {
   forwardRef,
+  useCallback,
   useEffect,
   useImperativeHandle,
   useRef,
@@ -53,13 +54,6 @@ const CatalogList = forwardRef<CatalogListHandle, CatalogListProps>(
     const [items, setItems] = useState<GetItem[]>([]);
     const [total, setTotal] = useState<number>(0);
     const [refreshId, setRefreshId] = useState("");
-    const params: GetItemsParams = {
-      page: 1,
-      password: "",
-      path: path ?? "/",
-      per_page: default_per_page,
-      refresh: false,
-    };
 
     const getItem = (_data: GetItem, index: number) => {
       const item = items[index];
@@ -118,27 +112,37 @@ const CatalogList = forwardRef<CatalogListHandle, CatalogListProps>(
       console.log("onScrollToIndexFailed");
     };
 
-    const onFetch = async (refresh?: boolean) => {
-      if (data) {
-        setItems([...data]);
-        setTotal(data.length);
-      } else {
-        try {
-          setRefreshing(true);
-          await new Promise((resolve) => setTimeout(resolve, 300));
-          const { data } = await GetItems(params, refresh);
-          const list = await getSortOrderItems(data.content);
-          setItems(list);
-          setTotal(data.total);
-          onChangeText && onChangeText(`${list.length}/${data.total}`);
-          currentPath.current = params.path;
-        } catch {
-          return Promise.reject("onFetch Request Error");
-        } finally {
-          setRefreshing(false);
+    const onFetch = useCallback(
+      async (refresh?: boolean) => {
+        if (data) {
+          setItems([...data]);
+          setTotal(data.length);
+        } else {
+          try {
+            setRefreshing(true);
+            const params = {
+              page: 1,
+              password: "",
+              path: path ?? "/",
+              per_page: default_per_page,
+              refresh: false,
+            };
+            await new Promise((resolve) => setTimeout(resolve, 300));
+            const { data } = await GetItems(params, refresh);
+            const list = await getSortOrderItems(data.content);
+            setItems(list);
+            setTotal(data.total);
+            onChangeText && onChangeText(`${list.length}/${data.total}`);
+            currentPath.current = params.path;
+          } catch {
+            return Promise.reject("onFetch Request Error");
+          } finally {
+            setRefreshing(false);
+          }
         }
-      }
-    };
+      },
+      [data, onChangeText, path]
+    );
 
     const onPullRefresh = () => {
       onFetch(true);
@@ -153,20 +157,13 @@ const CatalogList = forwardRef<CatalogListHandle, CatalogListProps>(
       ) {
         onFetch();
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [path, value, index]);
+    }, [path, value, index, onFetch]);
 
     useEffect(() => {
       if (data) onFetch();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [data]);
+    }, [data, onFetch]);
 
-    useImperativeHandle(
-      ref,
-      () => ({ onFetch }),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [path]
-    );
+    useImperativeHandle(ref, () => ({ onFetch }), [onFetch]);
 
     if (refreshing)
       return (

@@ -4,38 +4,41 @@ import { globalStyles } from "@/styles";
 import { useRouter } from "expo-router";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
-import {
-  useEffect,
-  useState,
-  type PropsWithChildren,
-  type ReactElement,
-} from "react";
 import { ThemedView, type ThemedViewProps } from "./ThemedView";
-import {
-  View,
-  StyleSheet,
-  ImageBackground,
-  TouchableOpacity,
-  Dimensions,
-} from "react-native";
 import type { MaterialIconsName } from "@/types";
 import { randomNum } from "@/utils/lib";
 import { Text, useTheme } from "@rneui/themed";
 import { getStorageAsync } from "@/utils/store";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type PropsWithChildren,
+  type ReactElement,
+} from "react";
+import {
+  View,
+  ImageBackground,
+  TouchableOpacity,
+  Dimensions,
+  StyleSheet,
+  Animated,
+} from "react-native";
+import { setStorage } from "@/storage/long";
 
 const { width } = Dimensions.get("window");
 
 type ThemedNavigationProps = PropsWithChildren<
   ThemedViewProps & {
     leftIcon?: MaterialIconsName;
-    rightIcon?: MaterialIconsName;
-    rightText?: ReactElement;
+    rightText?: (fn?: () => void) => ReactElement;
     statusBar?: boolean;
     title?: string;
     opacity?: number;
     iconSize?: number;
-    isHappy?: boolean;
     isImage?: boolean;
+    isModal?: boolean;
     src?: string;
     onLeft?: () => void | boolean;
     onRight?: () => void | boolean;
@@ -48,14 +51,13 @@ const ThemedNavigation = (props: ThemedNavigationProps) => {
     title,
     style,
     children,
-    isHappy,
     isImage,
     leftIcon = "chevron-left",
-    rightIcon = "refresh",
     opacity = 0.3,
     rightText,
     src,
-    iconSize,
+    iconSize = 22,
+    isModal,
   } = props;
   const { onLeft, onRight } = props;
   const { theme } = useTheme();
@@ -64,6 +66,26 @@ const ThemedNavigation = (props: ThemedNavigationProps) => {
   const { isImageBackground } = useSelector((state: RootState) => state.app);
   const { audioInfo } = audio;
   const [currentSrc, setCurrentSrc] = useState<string | undefined>(src);
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
+  const [isHappy, setIsHappy] = useState(false);
+  const initRef = useRef(false);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  const fadeOut = useCallback(() => {
+    Animated.timing(fadeAnim, {
+      toValue: -500,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, [fadeAnim]);
+
+  const fadeIn = useCallback(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, [fadeAnim]);
 
   const onCanBack = () => {
     if (onLeft) {
@@ -84,71 +106,110 @@ const ThemedNavigation = (props: ThemedNavigationProps) => {
     }
   };
 
-  const handleCurrentSrc = async () => {
+  const toViewer = async (index: number) => {
+    if (isModal) {
+      onCanBack();
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+    setStorage("viewerIndex", index).then(() => {
+      router.push("/views/viewer");
+    });
+  };
+
+  const handleCurrentSrc = useCallback(async () => {
     const { coverItems } = await getStorageAsync();
     if (coverItems.length) {
-      const option = coverItems[randomNum(coverItems.length - 1)];
-      if (option) setCurrentSrc(option.value);
+      const index = randomNum(coverItems.length - 1);
+      const option = coverItems[index];
+      if (option) {
+        setCurrentIndex(index);
+        setCurrentSrc(option.value);
+      }
     } else {
       setCurrentSrc(audioInfo.cover);
     }
-  };
+  }, [audioInfo.cover]);
+
+  const isBackImage = useCallback(() => {
+    return isHappy || (isImage === undefined ? isImageBackground : isImage);
+  }, [isHappy, isImage, isImageBackground]);
+
+  useEffect(() => {
+    if (!initRef.current) {
+      initRef.current = true;
+      return;
+    }
+    if (isHappy) {
+      fadeOut();
+    } else {
+      fadeIn();
+    }
+  }, [fadeIn, fadeOut, isHappy]);
 
   useEffect(() => {
     if (!currentSrc) handleCurrentSrc();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [currentSrc, handleCurrentSrc]);
 
   return (
     <ThemedView style={styles.container}>
-      {(isImage === undefined ? isImageBackground : isImage) && (
+      {isBackImage() && (
         <ImageBackground
           style={[styles.backgroundImage, { opacity: isHappy ? 1 : opacity }]}
           src={currentSrc || audioInfo.cover}
           resizeMode="cover"
         />
       )}
-      <View style={{ width: "100%" }}>
+      <View
+        style={[
+          styles.header,
+          {
+            backgroundColor: isHappy
+              ? theme.mode === "dark"
+                ? "rgba(0,0,0,0.3)"
+                : "rgba(255,255,255,0.3)"
+              : "transparent",
+          },
+        ]}
+      >
         {statusBar && <HeaderBar />}
-        <View
-          style={[styles.header, globalStyles.row, globalStyles.justifyBetween]}
-        >
+        <View style={[globalStyles.row, globalStyles.justifyBetween]}>
           <TouchableOpacity
-            style={[
-              globalStyles.row,
-              globalStyles.justifyCenter,
-              styles.action,
-            ]}
+            style={[globalStyles.row, styles.action]}
             onPress={onCanBack}
           >
-            <IconSymbol
-              color={theme.colors.grey0}
-              size={iconSize ?? 22}
-              name={leftIcon}
-            />
+            <IconSymbol size={iconSize} name={leftIcon} />
+            {isBackImage() && (
+              <TouchableOpacity onPress={() => toViewer(currentIndex)}>
+                <Text>第{currentIndex + 1}张</Text>
+              </TouchableOpacity>
+            )}
           </TouchableOpacity>
           <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
             {title}
           </Text>
-          {rightText || (
-            <TouchableOpacity
-              style={[
-                globalStyles.row,
-                globalStyles.justifyCenter,
-                styles.action,
-              ]}
-              onPress={onCanRight}
-            >
-              <IconSymbol
-                color={theme.colors.grey0}
-                size={iconSize ?? 22}
-                name={rightIcon}
-              />
-            </TouchableOpacity>
+          {(rightText && rightText(handleCurrentSrc)) ?? (
+            <View style={[globalStyles.row, styles.action]}>
+              {isBackImage() && (
+                <TouchableOpacity onPress={onCanRight}>
+                  <IconSymbol name="refresh" />
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity onPress={() => setIsHappy(!isHappy)}>
+                <IconSymbol name="photo" />
+              </TouchableOpacity>
+            </View>
           )}
         </View>
       </View>
-      <View style={[styles.content, style]}>{children}</View>
+      <Animated.View
+        style={[
+          styles.content,
+          style,
+          { transform: [{ translateX: fadeAnim }] },
+        ]}
+      >
+        {children}
+      </Animated.View>
     </ThemedView>
   );
 };
@@ -169,10 +230,10 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   title: {
-    width: width * 0.5,
-    fontSize: 18,
+    width: width - 160,
+    fontSize: 14,
     fontWeight: "bold",
-    flexGrow: 1,
+    flex: 1,
     textAlign: "center",
   },
   content: {
@@ -181,10 +242,10 @@ const styles = StyleSheet.create({
   header: {
     width: "100%",
     overflow: "hidden",
+    padding: 10,
   },
   action: {
-    width: 50,
-    paddingVertical: 10,
+    gap: 10,
   },
 });
 

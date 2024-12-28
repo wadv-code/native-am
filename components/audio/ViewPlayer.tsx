@@ -2,21 +2,24 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { IconSymbol } from "@/components/ui";
 import Slider from "@react-native-community/slider";
 import { useSelector } from "react-redux";
-import type { RootState } from "@/store";
 import { useAppDispatch } from "@/hooks/useStore";
 import { formatMilliseconds } from "@/utils/lib";
-import { GetCover, GetMusic } from "@/api/api";
+import { GetCover } from "@/api/api";
 import { ThemedNavigation } from "../theme/ThemedNavigation";
 import { Image, Text, makeStyles, useTheme } from "@rneui/themed";
 import { globalStyles } from "@/styles";
 import { player } from "@/utils/audio";
+import { handleCoverItems } from "@/utils/store";
+import type { MaterialIconsName } from "@/types";
+import { onSwitchAudio } from ".";
+import type { RootState } from "@/store";
+
 import {
   setAudioCover,
   setAudioInfo,
   setLoading,
   setPlaying,
 } from "@/store/slices/audioSlice";
-import { handleCoverItems } from "@/utils/store";
 import {
   ActivityIndicator,
   Dimensions,
@@ -24,20 +27,23 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
 const { width } = Dimensions.get("window");
 
 type ViewPlayerProps = {
   closeModal: () => void;
 };
 
+type ToolsOption = {
+  value: number;
+  icon: MaterialIconsName;
+  selectedIcon?: MaterialIconsName;
+  disabled?: boolean;
+  selected?: boolean;
+};
+
 const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
   const { theme } = useTheme();
   const dispatch = useAppDispatch();
-  const [refreshing, setRefreshing] = useState(false);
-  const [value, setValue] = useState(0);
-  const startRef = useRef(false);
-  const [dragCurrent, setDragCurrent] = useState<string | undefined>();
   const audio = useSelector((state: RootState) => state.audio);
   const { audioInfo, playing, loading } = audio;
   const {
@@ -46,8 +52,32 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
     currentFormat,
     durationFormat,
   } = audioInfo;
+  const [refreshing, setRefreshing] = useState(false);
+  const [isMusic, setIsMusic] = useState(!audioInfo.parent);
+  // const [selectIndex, setSelectedIndex] = useState(0);
+  const [tools, setTools] = useState<ToolsOption[]>([
+    { value: 1, icon: "message" },
+    { value: 2, icon: "file-download" },
+    { value: 3, icon: "star-outline" },
+    { value: 4, icon: "more-time" },
+    { value: 5, icon: "music-off", selectedIcon: "music-note" },
+  ]);
+  const [value, setValue] = useState(0);
+  const startRef = useRef(false);
+  const [dragCurrent, setDragCurrent] = useState<string | undefined>();
 
   const styles = useStyles();
+
+  const updateTool = (id: number, key: keyof ToolsOption, value: any) => {
+    setTools((prevItems) => {
+      return prevItems.map((item) => {
+        if (item.value === id) {
+          return { ...item, [key]: value };
+        }
+        return item;
+      });
+    });
+  };
 
   const onSlidingComplete = (value: number) => {
     startRef.current = false;
@@ -68,7 +98,6 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
 
   const onSlidingStart = () => {
     startRef.current = true;
-    dispatch(setPlaying(false));
   };
 
   const onCoverRefresh = async () => {
@@ -87,27 +116,15 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
     }
   };
 
-  const nextPress = async () => {
+  const nextPress = async (gate: 1 | -1) => {
     if (loading || refreshing) return;
-    try {
-      setRefreshing(true);
-      const { info } = await GetMusic();
-      if (info) {
-        const id = info.id.toString();
-        dispatch(
-          setAudioInfo({
-            id,
-            name: info.name,
-            auther: info.auther,
-            raw_url: info.url,
-            cover: info.pic_url,
-          })
-        );
-      }
-    } finally {
-      setRefreshing(false);
-      // dispatch(setLoading(false));
+    setRefreshing(true);
+    const audio = await onSwitchAudio(audioInfo, gate, isMusic);
+    if (audio) {
+      dispatch(setPlaying(true));
+      dispatch(setAudioInfo(audio));
     }
+    setRefreshing(false);
   };
 
   const togglePlaying = useCallback(() => {
@@ -121,18 +138,29 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
     }
   }, [loading, playing, dispatch]);
 
+  const onPressTollbar = useCallback(
+    (index: number) => {
+      const item = tools[index];
+      if (item && item.value === 5) {
+        setIsMusic(!isMusic);
+        updateTool(item.value, "selected", !isMusic);
+      }
+    },
+    [isMusic, tools]
+  );
+
   useEffect(() => {
     setValue(progress);
-    if (dragCurrent) setDragCurrent(undefined);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (!startRef.current) setDragCurrent(undefined);
   }, [progress]);
 
   return (
     <ThemedNavigation
       statusBar={true}
-      isImage={true}
       style={styles.viewContainer}
       onLeft={closeModal}
+      iconSize={30}
+      isModal={true}
       leftIcon="keyboard-arrow-down"
     >
       <View style={styles.animatedImage}>
@@ -153,16 +181,24 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
       </View>
       <View style={styles.infoContainer}>
         <Text style={styles.infoTitle}>{audioInfo.name}</Text>
-        <Text style={styles.parent}>{audioInfo.auther}</Text>
-        <Text style={[styles.parent, { color: theme.colors.grey0 }]}>
-          {audioInfo.parent}
-        </Text>
-        <Text style={[styles.parent, { color: theme.colors.grey0 }]}>
-          {audioInfo.sizeFormat}
-        </Text>
-        <Text style={{ color: theme.colors.grey0 }}>
-          {audioInfo.modifiedFormat}
-        </Text>
+        <Text>{audioInfo.auther}</Text>
+        <Text style={{ color: theme.colors.grey0 }}>{audioInfo.parent}</Text>
+        <View
+          style={[
+            globalStyles.rowAround,
+            { width: "100%", paddingVertical: 5 },
+          ]}
+        >
+          <Text style={{ color: theme.colors.grey0 }}>
+            {audioInfo.sizeFormat}
+          </Text>
+          <Text style={{ color: theme.colors.grey0 }}>
+            {audioInfo.modifiedFormat}
+          </Text>
+          <TouchableOpacity onPress={() => onPressTollbar(4)}>
+            <Text>{isMusic ? "音乐模式" : "资源模式"}</Text>
+          </TouchableOpacity>
+        </View>
         <Slider
           value={value}
           onSlidingStart={onSlidingStart}
@@ -179,12 +215,27 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
           <Text style={styles.timeText}>{dragCurrent || currentFormat}</Text>
           <Text style={styles.timeText}>{durationFormat}</Text>
         </View>
-        <View style={[globalStyles.rowAround, styles.toolbar]}>
-          <TouchableOpacity onPress={nextPress}>
+        <View style={[globalStyles.rowBetween, styles.toolbar]}>
+          {tools.map((v, index) => {
+            return (
+              <TouchableOpacity
+                key={v.value}
+                onPress={() => onPressTollbar(index)}
+              >
+                <IconSymbol
+                  color={v.disabled ? theme.colors.grey3 : theme.colors.grey0}
+                  name={v.selected ? v.selectedIcon ?? v.icon : v.icon}
+                />
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+        <View style={[globalStyles.rowAround, styles.acion]}>
+          <TouchableOpacity onPress={() => nextPress(-1)}>
             <IconSymbol
               name="skip-previous"
               size={Platform.OS === "android" ? 40 : 30}
-              style={styles.toolbarIcon}
+              style={styles.acionIcon}
             />
           </TouchableOpacity>
           {loading ? (
@@ -194,15 +245,15 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
               <IconSymbol
                 name={playing ? "pause-circle" : "play-circle"}
                 size={70}
-                style={styles.toolbarIcon}
+                style={styles.acionIcon}
               />
             </TouchableOpacity>
           )}
-          <TouchableOpacity onPress={nextPress}>
+          <TouchableOpacity onPress={() => nextPress(1)}>
             <IconSymbol
               name="skip-next"
               size={Platform.OS === "android" ? 40 : 30}
-              style={styles.toolbarIcon}
+              style={styles.acionIcon}
             />
           </TouchableOpacity>
         </View>
@@ -239,17 +290,14 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: "row",
     justifyContent: "center",
     position: "relative",
-    paddingTop: width * 0.05,
+    paddingTop: 10,
   },
   infoContainer: {
-    width: "100%",
+    width: "98%",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
     gap: 5,
-  },
-  parent: {
-    fontSize: 14,
   },
   time: {
     width: "100%",
@@ -273,15 +321,19 @@ const useStyles = makeStyles((theme) => ({
     elevation: 6, // Android上的阴影效果
     overflow: "hidden",
   },
-  toolbar: {
+  acion: {
     width: "90%",
-    paddingVertical: 30,
+    paddingBottom: 30,
   },
-  toolbarIcon: {
+  acionIcon: {
     shadowOffset: { width: 10, height: 10 },
     shadowOpacity: 1,
     shadowRadius: 10,
     elevation: 10, // Android上的阴影效果
+  },
+  toolbar: {
+    width: "90%",
+    paddingVertical: 10,
   },
 }));
 

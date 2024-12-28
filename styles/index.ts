@@ -38,6 +38,12 @@ export const globalStyles = StyleSheet.create({
   justifyCenter: {
     justifyContent: "center",
   },
+  justifyEnd: {
+    justifyContent: "flex-end",
+  },
+  justifyStart: {
+    justifyContent: "flex-start",
+  },
   justifyAround: {
     justifyContent: "space-around",
   },
