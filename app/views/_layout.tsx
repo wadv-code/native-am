@@ -11,12 +11,9 @@ export default function ViewsLayout() {
       <Stack.Screen name="web" options={{ headerShown: false }} />
       <Stack.Screen name="hot" options={{ headerShown: false }} />
       <Stack.Screen name="video" options={{ headerShown: false }} />
+      <Stack.Screen name="server/server" options={{ headerShown: false }} />
       <Stack.Screen
-        name="image-server/image-server"
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="image-server/image-server-edit"
+        name="server/server-edit"
         options={{ headerShown: false }}
       />
     </Stack>

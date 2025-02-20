@@ -1,6 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import audioSlice, { loadInitialAudio } from "./slices/audioSlice";
-import appSlice from "./slices/appSlice";
+import appSlice, { loadInitialApp } from "./slices/appSlice";
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +10,7 @@ export const store = configureStore({
 });
 
 // 在应用启动时调度初始化 thunk
+store.dispatch(loadInitialApp());
 store.dispatch(loadInitialAudio());
 
 export type RootState = ReturnType<typeof store.getState>;

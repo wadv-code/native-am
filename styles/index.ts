@@ -1,6 +1,10 @@
 import { StyleSheet } from "react-native";
+import Constants from "expo-constants";
 
 export const globalStyles = StyleSheet.create({
+  statusbar: {
+    paddingTop: Constants.statusBarHeight,
+  },
   screen: {
     width: "100%",
     height: "100%",

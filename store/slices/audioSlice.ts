@@ -1,6 +1,6 @@
 import type { GetItem } from "@/api";
 import { getStorage, setStorage } from "@/storage/long";
-import { IMAGE_DEFAULT_URL } from "@/utils";
+import { INIT_AUDIO_DATA } from "@/storage/storage-keys";
 import { formatAudioPosition } from "@/utils/lib";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
@@ -9,18 +9,20 @@ export type AudioSlice = {
   loading: boolean;
   playing: boolean;
   audioInfo: GetItem;
+  seek?: number;
 };
 
 export const initialState: AudioSlice = {
   covering: false,
   loading: false,
   playing: false,
+  seek: 0,
   audioInfo: {
     id: "",
     name: "暂时没用可播放的音乐",
     auther: "",
     raw_url: "",
-    cover: IMAGE_DEFAULT_URL,
+    cover: "",
     progress: 0,
     duration: 0,
     position: 0,
@@ -30,24 +32,11 @@ export const initialState: AudioSlice = {
 };
 
 export const loadInitialAudio = createAsyncThunk(
-  "app/loadInitialAudio",
+  "audio/loadInitialAudio",
   async () => {
     const info = JSON.parse(JSON.stringify(initialState.audioInfo));
     try {
-      return await getStorage("initialAudioData", info);
-    } catch (error) {
-      console.error("Failed to load initial data:", error);
-      return info;
-    }
-  }
-);
-
-export const fetchAudioCover = createAsyncThunk(
-  "app/fetchAudioCover",
-  async () => {
-    const info = JSON.parse(JSON.stringify(initialState.audioInfo));
-    try {
-      return await getStorage("initialAudioData", info);
+      return await getStorage(INIT_AUDIO_DATA, info);
     } catch (error) {
       console.error("Failed to load initial data:", error);
       return info;
@@ -59,6 +48,9 @@ const audioSlice = createSlice({
   name: "audio",
   initialState: initialState,
   reducers: {
+    setSeek(state, action) {
+      state.seek = action.payload;
+    },
     setPlaying: (state, action) => {
       state.playing = action.payload;
     },
@@ -70,7 +62,7 @@ const audioSlice = createSlice({
     },
     setAudioCover: (state, action) => {
       state.audioInfo.cover = action.payload;
-      setStorage("initialAudioData", state.audioInfo);
+      setStorage(INIT_AUDIO_DATA, state.audioInfo);
     },
     setPosition: (state, action) => {
       const position = action.payload.position;
@@ -82,7 +74,7 @@ const audioSlice = createSlice({
       state.audioInfo.duration = duration;
       state.audioInfo.durationFormat = durationFormat;
       state.audioInfo.currentFormat = currentFormat;
-      setStorage("initialAudioData", state.audioInfo);
+      setStorage(INIT_AUDIO_DATA, state.audioInfo);
     },
     setAudioInfo: (state, action) => {
       if (state.loading) return;
@@ -91,10 +83,10 @@ const audioSlice = createSlice({
         action.payload.position = 0;
         action.payload.durationFormat = "00:00";
         action.payload.currentFormat = "00:00";
-        action.payload.cover = action.payload.cover || IMAGE_DEFAULT_URL;
+        action.payload.cover = action.payload.cover || "";
       }
       state.audioInfo = action.payload;
-      setStorage("initialAudioData", state.audioInfo);
+      setStorage(INIT_AUDIO_DATA, state.audioInfo);
     },
   },
   extraReducers: (builder) => {
@@ -114,6 +106,7 @@ const audioSlice = createSlice({
 });
 
 export const {
+  setSeek,
   setPlaying,
   setCovering,
   setLoading,

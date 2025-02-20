@@ -14,11 +14,13 @@ import { Text } from "@rneui/themed";
 import { orders, sorts } from "@/utils";
 import { getSortOrder } from "@/utils/common";
 import { setStorage } from "@/storage/long";
+import { ORDER_STRING, SORT_STRING } from "@/storage/storage-keys";
 
 type CatalogActionProps = ViewProps & {
   title?: string;
   rightText?: string;
   onSortOrder?: (order: ActionSortOrder) => void;
+  onLeftPress?: () => void;
 };
 
 const CatalogAction = ({
@@ -26,6 +28,7 @@ const CatalogAction = ({
   title,
   rightText,
   onSortOrder,
+  onLeftPress,
 }: CatalogActionProps) => {
   const [sort, setSort] = useState<ActionSort>("descending");
   const [order, setOrder] = useState<ActionOrder>("time");
@@ -35,7 +38,7 @@ const CatalogAction = ({
     const orderString = orders[index + 1];
     const value = orderString ?? orders[0];
     setOrder(value);
-    setStorage("orderString", value);
+    setStorage(ORDER_STRING, value);
     onSortOrder && onSortOrder({ sort, order: value });
   };
 
@@ -44,7 +47,7 @@ const CatalogAction = ({
     const sortString = sorts[index + 1];
     const value = sortString ?? sorts[0];
     setSort(value);
-    setStorage("sortString", value);
+    setStorage(SORT_STRING, value);
     onSortOrder && onSortOrder({ sort: value, order });
   };
 
@@ -66,13 +69,11 @@ const CatalogAction = ({
 
   return (
     <View style={[globalStyles.rowBetween, style]}>
-      <Text
-        style={[styles.smallText, { width: "63%" }]}
-        numberOfLines={1}
-        ellipsizeMode="tail"
-      >
-        {title}
-      </Text>
+      <TouchableOpacity onPress={onLeftPress} style={{ width: "63%" }}>
+        <Text style={styles.smallText} numberOfLines={1} ellipsizeMode="tail">
+          {title}
+        </Text>
+      </TouchableOpacity>
       <View style={styles.action}>
         <Text style={styles.smallText}>{rightText}</Text>
         <TouchableOpacity style={globalStyles.row} onPress={onOrder}>

@@ -1,4 +1,5 @@
 export const IMAGE_DEFAULT_URL = "https://3650000.xyz/api/";
+export const VIDEO_DEFAULT_URL = "http://api.kxzjoker.cn/API/Beautyvideo.php";
 export const BASE_URL = "https://www.asmrgay.com";
 export const IMAGE_BASE_URL = "https://asmr.121231234.xyz";
 // 排序方式

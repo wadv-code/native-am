@@ -3,18 +3,31 @@ import { formatFileSize, formatPath, formatTimeAgo } from "./lib";
 import type { ActionOrder, ActionSort, ActionSortOrder } from "@/types";
 import dayjs from "dayjs";
 import { getStorage, setStorage } from "@/storage/long";
+import {
+  COLLECT_ITEMS,
+  ORDER_STRING,
+  SORT_STRING,
+} from "@/storage/storage-keys";
 
 /**
  * 格式化数据
  * @param items
  * @returns
  */
-export async function formatContent(items: GetItem[], parent?: string) {
+export async function formatContent(
+  items: GetItem[],
+  isRandomId: boolean,
+  parent?: string
+) {
   const collectItems = await getCollectItems();
   items.forEach((item) => {
     item.parent = item.parent || parent || "/";
     const path = formatPath(item.parent, item.name);
-    item.id = encodeURIComponent(path.replace(/\//g, ""));
+    if (isRandomId) {
+      item.id = Math.random().toString();
+    } else {
+      item.id = encodeURIComponent(path.replace(/\//g, ""));
+    }
     item.modifiedFormat = item.modified
       ? formatTimeAgo(item.modified)
       : undefined;
@@ -45,16 +58,16 @@ export const toggleCollect = async (item: GetItem) => {
 };
 
 export const getCollectItems = async () => {
-  return await getStorage<GetItem[]>("collectItems", []);
+  return await getStorage<GetItem[]>(COLLECT_ITEMS, []);
 };
 
 export const saveCollectItems = async (list: GetItem[]) => {
-  return setStorage("collectItems", list);
+  return setStorage(COLLECT_ITEMS, list);
 };
 
 export const getSortOrder = async (): Promise<ActionSortOrder> => {
-  const sort = await getStorage<ActionSort>("sortString", "descending");
-  const order = await getStorage<ActionOrder>("orderString", "time");
+  const sort = await getStorage<ActionSort>(SORT_STRING, "descending");
+  const order = await getStorage<ActionOrder>(ORDER_STRING, "time");
   return { sort, order };
 };
 

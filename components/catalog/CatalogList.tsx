@@ -22,6 +22,8 @@ import {
   type NativeSyntheticEvent,
   type ViewProps,
 } from "react-native";
+import { sleep } from "@/utils/lib";
+import { Toast } from "../theme";
 
 type CatalogListProps = ViewProps & {
   path?: string;
@@ -31,13 +33,14 @@ type CatalogListProps = ViewProps & {
   index?: number;
   showParent?: boolean;
   onRefresh?: () => void;
-  onChangeText?: (text: string) => void;
+  onRightText?: (text: string) => void;
   onLeftPress?: (item: GetItem) => void;
   onRightPress?: (item: GetItem) => void;
 };
 
 type CatalogListHandle = {
   onFetch: () => void;
+  scrollItem: () => void;
 };
 
 const default_per_page = 1000;
@@ -45,7 +48,7 @@ const default_per_page = 1000;
 const CatalogList = forwardRef<CatalogListHandle, CatalogListProps>(
   (props, ref) => {
     const { path, value, index, height = 50, data, showParent } = props;
-    const { onLeftPress, onRightPress, onChangeText, onRefresh } = props;
+    const { onLeftPress, onRightPress, onRightText, onRefresh } = props;
     const { theme } = useTheme();
     const virtualizedRef = useRef<VirtualizedList<GetItem>>(null);
     const currentPath = useRef<string>("");
@@ -54,6 +57,15 @@ const CatalogList = forwardRef<CatalogListHandle, CatalogListProps>(
     const [items, setItems] = useState<GetItem[]>([]);
     const [total, setTotal] = useState<number>(0);
     const [refreshId, setRefreshId] = useState("");
+    const [selectedItem, setSelectedItem] = useState<GetItem>({
+      name: "",
+      id: "",
+    });
+
+    const handleLeftPress = (item: GetItem) => {
+      setSelectedItem(item);
+      onLeftPress && onLeftPress(item);
+    };
 
     const getItem = (_data: GetItem, index: number) => {
       const item = items[index];
@@ -108,9 +120,16 @@ const CatalogList = forwardRef<CatalogListHandle, CatalogListProps>(
       });
     };
 
-    const onScrollToIndexFailed = () => {
-      console.log("onScrollToIndexFailed");
-    };
+    const scrollItem = useCallback(() => {
+      if (selectedItem.id) {
+        virtualizedRef.current?.scrollToItem({
+          item: selectedItem,
+          animated: true,
+        });
+      }
+    }, [selectedItem]);
+
+    const onScrollToIndexFailed = () => {};
 
     const onFetch = useCallback(
       async (refresh?: boolean) => {
@@ -122,26 +141,28 @@ const CatalogList = forwardRef<CatalogListHandle, CatalogListProps>(
             setRefreshing(true);
             const params = {
               page: 1,
-              password: "",
+              password: "asmrgay",
               path: path ?? "/",
               per_page: default_per_page,
               refresh: false,
             };
-            await new Promise((resolve) => setTimeout(resolve, 300));
+            await sleep(300);
             const { data } = await GetItems(params, refresh);
             const list = await getSortOrderItems(data.content);
             setItems(list);
             setTotal(data.total);
-            onChangeText && onChangeText(`${list.length}/${data.total}`);
+            onRightText && onRightText(`${list.length}/${data.total}`);
             currentPath.current = params.path;
-          } catch {
-            return Promise.reject("onFetch Request Error");
+          } catch (err) {
+            const message = String(err);
+            Toast.error(message);
+            return Promise.reject(message);
           } finally {
             setRefreshing(false);
           }
         }
       },
-      [data, onChangeText, path]
+      [data, onRightText, path]
     );
 
     const onPullRefresh = () => {
@@ -163,9 +184,12 @@ const CatalogList = forwardRef<CatalogListHandle, CatalogListProps>(
       if (data) onFetch();
     }, [data, onFetch]);
 
-    useImperativeHandle(ref, () => ({ onFetch }), [onFetch]);
+    useImperativeHandle(ref, () => ({ onFetch, scrollItem }), [
+      onFetch,
+      scrollItem,
+    ]);
 
-    if (refreshing)
+    if (refreshing) {
       return (
         <ActivityIndicator
           size={50}
@@ -173,6 +197,7 @@ const CatalogList = forwardRef<CatalogListHandle, CatalogListProps>(
           style={styles.loading}
         />
       );
+    }
 
     return (
       <View style={styles.container}>
@@ -185,7 +210,7 @@ const CatalogList = forwardRef<CatalogListHandle, CatalogListProps>(
               height={height}
               showParent={showParent}
               refreshId={refreshId}
-              onLeftPress={onLeftPress}
+              onLeftPress={handleLeftPress}
               onIconPress={onIconPress}
               onRightPress={onRightPress}
             />

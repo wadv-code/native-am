@@ -1,10 +1,14 @@
 import { ThemedView } from "../theme/ThemedView";
 import { IconSymbol } from "../ui";
 import { useDispatch, useSelector } from "react-redux";
-import type { RootState } from "@/store";
-import { setLoading } from "@/store/slices/audioSlice";
-import type { ModalPlayerType } from "./ModalPlayer";
+import { setPlaying } from "@/store/slices/audioSlice";
 import { Image, Text, useTheme } from "@rneui/themed";
+import { globalStyles } from "@/styles";
+import { Circle } from "react-native-progress";
+// import { player } from "@/utils/audio";
+import { useCallback } from "react";
+import type { RootState } from "@/store";
+import type { ModalPlayerType } from "./ModalPlayer";
 import {
   View,
   Platform,
@@ -13,10 +17,6 @@ import {
   ImageBackground,
   TouchableOpacity,
 } from "react-native";
-import { globalStyles } from "@/styles";
-import { Circle } from "react-native-progress";
-import { player } from "@/utils/audio";
-import { useCallback } from "react";
 
 // const sound =
 //   "http://nm.hzwima.com:8000/%E5%91%A8%E6%9D%B0%E4%BC%A6-%E7%A8%BB%E9%A6%99.mp3";
@@ -33,14 +33,8 @@ const AudioBar = ({ onPress }: AudioBarProps) => {
 
   const togglePlaying = useCallback(() => {
     if (loading) return;
-    if (playing) {
-      dispatch(setLoading(true));
-      player.pause().finally(() => dispatch(setLoading(false)));
-    } else {
-      dispatch(setLoading(true));
-      player.play(true).finally(() => dispatch(setLoading(false)));
-    }
-  }, [loading, playing, dispatch]);
+    dispatch(setPlaying(!playing));
+  }, [dispatch, loading, playing]);
 
   return (
     <View

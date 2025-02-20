@@ -5,7 +5,7 @@ import type { GetItem } from "@/api";
 import { GetItems } from "@/api/api";
 import { useRouter } from "expo-router";
 import { ThemedNavigation } from "../theme/ThemedNavigation";
-import { formatPath } from "@/utils/lib";
+import { formatPath, sleep } from "@/utils/lib";
 import { CatalogItem } from "../catalog/CatalogItem";
 import { Text } from "@rneui/themed";
 import {
@@ -28,7 +28,6 @@ const ListPlayer = ({ closeModal }: ListPlayerProps) => {
   const { audioInfo } = audio;
   const [total, setTotal] = useState<number>(0);
   const [items, setItems] = useState<GetItem[]>([]);
-  const [path, setPath] = useState<string>("/");
 
   const onFetch = useCallback(async () => {
     try {
@@ -36,7 +35,7 @@ const ListPlayer = ({ closeModal }: ListPlayerProps) => {
       const params = {
         page: 1,
         password: "asmrgay",
-        path,
+        path: audioInfo.parent ?? "/",
         per_page: 1000,
         refresh: false,
       };
@@ -48,38 +47,38 @@ const ListPlayer = ({ closeModal }: ListPlayerProps) => {
     } finally {
       setRefreshing(false);
     }
-  }, [path]);
+  }, [audioInfo.parent]);
 
   // 刷新
   const onRefresh = async () => {
     if (refreshing) return;
     setRefreshing(true);
     setItems([]);
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await sleep(300);
     onFetch();
   };
 
   const onLeftPress = async (item: GetItem) => {
     if (refreshing) return;
-    await setStorage(
-      "onCatalogChangePath",
-      formatPath(item.parent || "/", item.name)
-    );
-    closeModal();
-    router.replace("/catalog");
+    if (item.is_dir) {
+      await setStorage(
+        "onCatalogChangePath",
+        formatPath(item.parent || "/", item.name)
+      );
+      closeModal();
+      router.replace("/catalog");
+    }
   };
 
   useEffect(() => {
-    if (audioInfo.parent) {
-      setPath(audioInfo.parent);
-      onFetch();
-    }
+    if (audioInfo.parent) onFetch();
   }, [audioInfo.parent, onFetch]);
 
   return (
     <ThemedNavigation
       statusBar={true}
       isImage={true}
+      opacity={0.2}
       isModal={true}
       onLeft={closeModal}
       leftIcon="keyboard-arrow-down"
@@ -100,10 +99,10 @@ const ListPlayer = ({ closeModal }: ListPlayerProps) => {
         }
         contentContainerStyle={Platform.select({
           ios: {
-            paddingBottom: 80,
+            paddingBottom: 180,
           },
           default: {
-            paddingBottom: 10,
+            paddingBottom: 100,
           },
         })}
       />

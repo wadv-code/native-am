@@ -8,6 +8,20 @@ import { ThemedView } from "@/components/theme/ThemedView";
 import { globalStyles } from "@/styles";
 import { Text, useTheme } from "@rneui/themed";
 import { IMAGE_BASE_URL, IMAGE_DEFAULT_URL } from "@/utils";
+import { isNumber } from "@/utils/helper";
+import { setStorage } from "@/storage/long";
+import { getStorageAsync, type OptionType } from "@/utils/store";
+import { useRoute, type RouteProp } from "@react-navigation/native";
+import type { RootStackParamList } from "@/types";
+import { Toast } from "@/components/theme";
+import { getImageDefaultItem } from "@/components/mine/util";
+import { COVER_ITEMS, VIEWER_INDEX } from "@/storage/storage-keys";
+import {
+  formatPath,
+  isImageFile,
+  randomNum,
+  removeLastPath,
+} from "@/utils/lib";
 import {
   ActivityIndicator,
   Image,
@@ -17,18 +31,6 @@ import {
   useColorScheme,
   View,
 } from "react-native";
-import { isNumber } from "@/utils/helper";
-import { setStorage } from "@/storage/long";
-import { getStorageAsync, type OptionType } from "@/utils/store";
-import { useRoute, type RouteProp } from "@react-navigation/native";
-import type { RootStackParamList } from "@/types";
-import {
-  formatPath,
-  isImageFile,
-  randomNum,
-  removeLastPath,
-} from "@/utils/lib";
-import { Toast } from "@/components/theme";
 
 type VideoScreenRouteProp = RouteProp<RootStackParamList, "video">;
 
@@ -39,16 +41,18 @@ const ImageScreen = () => {
   const { theme } = useTheme();
   const route = useRoute<VideoScreenRouteProp>();
   const [index, setIndex] = useState(-1);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [imageLoading, setImageLoading] = useState(false);
   const [images, setImages] = useState<OptionType[]>([]);
   const [imageUrl, setImageUrl] = useState(IMAGE_DEFAULT_URL);
+  const [serverName, setServerName] = useState<string>("");
   const type = useRef<ImageScreenType>("image");
 
   const router = useRouter();
 
   const setImagesAsync = async (list: OptionType[]) => {
     setImages(list);
-    await setStorage("coverItems", list);
+    await setStorage(COVER_ITEMS, list);
   };
 
   const updateImage = (id: string, key: keyof OptionType, value: any) => {
@@ -68,7 +72,6 @@ const ImageScreen = () => {
 
   const prevPicture = useCallback(() => {
     if (index > 0) {
-      setLoading(true);
       setIndex(index - 1);
     } else {
       Toast.warn("到头了", "top");
@@ -78,11 +81,9 @@ const ImageScreen = () => {
   const nextPicture = useCallback(() => {
     if (type.current === "image") {
       if (index < images.length - 1) {
-        setLoading(true);
         setIndex(index + 1);
       }
     } else {
-      setLoading(true);
       setIndex(index + 1);
     }
   }, [index, images]);
@@ -145,7 +146,7 @@ const ImageScreen = () => {
   useEffect(() => {
     if (index > -1) {
       const cover = images[index];
-      if (type.current === "viewer") setStorage("viewerIndex", index);
+      if (type.current === "viewer") setStorage(VIEWER_INDEX, index);
       if (cover && cover.value) {
         setImageUrl(cover.value);
       } else if (type.current === "viewer") {
@@ -155,16 +156,16 @@ const ImageScreen = () => {
             const option = { key: Date.now().toString(), value: url };
             setImagesAsync([...images, option]);
           })
-          .catch(() => {
+          .finally(() => {
             setLoading(false);
           });
       } else if (cover && type.current === "image") {
         setLoading(true);
-        GetDetail({ path: cover.key, password: "" })
+        GetDetail({ path: cover.key, password: "asmrgay" })
           .then(({ data }) => {
-            if (!data) setLoading(false);
             const raw_url = data.raw_url ?? "";
             const sign = data.sign ?? "";
+            if (data.name) setServerName(data.name);
             if (raw_url.indexOf(IMAGE_BASE_URL) !== -1) {
               setImages([
                 ...images.map((v) => {
@@ -178,7 +179,7 @@ const ImageScreen = () => {
               updateImage(cover.key, "value", raw_url);
             }
           })
-          .catch(() => {
+          .finally(() => {
             setLoading(false);
           });
       }
@@ -191,6 +192,8 @@ const ImageScreen = () => {
         type.current = "image";
         onFetch(route.params.path);
       } else {
+        const server = await getImageDefaultItem();
+        if (server) setServerName(server.title);
         type.current = "viewer";
         const { coverItems, viewerIndex } = await getStorageAsync();
         setIndex(isNumber(viewerIndex) ? viewerIndex : 0);
@@ -208,13 +211,20 @@ const ImageScreen = () => {
   return (
     <ThemedView style={styles.viewContainer}>
       <View style={styles.headerContainer}>
-        <TouchableOpacity onPress={onBack}>
+        <TouchableOpacity onPress={onBack} style={{ width: 60 }}>
           <IconSymbol
             name="chevron-left"
             size={Platform.OS === "android" ? 30 : 22}
           />
         </TouchableOpacity>
-        <View style={[globalStyles.row, { gap: 10 }]}>
+        <Text
+          style={{ fontSize: 16, width: "65%" }}
+          ellipsizeMode="tail"
+          numberOfLines={1}
+        >
+          {serverName}
+        </Text>
+        <View style={[globalStyles.row, { gap: 10, width: 60 }]}>
           <TouchableOpacity onPress={handleDelete}>
             <IconSymbol name="delete-outline" />
           </TouchableOpacity>
@@ -227,10 +237,17 @@ const ImageScreen = () => {
         <Image
           src={imageUrl}
           style={styles.imageViewer}
-          onError={() => setLoading(false)}
-          onLoadEnd={() => setLoading(false)}
-          onLoadStart={() => setLoading(true)}
+          onError={() => setImageLoading(false)}
+          onLoadEnd={() => setImageLoading(false)}
+          onLoadStart={() => setImageLoading(true)}
         />
+        {imageLoading && (
+          <ActivityIndicator
+            size={40}
+            color={theme.colors.primary}
+            style={styles.loading}
+          />
+        )}
       </ReactNativeZoomableView>
       <View
         style={[
@@ -259,9 +276,11 @@ const ImageScreen = () => {
           {loading ? (
             <ActivityIndicator size={40} color={theme.colors.grey0} />
           ) : (
-            <Text style={styles.centerText}>
-              {index + 1}/{images.length}
-            </Text>
+            <TouchableOpacity onPress={handleRefresh}>
+              <Text style={styles.centerText}>
+                {index + 1}/{images.length}
+              </Text>
+            </TouchableOpacity>
           )}
         </View>
         <TouchableOpacity onPress={nextPicture}>
@@ -289,6 +308,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     position: "relative",
+  },
+  loading: {
+    position: "absolute",
+    left: "50%",
+    top: "50%",
+    transform: [{ translateX: "-50%" }, { translateY: "-50%" }],
+    zIndex: 1,
   },
   center: {
     width: 100,

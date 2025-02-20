@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Tabs } from "expo-router";
 import { Platform } from "react-native";
 import { useTheme } from "@rneui/themed";
@@ -8,18 +8,23 @@ import TabBarBackground from "@/components/ui/TabBarBackground";
 import { AudioBar } from "@/components/audio";
 import { useState } from "react";
 import { MusicPlayer } from "@/components/audio/MusicPlayer";
+import { useAppDispatch } from "@/hooks/useStore";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store";
 import {
   ModalPlayer,
   type ModalPlayerType,
 } from "@/components/audio/ModalPlayer";
+import { setIsHttpsURL } from "@/utils/request";
 
 export default function TabLayout() {
+  const dispatch = useAppDispatch();
   const { theme } = useTheme();
   const [visible, setVisible] = useState(false);
   const [modalType, setModalType] = useState<ModalPlayerType>("view");
+  const { isHttps } = useSelector((state: RootState) => state.app);
 
   const closeModal = () => {
-    console.log("closeModal");
     setVisible(false);
   };
 
@@ -27,6 +32,10 @@ export default function TabLayout() {
     setModalType(type);
     setVisible(true);
   };
+
+  useEffect(() => {
+    setIsHttpsURL(isHttps);
+  }, [dispatch, isHttps]);
   return (
     <>
       <Tabs

@@ -1,9 +1,10 @@
 import request from "@/utils/request";
-import { IMAGE_DEFAULT_URL } from "@/utils";
+import { IMAGE_DEFAULT_URL, VIDEO_DEFAULT_URL } from "@/utils";
 import { findAllUrls } from "@/utils/lib";
 import { formatContent } from "@/utils/common";
 import {
-  getImageServerDefaultItem,
+  getImageDefaultItem,
+  getVideoDefaultItem,
   type ServerItem,
 } from "@/components/mine/util";
 import type {
@@ -27,7 +28,7 @@ export async function GetItems(params: GetItemsParams, refresh?: boolean) {
     cache: true,
     refresh: refresh,
   }).then(async (res) => {
-    await formatContent(res.data.content, params.path);
+    await formatContent(res.data.content, false, params.path);
     return res;
   });
 }
@@ -56,7 +57,7 @@ export async function GetSearch(data: GetSearchParams) {
     method: "post",
     data,
   }).then(async (res) => {
-    await formatContent(res.data.content);
+    await formatContent(res.data.content, true);
     return res;
   });
 }
@@ -67,7 +68,7 @@ export async function GetSearch(data: GetSearchParams) {
  * @param params
  */
 export async function GetCover(item?: ServerItem): Promise<string> {
-  const row = item || (await getImageServerDefaultItem());
+  const row = item || (await getImageDefaultItem());
   const param: Recordable<string> = {};
   if (row) {
     row.params.forEach((v) => {
@@ -87,6 +88,28 @@ export async function GetCover(item?: ServerItem): Promise<string> {
     const uri = __DEV__ ? url : url.replace(/http:/g, "https:");
     return uri;
   });
+}
+
+/**
+ * 获取视频
+ * @constructor
+ * @param params
+ */
+export async function GetVideo<T = any>(item?: ServerItem) {
+  const row = item || (await getVideoDefaultItem());
+  const param: Recordable<string> = {};
+  if (row) {
+    row.params.forEach((v) => {
+      param[v.key] = v.value;
+    });
+  } else {
+    param.type = "json";
+  }
+  return request<T>({
+    url: row ? row.url : VIDEO_DEFAULT_URL,
+    method: "get",
+    params: param,
+  }) as Promise<T>;
 }
 
 export type MusicRes = {

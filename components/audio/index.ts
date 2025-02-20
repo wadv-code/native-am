@@ -1,7 +1,9 @@
 import type { GetItem } from "@/api";
-import { GetItems, GetMusic } from "@/api/api";
+import { GetDetail, GetItems, GetMusic } from "@/api/api";
 import { getSortOrderItems } from "@/utils/common";
-import { isAudioFile } from "@/utils/lib";
+import { formatPath, isAudioFile } from "@/utils/lib";
+import { getStorageAsync, handleRawUrlItems } from "@/utils/store";
+import type { AVPlaybackSource } from "expo-av";
 
 export * from "./AudioBar";
 
@@ -34,7 +36,6 @@ export const onSwitchAudio = async (
         order: "name",
       });
       const index = items.findIndex((f) => f.id === audioInfo.id);
-      console.log(items.map((v) => v.name));
       if (index !== -1) {
         const audio = audioItems[index + gate];
         return audio;
@@ -44,5 +45,40 @@ export const onSwitchAudio = async (
     } catch {
       return undefined;
     }
+  }
+};
+
+type GetAudioRawUrlProps = {
+  parent?: string;
+  name?: string;
+  raw_url?: string;
+};
+
+export const GetAudioSource = async ({
+  parent,
+  name,
+  raw_url,
+}: GetAudioRawUrlProps): Promise<AVPlaybackSource | undefined> => {
+  try {
+    if (raw_url) {
+      return { uri: raw_url };
+    }
+    const path = formatPath(parent ?? "/", name ?? "/");
+    const { rawUrlItems } = await getStorageAsync();
+    const raw = rawUrlItems.find((f) => f.key === path);
+    if (raw) {
+      return { uri: raw.value };
+    } else {
+      const { data } = await GetDetail({
+        password: "asmrgay",
+        path,
+      });
+      if (data && data.raw_url) {
+        handleRawUrlItems({ key: path, value: data.raw_url });
+        return { uri: data.raw_url };
+      } else return undefined;
+    }
+  } catch {
+    return Promise.resolve(undefined);
   }
 };

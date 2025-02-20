@@ -3,22 +3,20 @@ import { IconSymbol } from "@/components/ui";
 import Slider from "@react-native-community/slider";
 import { useSelector } from "react-redux";
 import { useAppDispatch } from "@/hooks/useStore";
-import { formatMilliseconds } from "@/utils/lib";
+import { formatMilliseconds, sleep } from "@/utils/lib";
 import { GetCover } from "@/api/api";
 import { ThemedNavigation } from "../theme/ThemedNavigation";
 import { Image, Text, makeStyles, useTheme } from "@rneui/themed";
 import { globalStyles } from "@/styles";
-import { player } from "@/utils/audio";
 import { handleCoverItems } from "@/utils/store";
 import type { MaterialIconsName } from "@/types";
 import { onSwitchAudio } from ".";
 import type { RootState } from "@/store";
-
 import {
   setAudioCover,
   setAudioInfo,
-  setLoading,
   setPlaying,
+  setSeek,
 } from "@/store/slices/audioSlice";
 import {
   ActivityIndicator,
@@ -27,6 +25,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { setStorage } from "@/storage/long";
+import { router } from "expo-router";
+import { CATALOG_CHANGE_PATH } from "@/storage/storage-keys";
 const { width } = Dimensions.get("window");
 
 type ViewPlayerProps = {
@@ -53,13 +54,14 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
     durationFormat,
   } = audioInfo;
   const [refreshing, setRefreshing] = useState(false);
+  const [isMotion, setIsMotion] = useState(true);
   const [isMusic, setIsMusic] = useState(!audioInfo.parent);
   // const [selectIndex, setSelectedIndex] = useState(0);
   const [tools, setTools] = useState<ToolsOption[]>([
     { value: 1, icon: "message" },
     { value: 2, icon: "file-download" },
     { value: 3, icon: "star-outline" },
-    { value: 4, icon: "more-time" },
+    { value: 4, icon: "motion-photos-on", selectedIcon: "motion-photos-auto" },
     { value: 5, icon: "music-off", selectedIcon: "music-note" },
   ]);
   const [value, setValue] = useState(0);
@@ -83,10 +85,7 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
     startRef.current = false;
     setDragCurrent(undefined);
     const seek = Math.round(value * duration);
-    dispatch(setLoading(true));
-    player.seek(seek).finally(() => {
-      dispatch(setLoading(false));
-    });
+    dispatch(setSeek(seek));
   };
 
   const onValueChange = (value: number) => {
@@ -100,6 +99,13 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
     startRef.current = true;
   };
 
+  const openPage = async () => {
+    await setStorage(CATALOG_CHANGE_PATH, audioInfo.parent || "/");
+    closeModal();
+    await sleep(300);
+    router.replace("/catalog");
+  };
+
   const onCoverRefresh = async () => {
     if (refreshing) return;
     try {
@@ -109,19 +115,16 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
         handleCoverItems({ key: audioInfo.id, value: url });
         dispatch(setAudioCover(url));
       }
-    } catch {
-      console.log("图片加载失败");
     } finally {
       setRefreshing(false);
     }
   };
 
   const nextPress = async (gate: 1 | -1) => {
-    if (loading || refreshing) return;
+    if (refreshing) return;
     setRefreshing(true);
     const audio = await onSwitchAudio(audioInfo, gate, isMusic);
     if (audio) {
-      dispatch(setPlaying(true));
       dispatch(setAudioInfo(audio));
     }
     setRefreshing(false);
@@ -129,24 +132,21 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
 
   const togglePlaying = useCallback(() => {
     if (loading) return;
-    if (playing) {
-      dispatch(setLoading(true));
-      player.pause().finally(() => dispatch(setLoading(false)));
-    } else {
-      dispatch(setLoading(true));
-      player.play(true).finally(() => dispatch(setLoading(false)));
-    }
+    dispatch(setPlaying(!playing));
   }, [loading, playing, dispatch]);
 
-  const onPressTollbar = useCallback(
+  const onPressToolbar = useCallback(
     (index: number) => {
       const item = tools[index];
       if (item && item.value === 5) {
         setIsMusic(!isMusic);
         updateTool(item.value, "selected", !isMusic);
+      } else if (item && item.value === 4) {
+        setIsMotion(!isMotion);
+        updateTool(item.value, "selected", !isMotion);
       }
     },
-    [isMusic, tools]
+    [isMotion, isMusic, tools]
   );
 
   useEffect(() => {
@@ -182,7 +182,9 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
       <View style={styles.infoContainer}>
         <Text style={styles.infoTitle}>{audioInfo.name}</Text>
         <Text>{audioInfo.auther}</Text>
-        <Text style={{ color: theme.colors.grey0 }}>{audioInfo.parent}</Text>
+        <TouchableOpacity onPress={openPage}>
+          <Text style={{ color: theme.colors.grey0 }}>{audioInfo.parent}</Text>
+        </TouchableOpacity>
         <View
           style={[
             globalStyles.rowAround,
@@ -195,7 +197,7 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
           <Text style={{ color: theme.colors.grey0 }}>
             {audioInfo.modifiedFormat}
           </Text>
-          <TouchableOpacity onPress={() => onPressTollbar(4)}>
+          <TouchableOpacity onPress={() => onPressToolbar(4)}>
             <Text>{isMusic ? "音乐模式" : "资源模式"}</Text>
           </TouchableOpacity>
         </View>
@@ -207,9 +209,10 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
           minimumValue={0}
           maximumValue={1}
           minimumTrackTintColor={theme.colors.primary}
+          maximumTrackTintColor={theme.colors.grey0}
           thumbTintColor={theme.colors.primary}
           step={0.01}
-          style={{ width: "90%" }}
+          style={{ width: "95%" }}
         />
         <View style={styles.time}>
           <Text style={styles.timeText}>{dragCurrent || currentFormat}</Text>
@@ -220,7 +223,7 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
             return (
               <TouchableOpacity
                 key={v.value}
-                onPress={() => onPressTollbar(index)}
+                onPress={() => onPressToolbar(index)}
               >
                 <IconSymbol
                   color={v.disabled ? theme.colors.grey3 : theme.colors.grey0}

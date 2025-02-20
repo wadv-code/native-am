@@ -8,6 +8,7 @@ import { router } from "expo-router";
 type CatalogCrumbItem = {
   name: string;
   path: string;
+  selectedName?: string;
   text?: string;
 };
 

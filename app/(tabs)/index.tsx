@@ -1,20 +1,18 @@
 import { HeaderBar } from "@/components/sys";
-import { Toast } from "@/components/theme";
 import { ThemedView } from "@/components/theme/ThemedView";
-import { Button, Text } from "@rneui/themed";
+import { Text } from "@rneui/themed";
 import { StyleSheet } from "react-native";
+// import MineGrid from "@/components/mine/MineGrid";
+// import { gridItems } from "@/components/mine/util";
 
 const HomeScreen = () => {
-  const openToast = () => {
-    Toast.info("测试数据", "top");
-  };
   return (
     <ThemedView style={styles.container}>
       <HeaderBar />
       <Text h1={true} style={{ textAlign: "center" }}>
-        我是首页
+        我的首页
       </Text>
-      <Button onPress={openToast}>到头了</Button>
+      {/* <MineGrid items={gridItems} title="我的功能" /> */}
     </ThemedView>
   );
 };

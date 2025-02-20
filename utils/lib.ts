@@ -299,9 +299,7 @@ export function throttle<T extends (...args: any[]) => void>(
       func.apply(context, args);
       lastRan = Date.now();
     } else {
-      if (lastFunc) {
-        clearTimeout(lastFunc);
-      }
+      if (lastFunc) clearTimeout(lastFunc);
       lastFunc = setTimeout(function () {
         if (Date.now() - lastRan >= limit) {
           func.apply(context, args);
@@ -311,3 +309,12 @@ export function throttle<T extends (...args: any[]) => void>(
     }
   };
 }
+
+/**
+ * wait
+ * @param wait
+ * @returns
+ */
+export const sleep = async (wait: number = 2000) => {
+  return new Promise((resolve) => setTimeout(resolve, wait));
+};

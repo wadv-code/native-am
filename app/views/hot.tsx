@@ -5,6 +5,7 @@ import { getStorage, setStorage } from "@/storage/long";
 import { ThemedNavigation } from "@/components/theme/ThemedNavigation";
 import { HotTabs } from "@/components/hot/HotTabs";
 import { HotTabView } from "@/components/hot/HotTabView";
+import { HOT_SCREEN } from "@/storage/storage-keys";
 
 const HotScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
@@ -16,7 +17,7 @@ const HotScreen = () => {
   const onFetch = async (refresh?: boolean) => {
     try {
       setRefreshing(true);
-      const HotScreenName = await getStorage("HotScreen", "");
+      const HotScreenName = await getStorage(HOT_SCREEN, "");
       const { data } = await GetHotList(refresh);
       const idx = data.findIndex((f) => f.name === HotScreenName);
       if (idx !== -1) setIndex(idx);
@@ -34,9 +35,8 @@ const HotScreen = () => {
 
   useEffect(() => {
     const item = items[index];
-    if (item) setStorage("HotScreen", item.name);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [index]);
+    if (item) setStorage(HOT_SCREEN, item.name);
+  }, [index, items]);
 
   useEffect(() => {
     onFetch();

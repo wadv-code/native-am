@@ -1,12 +1,5 @@
 import React, { memo } from "react";
 import type { GetItem } from "@/api";
-import {
-  formatPath,
-  getIconSymbol,
-  isAudioFile,
-  isImageFile,
-  isVideoFile,
-} from "@/utils/lib";
 import { IconSymbol } from "../ui";
 import { makeStyles, Text, useTheme } from "@rneui/themed";
 import { useSelector } from "react-redux";
@@ -15,6 +8,13 @@ import type { RootState } from "@/store";
 import { useAppDispatch } from "@/hooks/useStore";
 import { setAudioInfo } from "@/store/slices/audioSlice";
 import { router } from "expo-router";
+import {
+  formatPath,
+  getIconSymbol,
+  isAudioFile,
+  isImageFile,
+  isVideoFile,
+} from "@/utils/lib";
 
 type ItemProps = {
   item: GetItem;
@@ -57,11 +57,10 @@ const CatalogItem = memo(
             path: formatPath(item.parent ?? "/", item.name),
           },
         });
-      } else if (item.is_dir) {
-        onLeftPress && onLeftPress(item);
       } else {
         Alert.prompt("还未处理的文件格式。");
       }
+      onLeftPress && onLeftPress(item);
     };
 
     return (

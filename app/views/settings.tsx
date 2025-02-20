@@ -15,10 +15,11 @@ import {
   View,
 } from "react-native";
 import { removeStorage, setStorage } from "@/storage/long";
-import { setIsImageBackground } from "@/store/slices/appSlice";
+import { setIsHttps, setIsImageBackground } from "@/store/slices/appSlice";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
 import { useAppDispatch } from "@/hooks/useStore";
+import { COLOR_SCHEME, THEME_PRIMARY } from "@/storage/storage-keys";
 
 const SettingsScreen = () => {
   const router = useRouter();
@@ -26,7 +27,9 @@ const SettingsScreen = () => {
   const dispatch = useAppDispatch();
   const { theme, updateTheme } = useTheme();
   const [colors, setColors] = useState<string[]>([]);
-  const { isImageBackground } = useSelector((state: RootState) => state.app);
+  const { isHttps, isImageBackground } = useSelector(
+    (state: RootState) => state.app
+  );
   const { setColorScheme } = Appearance;
 
   const setMode = () => {
@@ -35,11 +38,15 @@ const SettingsScreen = () => {
     updateTheme({
       mode: colorScheme,
     });
-    setStorage("colorScheme", colorScheme);
+    setStorage(COLOR_SCHEME, colorScheme);
   };
 
   const onIsImage = () => {
     dispatch(setIsImageBackground(!isImageBackground));
+  };
+
+  const onIsHttps = () => {
+    dispatch(setIsHttps(!isHttps));
   };
 
   const openAbout = () => {
@@ -106,7 +113,7 @@ const SettingsScreen = () => {
           primary: color,
         },
       });
-      setStorage("themePrimary", color);
+      setStorage(THEME_PRIMARY, color);
     } else {
       updateTheme({
         darkColors: {
@@ -116,7 +123,7 @@ const SettingsScreen = () => {
           primary: Colors.light.primary,
         },
       });
-      removeStorage("themePrimary");
+      removeStorage(THEME_PRIMARY);
     }
   };
 
@@ -133,6 +140,13 @@ const SettingsScreen = () => {
           </Text>
         </View>
         <Switch onValueChange={setMode} value={theme.mode === "dark"} />
+      </View>
+      <View style={styles.cellStyle}>
+        <View style={[globalStyles.row, { gap: 10 }]}>
+          <IconSymbol name="wifi-tethering" />
+          <Text style={styles.cellTitle}>启用HTTPS</Text>
+        </View>
+        <Switch onValueChange={onIsHttps} value={isHttps} />
       </View>
       <View style={styles.cellStyle}>
         <View style={[globalStyles.row, { gap: 10 }]}>

@@ -13,10 +13,14 @@ interface HistoryItemType extends GetItemsParams {
 
 export type HistoryItem = HistoryItemType;
 
+export type ServerType = "image" | "video";
+
 export type RootStackParamList = {
   search: { path: string };
   video: { path: string };
   viewer: { path: string };
+  server: { type: ServerType };
+  "server-edit": { id?: string; type: ServerType };
   "web-view": { url: string; title: string };
 };
 

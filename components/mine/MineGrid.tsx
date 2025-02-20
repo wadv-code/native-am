@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { IconSymbol } from "../ui";
 import { ThemedView, type ThemedViewProps } from "../theme/ThemedView";
-import { useRouter, type Href } from "expo-router";
+import { useRouter } from "expo-router";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Text, useTheme } from "@rneui/themed";
 import ThemedModal from "../theme/ThemedModal";
@@ -14,6 +14,7 @@ import {
   View,
 } from "react-native";
 import { clearStorage, removeStorage, setStorage } from "@/storage/long";
+import { COLOR_SCHEME } from "@/storage/storage-keys";
 
 export type MineGridProps = ThemedViewProps & {
   items: GridItem[];
@@ -29,8 +30,8 @@ const MineGrid = ({ style, items, title }: MineGridProps) => {
 
   const { setColorScheme } = Appearance;
 
-  const openPage = (href: Href) => {
-    router.navigate(href);
+  const openPage = (item: GridItem) => {
+    if (item.href) router.push(item.href);
   };
 
   const clearStorageAll = (key: "all" | "catalogRes") => {
@@ -68,7 +69,7 @@ const MineGrid = ({ style, items, title }: MineGridProps) => {
 
   const handleItem = (item: GridItem) => {
     if (item.href) {
-      openPage(item.href);
+      openPage(item);
     } else if (item.type === "clear") {
       clearStorageAll("all");
     } else if (item.type === "catalogRes") {
@@ -89,7 +90,7 @@ const MineGrid = ({ style, items, title }: MineGridProps) => {
     updateTheme({
       mode: colorScheme,
     });
-    setStorage("colorScheme", colorScheme);
+    setStorage(COLOR_SCHEME, colorScheme);
   };
 
   return (
@@ -124,7 +125,7 @@ const MineGrid = ({ style, items, title }: MineGridProps) => {
 
 const styles = StyleSheet.create({
   grid: {
-    flex: 1,
+    // flex: 1,
     marginHorizontal: "2%",
     marginTop: 10,
     padding: 10,

@@ -1,4 +1,5 @@
 import { getStorage } from "@/storage/long";
+import { VIDEO_ITEMS, IMAGE_ITEMS } from "@/storage/storage-keys";
 import type { MaterialIconsName } from "@/types";
 import { IMAGE_DEFAULT_URL } from "@/utils";
 import type { Href } from "expo-router";
@@ -19,8 +20,20 @@ export const gridItems: GridItem[] = [
   {
     title: "图片服务器",
     icon: "developer-board",
-    href: "/views/image-server/image-server",
+    href: {
+      pathname: "/views/server/server",
+      params: { type: "image" },
+    },
   },
+  {
+    title: "视频服务器",
+    icon: "video-camera-back",
+    href: {
+      pathname: "/views/server/server",
+      params: { type: "video" },
+    },
+  },
+  { title: "刷视频", icon: "video-collection", href: "/views/video" },
   { title: "热搜聚合", icon: "whatshot", href: "/views/hot" },
   { title: "测试弹窗", icon: "table-view", type: "modal" },
 ];
@@ -38,27 +51,37 @@ export type ServerItem = {
   isDefault?: boolean;
 };
 
-export const getServerItems = (): ServerItem[] => {
+export const getImageDefault = (): ServerItem[] => {
   return [
     {
       id: "1",
       url: IMAGE_DEFAULT_URL,
-      title: "3650000",
+      title: "3650000 mode 6",
       params: [
         { key: "type", value: "json" },
-        { key: "mode", value: "2,8" },
+        { key: "mode", value: "6" },
       ],
       isDefault: true,
     },
     {
       id: "2",
+      url: IMAGE_DEFAULT_URL,
+      title: "3650000 mode 2,8",
+      params: [
+        { key: "type", value: "json" },
+        { key: "mode", value: "2,8" },
+      ],
+      isDefault: false,
+    },
+    {
+      id: "3",
       url: "https://t.alcy.cc/ycy/",
       title: "alcy",
       params: [{ key: "json", value: "" }],
       isDefault: false,
     },
     {
-      id: "3",
+      id: "4",
       url: "https://moe.jitsu.top/img/",
       title: "alcy",
       params: [
@@ -68,14 +91,14 @@ export const getServerItems = (): ServerItem[] => {
       isDefault: false,
     },
     {
-      id: "4",
+      id: "5",
       url: "https://api.vvhan.com/api/wallpaper/pcGirl/",
       title: "vvhan电脑",
       params: [{ key: "type", value: "json" }],
       isDefault: false,
     },
     {
-      id: "5",
+      id: "6",
       url: "https://api.vvhan.com/api/wallpaper/mobileGirl/",
       title: "vvhan手机",
       params: [{ key: "type", value: "json" }],
@@ -84,18 +107,41 @@ export const getServerItems = (): ServerItem[] => {
   ];
 };
 
-export type GetImageServerItemsFn = () => Promise<ServerItem[]>;
-export type getImageServerDefaultItemFn = (
+export const getVideoDefault = (): ServerItem[] => {
+  return [
+    {
+      id: "1",
+      url: "https://api.kxzjoker.cn/API/Beautyvideo.php",
+      title: "随机美女视频",
+      params: [{ key: "type", value: "json" }],
+      isDefault: true,
+    },
+  ];
+};
+
+export type GetServerItemsFn = () => Promise<ServerItem[]>;
+export type getServerDefaultItemFn = (
   id?: string
 ) => Promise<ServerItem | undefined>;
 
-export const getImageServerItems: GetImageServerItemsFn = async () => {
-  return await getStorage<ServerItem[]>("serverItems", getServerItems());
+export const getImageItems: GetServerItemsFn = async () => {
+  return await getStorage<ServerItem[]>(IMAGE_ITEMS, getImageDefault());
 };
 
-export const getImageServerDefaultItem: getImageServerDefaultItemFn = async (
+export const getImageDefaultItem: getServerDefaultItemFn = async (
   id?: string
 ) => {
-  const list = await getImageServerItems();
+  const list = await getImageItems();
+  return list.find((f) => (id ? f.id === id : f.isDefault));
+};
+
+export const getVideoItems: GetServerItemsFn = async () => {
+  return await getStorage<ServerItem[]>(VIDEO_ITEMS, getVideoDefault());
+};
+
+export const getVideoDefaultItem: getServerDefaultItemFn = async (
+  id?: string
+) => {
+  const list = await getVideoItems();
   return list.find((f) => (id ? f.id === id : f.isDefault));
 };

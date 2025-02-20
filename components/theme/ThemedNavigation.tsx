@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
 import { ThemedView, type ThemedViewProps } from "./ThemedView";
 import type { MaterialIconsName } from "@/types";
-import { randomNum } from "@/utils/lib";
+import { randomNum, sleep } from "@/utils/lib";
 import { Text, useTheme } from "@rneui/themed";
 import { getStorageAsync } from "@/utils/store";
 import {
@@ -26,6 +26,7 @@ import {
   Animated,
 } from "react-native";
 import { setStorage } from "@/storage/long";
+import { VIEWER_INDEX } from "@/storage/storage-keys";
 
 const { width } = Dimensions.get("window");
 
@@ -109,9 +110,9 @@ const ThemedNavigation = (props: ThemedNavigationProps) => {
   const toViewer = async (index: number) => {
     if (isModal) {
       onCanBack();
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await sleep(300);
     }
-    setStorage("viewerIndex", index).then(() => {
+    setStorage(VIEWER_INDEX, index).then(() => {
       router.push("/views/viewer");
     });
   };

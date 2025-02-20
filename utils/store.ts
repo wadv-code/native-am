@@ -1,4 +1,9 @@
 import { getStorage, setStorage } from "@/storage/long";
+import {
+  COVER_ITEMS,
+  RAW_URL_ITEMS,
+  VIEWER_INDEX,
+} from "@/storage/storage-keys";
 
 export type OptionType = {
   key: string;
@@ -12,11 +17,11 @@ export type GetStorageAsync = {
 };
 
 export const getStorageAsync = async (): Promise<GetStorageAsync> => {
-  const viewerIndex = await getStorage<number>("viewerIndex", 0);
+  const viewerIndex = await getStorage<number>(VIEWER_INDEX, 0);
   // 源集
-  const rawUrlItems = await getStorage<OptionType[]>("rawUrlItems", []);
+  const rawUrlItems = await getStorage<OptionType[]>(RAW_URL_ITEMS, []);
   // 封面集
-  const coverItems = await getStorage<OptionType[]>("coverItems", []);
+  const coverItems = await getStorage<OptionType[]>(COVER_ITEMS, []);
 
   return {
     coverItems,
@@ -30,10 +35,10 @@ export const handleRawUrlItems = async ({ value, key }: OptionType) => {
   const rawUrl = rawUrlItems.find((f) => f.key === key);
   if (rawUrl) {
     rawUrl.value = value;
-    await setStorage("rawUrlItems", [...rawUrlItems]);
+    await setStorage(RAW_URL_ITEMS, [...rawUrlItems]);
   } else {
     const list = [...rawUrlItems, { value, key }];
-    await setStorage("rawUrlItems", list);
+    await setStorage(RAW_URL_ITEMS, list);
   }
 };
 
@@ -46,11 +51,11 @@ export const handleCoverItems = async ({
   if (cover) {
     cover.value = value;
     const list = [...coverItems];
-    setStorage("coverItems", list);
+    setStorage(COVER_ITEMS, list);
     return list;
   } else {
     const list = [...coverItems, { value, key }];
-    setStorage("coverItems", list);
+    setStorage(COVER_ITEMS, list);
     return list;
   }
 };

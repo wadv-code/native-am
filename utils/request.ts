@@ -2,6 +2,8 @@ import axios from "axios";
 import { getStorage, setStorage } from "@/storage/long";
 import type { AxiosInstance, AxiosRequestConfig } from "axios";
 import { BASE_URL } from ".";
+import { CATALOG_RES } from "@/storage/storage-keys";
+import { Platform } from "react-native";
 
 /**
  * 生成key
@@ -53,7 +55,7 @@ const cacheAdapter = async (config: AxiosRequestConfig) => {
   const cacheAge = config.cache;
   if (cacheAge) {
     const cacheKey = generateCacheKey(config);
-    const cache = await getStorage<Recordable<any>>("catalogRes", {});
+    const cache = await getStorage<Recordable<any>>(CATALOG_RES, {});
     const cacheRes = cache[cacheKey];
     if (cacheRes && !config.refresh) {
       return Promise.resolve(cacheRes);
@@ -63,7 +65,7 @@ const cacheAdapter = async (config: AxiosRequestConfig) => {
       if (res.data && res.data.data) {
         cache[cacheKey] = res;
         // 保存数据
-        await setStorage("catalogRes", cache);
+        await setStorage(CATALOG_RES, cache);
       }
       return res;
     }
@@ -80,6 +82,20 @@ const request: AxiosInstance = axios.create({
   baseURL: BASE_URL,
   timeout: 50000,
 });
+
+// 在开发环境下忽略SSL错误
+if (Platform.OS === "android") {
+  request.interceptors.request.use((config) => {
+    // 在安卓开发环境下，设置忽略SSL验证
+    config.httpsAgent = {
+      rejectUnauthorized: false,
+    };
+    config.httpAgent = {
+      rejectUnauthorized: false,
+    };
+    return config;
+  });
+}
 
 // 添加请求拦截器
 request.interceptors.request.use(
@@ -134,6 +150,12 @@ request.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+export const setIsHttpsURL = (isHttps?: boolean) => {
+  request.defaults.baseURL = isHttps
+    ? BASE_URL
+    : BASE_URL.replace("https", "http");
+};
 
 // 导出 axios 实例
 export default request;

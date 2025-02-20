@@ -1,5 +1,5 @@
 import { BackHandler, StyleSheet } from "react-native";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { TabView } from "@rneui/themed";
 import { ThemedView } from "@/components/theme/ThemedView";
 import { HeaderBar } from "@/components/sys";
@@ -13,19 +13,12 @@ import {
   CatalogList,
   type CatalogListHandle,
 } from "@/components/catalog/CatalogList";
-
-// const defaultPaths = () => [
-//   { name: "", path: "/" },
-//   // { name: "asmr", path: "/asmr" },
-//   // { name: "中文音声", path: "/asmr/中文音声" },
-//   // { name: "圈圈", path: "/asmr/中文音声/圈圈" },
-// ];
+import { CATALOG_CHANGE_PATH, CATALOG_PATH } from "@/storage/storage-keys";
 
 const CatalogScreen = () => {
   const isFocused = useIsFocused();
   const catalogListRef = useRef<CatalogListHandle | null>(null);
   const isFocusedRef = useRef<boolean>(false);
-  // const [rightText, setRightText] = useState("");
   const itemsRef = useRef<CatalogCrumbItem[]>([]);
   const [items, setItems] = useState<CatalogCrumbItem[]>([]);
   const [value, setValue] = useState<number>(items.length - 1);
@@ -34,15 +27,23 @@ const CatalogScreen = () => {
     setValue(index);
   };
 
-  const onLeftPress = (item: GetItem) => {
-    const option = {
-      name: item.name,
-      path: formatPath(item.parent || "/", item.name),
-    };
-    const list = [...itemsRef.current.slice(0, value + 1), option];
-    setItems(list);
-    setValue(list.length - 1);
-  };
+  const onLeftPress = useCallback(
+    (item: GetItem) => {
+      updateItem(item.parent ?? "/", "selectedName", item.name);
+      if (item.is_dir) {
+        setTimeout(() => {
+          const option = {
+            name: item.name,
+            path: formatPath(item.parent || "/", item.name),
+          };
+          const list = [...itemsRef.current.slice(0, value + 1), option];
+          setItems(list);
+          setValue(list.length - 1);
+        }, 100);
+      }
+    },
+    [value]
+  );
 
   const onChangeView = (index: number, list?: CatalogCrumbItem[]) => {
     const result = [...(list || items).slice(0, index + 1)];
@@ -73,6 +74,10 @@ const CatalogScreen = () => {
     updateItem(item.path, "text", text);
   };
 
+  const onActionPress = () => {
+    catalogListRef.current?.scrollItem();
+  };
+
   const formatPathToItems = (path: string) => {
     const spPaths = path.split("/").filter((f: string) => f);
     const list: CatalogCrumbItem[] = spPaths.map((v, index) => {
@@ -90,7 +95,7 @@ const CatalogScreen = () => {
     setValue(items.length - 1);
     if (items.length) {
       const item = items[items.length - 1];
-      setStorage("catalogPath", item ? item.path : "/");
+      setStorage(CATALOG_PATH, item ? item.path : "/");
     }
   }, [items]);
 
@@ -98,12 +103,12 @@ const CatalogScreen = () => {
     isFocusedRef.current = isFocused;
     if (isFocused) {
       (async () => {
-        const path = await getStorage<string>("onCatalogChangePath", "");
+        const path = await getStorage<string>(CATALOG_CHANGE_PATH, "");
         if (path) {
           setItems(formatPathToItems(path));
-          await removeStorage("onCatalogChangePath");
+          await removeStorage(CATALOG_CHANGE_PATH);
         } else if (!itemsRef.current.length) {
-          const path = await getStorage("catalogPath", "/");
+          const path = await getStorage(CATALOG_PATH, "/");
           setItems(formatPathToItems(path));
         }
       })();
@@ -139,6 +144,7 @@ const CatalogScreen = () => {
         item={items[value]}
         onChangeView={onChangeView}
         onSortOrder={onSortOrder}
+        onLeftPress={onActionPress}
       />
       <TabView
         value={value}
@@ -157,7 +163,7 @@ const CatalogScreen = () => {
                 index={index}
                 value={value}
                 path={v.path}
-                onChangeText={setRightText}
+                onRightText={setRightText}
                 onLeftPress={onLeftPress}
               />
             </TabView.Item>

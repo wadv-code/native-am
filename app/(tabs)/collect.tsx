@@ -11,6 +11,7 @@ import { useIsFocused } from "@react-navigation/native";
 import { setStorage } from "@/storage/long";
 import { formatPath } from "@/utils/lib";
 import { router } from "expo-router";
+import { CATALOG_CHANGE_PATH } from "@/storage/storage-keys";
 
 const CollectScreen = () => {
   const [items, setItems] = useState<GetItem[]>([]);
@@ -29,7 +30,7 @@ const CollectScreen = () => {
 
   const onLeftPress = async (item: GetItem) => {
     await setStorage(
-      "onCatalogChangePath",
+      CATALOG_CHANGE_PATH,
       formatPath(item.parent || "/", item.name)
     );
     router.replace("/catalog");
@@ -47,7 +48,12 @@ const CollectScreen = () => {
         style={styles.action}
         onSortOrder={onSortOrder}
       />
-      <CatalogList data={items} onRefresh={onFetch} onLeftPress={onLeftPress} />
+      <CatalogList
+        showParent={true}
+        data={items}
+        onRefresh={onFetch}
+        onLeftPress={onLeftPress}
+      />
     </ThemedView>
   );
 };

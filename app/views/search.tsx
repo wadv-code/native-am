@@ -5,12 +5,13 @@ import { CatalogList } from "@/components/catalog/CatalogList";
 import { HeaderSearchBar } from "@/components/sys/HeaderSearchBar";
 import { ThemedView } from "@/components/theme/ThemedView";
 import { setStorage } from "@/storage/long";
+import { CATALOG_CHANGE_PATH } from "@/storage/storage-keys";
 import type { RootStackParamList } from "@/types";
-import { formatPath } from "@/utils/lib";
+import { formatPath, sleep } from "@/utils/lib";
 import { useRoute, type RouteProp } from "@react-navigation/native";
 import { Text, useTheme } from "@rneui/themed";
 import { router } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet } from "react-native";
 
 const default_per_page = 1000;
@@ -19,41 +20,42 @@ type SearchScreenRouteProp = RouteProp<RootStackParamList, "search">;
 const SearchScreen = () => {
   const { theme } = useTheme();
   const route = useRoute<SearchScreenRouteProp>();
-  const isInitialRender = useRef<boolean>(false);
   const [total, setTotal] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
   const [items, setItems] = useState<GetItem[]>([]);
   const [params, setParams] = useState<GetSearchParams>({
     keywords: "",
     page: 1,
-    parent: "/asmr",
+    parent: route.params.path ?? "/asmr",
     per_page: default_per_page,
     refresh: false,
   });
 
-  const onFetch = async () => {
+  const updateParam = useCallback(
+    (key: keyof GetSearchParams, value: any) => {
+      setParams({ ...params, [key]: value });
+    },
+    [params]
+  );
+
+  const onFetch = useCallback(async () => {
     if (!params.keywords) return Promise.resolve(true);
     try {
       setLoading(true);
       const { data } = await GetSearch(params);
       setTotal(data.total);
-      setItems([...items, ...data.content]);
+      setItems(data.content);
     } finally {
       setLoading(false);
     }
-  };
+  }, [params]);
 
-  // 刷新
   const onRefresh = async (keywords?: string) => {
     if (loading) return;
     setLoading(true);
     setItems([]);
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    setParams({
-      ...params,
-      page: 1,
-      keywords: keywords ?? params.keywords ?? "",
-    });
+    await sleep(300);
+    updateParam("keywords", keywords ?? params.keywords ?? "");
   };
 
   const onCanBack = () => {
@@ -68,7 +70,7 @@ const SearchScreen = () => {
   const onLeftPress = async (item: GetItem) => {
     if (item.is_dir) {
       setStorage(
-        "onCatalogChangePath",
+        CATALOG_CHANGE_PATH,
         formatPath(item.parent || "/", item.name)
       );
       onCanBack();
@@ -76,21 +78,13 @@ const SearchScreen = () => {
   };
 
   useEffect(() => {
-    if (!isInitialRender.current) {
-      isInitialRender.current = true;
-      if (route && route.params) {
-        params.parent = route.params.path;
-        setParams({ ...params });
-      }
-      return;
-    }
     if (params.keywords) onFetch();
     else setLoading(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params]);
+  }, [onFetch, params.keywords, route, updateParam]);
   return (
     <ThemedView style={styles.container}>
       <HeaderSearchBar
+        backIcon="chevron-left"
         keywords={params.keywords}
         loading={loading}
         onSearch={onRefresh}

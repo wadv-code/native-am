@@ -8,13 +8,15 @@ type ToolbarProps = {
   items: CatalogCrumbItem[];
   item?: CatalogCrumbItem;
   search?: boolean;
+  title?: string;
   onChangeView?: (index: number) => void;
   onSortOrder?: (order: ActionSortOrder) => void;
+  onLeftPress?: () => void;
 };
 
 const CatalogToolbar = (props: ToolbarProps) => {
-  const { item, items, search, onChangeView, onSortOrder } = props;
-
+  const { title, item, items, search, onChangeView, onSortOrder, onLeftPress } =
+    props;
   return (
     <View style={styles.container}>
       <CatalogCrumbs
@@ -25,8 +27,9 @@ const CatalogToolbar = (props: ToolbarProps) => {
       />
       <CatalogAction
         rightText={item?.text ?? ""}
-        title={item?.name || "精选"}
+        title={title || item?.selectedName || item?.name || "精选"}
         onSortOrder={onSortOrder}
+        onLeftPress={onLeftPress}
       />
     </View>
   );

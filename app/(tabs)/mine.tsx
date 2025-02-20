@@ -43,7 +43,6 @@ export default function MineScreen() {
   };
 
   const onLeft = () => {
-    console.log("onLeft");
     return true;
   };
 
