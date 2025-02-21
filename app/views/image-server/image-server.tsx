@@ -1,4 +1,4 @@
-import { getImageServerItems, type ServerItem } from "@/components/mine/util";
+import { getImageItems, type ServerItem } from "@/components/mine/util";
 import { ThemedNavigation } from "@/components/theme/ThemedNavigation";
 import { IconSymbol } from "@/components/ui";
 import { useBottomTabOverflow } from "@/components/ui/TabBarBackground";
@@ -63,7 +63,7 @@ const ImageServer = () => {
   };
 
   const getItems = async () => {
-    const list = await getImageServerItems();
+    const list = await getImageItems();
     setItems([...list]);
   };
 

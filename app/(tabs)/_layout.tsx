@@ -11,11 +11,11 @@ import { MusicPlayer } from "@/components/audio/MusicPlayer";
 import { useAppDispatch } from "@/hooks/useStore";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
+import { setIsHttpsURL } from "@/utils/request";
 import {
   ModalPlayer,
   type ModalPlayerType,
 } from "@/components/audio/ModalPlayer";
-import { setIsHttpsURL } from "@/utils/request";
 
 export default function TabLayout() {
   const dispatch = useAppDispatch();

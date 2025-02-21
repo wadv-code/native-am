@@ -8,6 +8,7 @@ import { ThemedNavigation } from "../theme/ThemedNavigation";
 import { formatPath, sleep } from "@/utils/lib";
 import { CatalogItem } from "../catalog/CatalogItem";
 import { Text } from "@rneui/themed";
+import { setStorage } from "@/storage/long";
 import {
   FlatList,
   Platform,
@@ -15,7 +16,6 @@ import {
   StyleSheet,
   type TextProps,
 } from "react-native";
-import { setStorage } from "@/storage/long";
 
 type ListPlayerProps = TextProps & {
   closeModal: () => void;

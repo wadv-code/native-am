@@ -18,7 +18,7 @@ import {
   View,
 } from "react-native";
 import {
-  getImageServerItems,
+  getImageItems,
   type ServerItem,
   type ServerItemParam,
 } from "@/components/mine/util";
@@ -40,13 +40,13 @@ const ImageServerEdit = () => {
   });
 
   const getItem = async () => {
-    const list = await getImageServerItems();
+    const list = await getImageItems();
     const row = list.find((f) => f.id === info.params?.id);
     if (row) setItem(row);
   };
 
   const saveItem = async (id?: string) => {
-    const list = await getImageServerItems();
+    const list = await getImageItems();
     const index = list.findIndex((f) => f.id === id);
     if (index !== -1) {
       const row = list[index];

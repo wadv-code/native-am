@@ -9,11 +9,11 @@ import { useIsFocused } from "@react-navigation/native";
 import type { GetItem } from "@/api";
 import { formatPath } from "@/utils/lib";
 import { getStorage, removeStorage, setStorage } from "@/storage/long";
+import { CATALOG_CHANGE_PATH, CATALOG_PATH } from "@/storage/storage-keys";
 import {
   CatalogList,
   type CatalogListHandle,
 } from "@/components/catalog/CatalogList";
-import { CATALOG_CHANGE_PATH, CATALOG_PATH } from "@/storage/storage-keys";
 
 const CatalogScreen = () => {
   const isFocused = useIsFocused();

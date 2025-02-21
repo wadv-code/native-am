@@ -8,15 +8,15 @@ import { globalStyles } from "@/styles";
 import { ThemedNavigation } from "@/components/theme/ThemedNavigation";
 import MineGrid from "@/components/mine/MineGrid";
 import { setAudioCover, setLoading } from "@/store/slices/audioSlice";
+import { gridItems } from "@/components/mine/util";
+import { Image, Text, useTheme } from "@rneui/themed";
+import { handleCoverItems } from "@/utils/store";
 import {
   ActivityIndicator,
   StyleSheet,
   TouchableOpacity,
   View,
 } from "react-native";
-import { gridItems } from "@/components/mine/util";
-import { Image, Text, useTheme } from "@rneui/themed";
-import { handleCoverItems } from "@/utils/store";
 
 export default function MineScreen() {
   const { theme } = useTheme();

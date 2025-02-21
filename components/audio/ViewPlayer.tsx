@@ -12,6 +12,9 @@ import { handleCoverItems } from "@/utils/store";
 import type { MaterialIconsName } from "@/types";
 import { onSwitchAudio } from ".";
 import type { RootState } from "@/store";
+import { setStorage } from "@/storage/long";
+import { router } from "expo-router";
+import { CATALOG_CHANGE_PATH } from "@/storage/storage-keys";
 import {
   setAudioCover,
   setAudioInfo,
@@ -25,9 +28,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { setStorage } from "@/storage/long";
-import { router } from "expo-router";
-import { CATALOG_CHANGE_PATH } from "@/storage/storage-keys";
+
 const { width } = Dimensions.get("window");
 
 type ViewPlayerProps = {
