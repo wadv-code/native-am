@@ -34,7 +34,7 @@ const CatalogScreen = () => {
         setTimeout(() => {
           const option = {
             name: item.name,
-            path: formatPath(item.parent || "/", item.name),
+            path: formatPath(item.parent ?? "/", item.name),
           };
           const list = [...itemsRef.current.slice(0, value + 1), option];
           setItems(list);
@@ -154,7 +154,7 @@ const CatalogScreen = () => {
       >
         {items.map((v, index) => {
           return (
-            <TabView.Item key={index} style={styles.tabViewItem}>
+            <TabView.Item key={v.path} style={styles.tabViewItem}>
               <CatalogList
                 ref={(ref) =>
                   v.path === items[value]?.path &&

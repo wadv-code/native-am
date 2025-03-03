@@ -31,7 +31,7 @@ const CollectScreen = () => {
   const onLeftPress = async (item: GetItem) => {
     await setStorage(
       CATALOG_CHANGE_PATH,
-      formatPath(item.parent || "/", item.name)
+      formatPath(item.parent ?? "/", item.name)
     );
     router.replace("/catalog");
   };

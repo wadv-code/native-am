@@ -54,13 +54,7 @@ export default function RootLayout() {
     getCreateThemeOptions();
   }, [getCreateThemeOptions]);
 
-  if (!theme) {
-    return null;
-  }
-
-  if (!loaded) {
-    return null;
-  }
+  if (!theme || !loaded) return null;
 
   return (
     <Provider store={store}>

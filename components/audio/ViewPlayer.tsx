@@ -216,7 +216,7 @@ const ViewPlayer = ({ closeModal }: ViewPlayerProps) => {
           style={{ width: "95%" }}
         />
         <View style={styles.time}>
-          <Text style={styles.timeText}>{dragCurrent || currentFormat}</Text>
+          <Text style={styles.timeText}>{dragCurrent ?? currentFormat}</Text>
           <Text style={styles.timeText}>{durationFormat}</Text>
         </View>
         <View style={[globalStyles.rowBetween, styles.toolbar]}>
