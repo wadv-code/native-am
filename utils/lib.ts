@@ -130,7 +130,7 @@ export function isAudioFile(fileName: string): boolean {
 export function isVideoFile(fileName: string): boolean {
   // 定义一个正则表达式，匹配常见的音频文件扩展名（不区分大小写）
   const videoRegex =
-    /\.(mp4|avi|mov|wmv|flv|mkv|webm|m4v|mpg|mpeg|ts|m2ts|vob|divx|xvid)$/i;
+    /\.(mp4|avi|mov|wmv|flv|mkv|webm|m4v|mpg|mpeg|ts|m2ts|vob|divx|xvid|m3u8)$/i;
 
   // 使用正则表达式的 test 方法来检查文件名
   return videoRegex.test(fileName);
@@ -138,6 +138,7 @@ export function isVideoFile(fileName: string): boolean {
 
 export type FnIconSymbol = (
   name: string,
+  type?: number,
   is_dir?: boolean
 ) => MaterialIconsName;
 
@@ -145,14 +146,18 @@ export type FnIconSymbol = (
  * 根据名称后缀获取图标
  * @returns  SymbolViewProps['name']
  */
-export const getIconSymbol: FnIconSymbol = (name: string, is_dir?: boolean) => {
+export const getIconSymbol: FnIconSymbol = (
+  name: string,
+  type: number = 0,
+  is_dir: boolean = false
+) => {
   if (is_dir) {
     return "folder";
-  } else if (isImageFile(name)) {
+  } else if (isImageFile(name) || type === 5) {
     return "photo";
-  } else if (isAudioFile(name)) {
+  } else if (isAudioFile(name) || type === 3) {
     return "music-note";
-  } else if (isVideoFile(name)) {
+  } else if (isVideoFile(name) || type === 2) {
     return "ondemand-video";
   } else {
     return "file-present";

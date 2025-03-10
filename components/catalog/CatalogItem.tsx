@@ -41,16 +41,16 @@ const CatalogItem = memo(
     );
 
     const onPress = () => {
-      if (isAudioFile(item.name)) {
+      if (isAudioFile(item.name) || item.type === 3) {
         dispatch(setAudioInfo(item));
-      } else if (isImageFile(item.name)) {
+      } else if (isImageFile(item.name) || item.type === 5) {
         router.push({
           pathname: "/views/viewer",
           params: {
             path: formatPath(item.parent ?? "/", item.name),
           },
         });
-      } else if (isVideoFile(item.name)) {
+      } else if (isVideoFile(item.name) || item.type === 2) {
         router.push({
           pathname: "/views/video",
           params: {
@@ -71,7 +71,7 @@ const CatalogItem = memo(
         <TouchableOpacity style={styles.leftContainer} onPress={onPress}>
           <IconSymbol
             size={24}
-            name={getIconSymbol(item.name, item.is_dir)}
+            name={getIconSymbol(item.name, item.type, item.is_dir)}
             color={theme.colors.primary}
             style={styles.leftSymbol}
           />
