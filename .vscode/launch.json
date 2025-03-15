@@ -1,15 +1,26 @@
 {
-  "$schema": "https://json.schemastore.org/launchsettings.json",
+  // 使用 IntelliSense 了解相关属性。
+  // 悬停以查看现有属性的描述。
+  // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "chrome",
-      "name": "wadv admin dev",
+      "command": "npm run start",
+      "name": "Run npm start",
       "request": "launch",
-      "url": "http://localhost:5173",
-      "env": { "NODE_ENV": "development" },
-      "sourceMaps": true,
-      "webRoot": "${workspaceFolder}"
+      "type": "node-terminal"
+    },
+    {
+      "command": "npm run android",
+      "name": "Run npm android",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
+      "command": "npm run ios",
+      "name": "Run npm ios",
+      "request": "launch",
+      "type": "node-terminal"
     }
   ]
 }
