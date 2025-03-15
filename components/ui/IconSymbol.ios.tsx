@@ -51,6 +51,8 @@ const MAPPING = {
   whatshot: "personalhotspot.circle",
   "wifi-tethering": "link",
   image: "photo.artframe",
+  "skip-next": "chevron.right.to.line",
+  "skip-previous": "chevron.left.to.line",
 } as Partial<
   Record<MaterialIconsName, import("expo-symbols").SymbolViewProps["name"]>
 >;
