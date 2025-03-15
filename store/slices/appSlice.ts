@@ -11,7 +11,7 @@ type AppState = {
 // 定义slice的初始状态
 const initialState: AppState = {
   isImageBackground: true,
-  isHttps: true,
+  isHttps: false,
   loading: false,
 };
 

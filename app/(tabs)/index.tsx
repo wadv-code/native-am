@@ -12,6 +12,9 @@ const HomeScreen = () => {
       <Text h1={true} style={{ textAlign: "center" }}>
         我的首页
       </Text>
+      <Text style={{ textAlign: "center", marginTop: 100 }}>
+        音频资源访问需要梯子，开发中测试关闭https即可
+      </Text>
       {/* <MineGrid items={gridItems} title="我的功能" /> */}
     </ThemedView>
   );

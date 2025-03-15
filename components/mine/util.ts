@@ -61,7 +61,7 @@ export const getImageDefault = (): ServerItem[] => {
         { key: "type", value: "json" },
         { key: "mode", value: "6" },
       ],
-      isDefault: true,
+      isDefault: false,
     },
     {
       id: "2",
@@ -71,7 +71,7 @@ export const getImageDefault = (): ServerItem[] => {
         { key: "type", value: "json" },
         { key: "mode", value: "2,8" },
       ],
-      isDefault: false,
+      isDefault: true,
     },
     {
       id: "3",

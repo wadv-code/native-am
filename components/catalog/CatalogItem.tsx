@@ -3,7 +3,7 @@ import type { GetItem } from "@/api";
 import { IconSymbol } from "../ui";
 import { makeStyles, Text, useTheme } from "@rneui/themed";
 import { useSelector } from "react-redux";
-import { Alert, TouchableOpacity, View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import type { RootState } from "@/store";
 import { useAppDispatch } from "@/hooks/useStore";
 import { setAudioInfo } from "@/store/slices/audioSlice";
@@ -58,7 +58,7 @@ const CatalogItem = memo(
           },
         });
       } else {
-        Alert.prompt("还未处理的文件格式。");
+        // Alert.prompt("还未处理的文件格式。");
       }
       onLeftPress && onLeftPress(item);
     };

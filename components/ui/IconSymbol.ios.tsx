@@ -21,6 +21,8 @@ const MAPPING = {
   "sort-by-alpha": "arrow.up.and.down.text.horizontal",
   "pause-circle-outline": "pause.circle",
   "play-circle-outline": "play.circle",
+  "play-circle": "play.fill",
+  "pause-circle": "pause.fill",
   "arrow-right": "chevron.right",
   "arrow-left": "chevron.left",
   "snippet-folder": "folder.fill.badge.gearshape",
@@ -43,6 +45,12 @@ const MAPPING = {
   "keyboard-double-arrow-right": "chevron.right.2",
   "keyboard-double-arrow-left": "chevron.left.2",
   delete: "delete.backward",
+  star: "star.fill",
+  "star-border": "star",
+  "video-collection": "video",
+  whatshot: "personalhotspot.circle",
+  "wifi-tethering": "link",
+  image: "photo.artframe",
 } as Partial<
   Record<MaterialIconsName, import("expo-symbols").SymbolViewProps["name"]>
 >;
